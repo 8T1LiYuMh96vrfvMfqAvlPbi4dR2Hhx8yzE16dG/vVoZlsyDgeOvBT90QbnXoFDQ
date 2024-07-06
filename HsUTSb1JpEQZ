@@ -32,6 +32,66 @@ function Setup:ClientController()
         end;
     end;
 
+    Manager['Movement'] = {
+        TWX = nil,
+        WS = function(Speed)
+            walkspeed = Speed;
+        end,
+        TW = function(self, Toggle)
+            if self.TWX then
+                self.TWX:Disconnect();
+            end;
+    
+            if Toggle then
+                self.TWX = rsv.RenderStepped:Connect(function()
+                    if hum.MoveDirection.Magnitude > 0 then
+                        walkspeed = walkspeed or 1;
+                        char:TranslateBy(hum.MoveDirection * walkspeed)
+                    end;
+                end);
+            end;
+        end,
+    
+        IJX = nil,
+        IJX2 = nil,
+        JP = function(Power)
+            jumppower = Power;
+        end,
+        IJ = function(self, Toggle)
+            if self.IJX then
+                self.IJX:Disconnect();
+                self.IJX2:Disconnect();
+            end;
+    
+            if Toggle then
+                local Pressing = false;
+    
+                local function jump()
+                    local Power = jumppower or hum.JumpPower or 50;
+                    hrp.Velocity = Vector3.new(hrp.Velocity.X, Power, hrp.Velocity.Z);
+                end;
+    
+                local function on()
+                    Pressing = true;
+    
+                    while Pressing do
+                        jump();
+                        task.wait(.1);
+                    end;
+                end;
+    
+                local function off()
+                    Pressing = false;
+                end;
+    
+                self.IJX = Recorder:Record(false,
+                    { ['Callback'] = on, ['Inputs'] = { "Space" }, ['CancelKeys'] = {}, ['Break'] = false });
+                self.IJX2 = Recorder:Record(true,
+                    { ['Callback'] = off, ['Inputs'] = { "Space" }, ['CancelKeys'] = {}, ['Break'] = false });
+            end;
+        end,
+    };
+
     return Manager;
 end;
 
