@@ -1,0 +1,332 @@
+local Setup = {};
+
+function Setup:ClientController()
+    local Players = game:GetService("Players");
+    local Manager = {};
+    client = Players.LocalPlayer;
+
+    repeat wait(); until client.Character;
+
+    char = client.Character;
+    hum = char:WaitForChild("Humanoid");
+    hrp = char:WaitForChild("HumanoidRootPart");
+
+    client.CharacterAdded:Connect(function()
+        char = client.Character;
+        hum = char:WaitForChild("Humanoid");
+        hrp = char:WaitForChild("HumanoidRootPart");
+    end);
+
+    function Manager:Reset()
+        if char then
+            char:BreakJoints();
+        end;
+    end;
+
+    function Manager:Goto(cf)
+        if typeof(cf) == 'Vector3' then cf = CFrame.new(cf) end;
+        if typeof(cf) ~= 'CFrame' then return; end;
+
+        if hrp then
+            hrp.CFrame = cf;
+        end;
+    end;
+
+    return Manager;
+end;
+
+function Setup:HttpService()
+    local HttpService = game:GetService("HttpService");
+    local Manager = {};
+
+    function Manager:Webhook(weblink, title, fields)
+        if not weblink then return; end;
+        local data = {
+            ["embeds"] = {
+                {
+                    ["title"] = title or "",
+                    ["type"] = "rich",
+                    ["color"] = tonumber(0x8383AA),
+                    ["fields"] = fields
+                },
+            },
+        };
+
+        local newdata = HttpService:JSONEncode(data)
+
+        request = http_request or request or HttpPost or syn.request;
+        request({ Url = weblink, Body = newdata, Method = "POST", Headers = { ["content-type"] = "application/json" } });
+    end;
+
+    return Manager;
+end;
+
+function Setup:File()
+    local Manager = {};
+    local Allowed = false;
+
+    if readfile and writefile and isfolder and isfile and makefolder and delfolder then
+        Allowed = true;
+    end;
+
+    function Manager:Read(path)
+        if not Allowed then return; end;
+        if typeof(path) ~= "string" then return; end;
+        local contents;
+
+        if isfile(path) then
+            contents = readfile(path);
+        elseif isfolder(path) then
+            if listfiles then
+                contents = listfiles(path);
+            end;
+        end;
+
+        return contents;
+    end;
+
+    function Manager:Write(path, contents)
+        if not Allowed then return; end;
+        if typeof(path) ~= 'string' then return; end;
+
+        local contents = contents or "";
+
+        writefile(path, tostring(contents));
+    end;
+
+    function Manager:CreateFolder(path)
+        if not Allowed then return; end;
+        if typeof(path) ~= 'string' then return; end;
+
+        makefolder(path);
+    end;
+
+    function Manager:DeleteFolder(path)
+        if not Allowed then return; end;
+        if typeof(path) ~= 'string' then return; end;
+        if isfolder(path) then
+            delfolder(path);
+        end;
+    end;
+
+    function Manager:Execute(path)
+        if not Allowed then return; end;
+        if typeof(path) ~= 'string' then return; end;
+
+        if isfile(path) then
+            if runfile then
+                runfile(path);
+            else
+                loadstring(readfile(path));
+            end
+        end;
+    end;
+
+    return Manager;
+end;
+
+function Setup:Basics()
+    Workspace, workspace = game:GetService("Workspace");
+    UserInputService = game:GetService("UserInputService");
+    ReplicatedStorage = game:GetService("ReplicatedStorage");
+    MarketplaceService = game:GetService("MarketplaceService");
+    Players = game:GetService("Players");
+    TweenService = game:GetService("TweenService");
+    RunService = game:GetService("RunService");
+    CoreGui = game:GetService("CoreGui");
+    TextService = game:GetService('TextService');
+    Camera = workspace.CurrentCamera;
+end;
+
+function Setup:Tween()
+    local TweenService = game:GetService("TweenService");
+    local Manager = {};
+    local Storage = {};
+
+    local Players = game:GetService("Players");
+    local client = Players.LocalPlayer;
+
+    function Manager:Create(pos, speed, nofall, extra, delayY)
+        local char = client.Character; if not char then return; end;
+        local hum = char:WaitForChild("Humanoid");
+        local hrp = char:WaitForChild("HumanoidRootPart");
+        if (typeof(pos) ~= "CFrame") or (not hrp) then
+            if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end; return;
+        end;
+        if (not char) and (not hrp) then return; end;
+
+        local isClose = false;
+        local cf, vec3 = pos, pos.Position;
+
+        if delayY then
+            cf = CFrame.new(pos.X, hrp.Position.Y, pos.Z);
+            vec3 = cf.Position;
+        end;
+
+        local speed = speed or 5;
+        local distance = (hrp.Position - vec3).magnitude;
+
+        if nofall then
+            if Storage["No Fall INS"] then
+                Storage["No Fall INS"]:Destroy();
+            end;
+
+            Storage["No Fall INS"] = Instance.new('BodyVelocity');
+            Storage["No Fall INS"].MaxForce = Vector3.new(math.huge, math.huge, math.huge);
+            Storage["No Fall INS"].Velocity = Vector3.new(0, 0, 0);
+            Storage["No Fall INS"].Parent = hrp;
+        end;
+
+        if distance <= speed / 5 then
+            isClose = true;
+            hrp.CFrame = pos;
+        end;
+
+        if typeof(extra) == "function" then
+            task.spawn(function()
+                extra(isClose);
+            end);
+        end;
+
+        local Time = distance / speed;
+        Storage['CurrentTween'] = TweenService:Create(hrp,
+            TweenInfo.new(Time, Enum.EasingStyle.Linear), { CFrame = cf });
+        Storage['CurrentTween']:Play();
+
+
+        return isClose;
+    end;
+
+    function Manager:Cancel()
+        if Storage["No Fall INS"] then Storage["No Fall INS"]:Destroy(); end;
+        if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end;
+    end;
+
+    return Manager;
+end;
+
+function Setup:VirtualInputManager()
+    local VirtualInputManager = game:GetService("VirtualInputManager");
+    local Manager = {};
+
+    function Manager:Press(Key)
+        if typeof(Key) == 'string' then
+            local EnumKey;
+
+            pcall(function() EnumKey = Enum.KeyCode[Key] end);
+
+            if not EnumKey then return; end;
+
+            VirtualInputManager:SendKeyEvent(true, EnumKey, false, game);
+            task.wait()
+            VirtualInputManager:SendKeyEvent(false, EnumKey, false, game);
+        end;
+    end;
+
+    function Manager:Click(mb)
+        if typeof(MB) == 'number' then
+            mb = math.floor(mb, 0, 2);
+
+            VirtualInputManager:SendMouseButtonEvent(0, 0, mb, true, game);
+            task.wait();
+            VirtualInputManager:SendMouseButtonEvent(0, 0, mb, false, game);
+        end;
+    end;
+
+    function Manager:Hold(Key)
+        if typeof(Key) == 'string' then
+            local EnumKey;
+
+            pcall(function() EnumKey = Enum.KeyCode[Key] end);
+
+            if not EnumKey then return; end;
+
+            VirtualInputManager:SendKeyEvent(true, EnumKey, false, game);
+        end;
+    end;
+
+    function Manager:Release(Key)
+        if typeof(Key) == 'string' then
+            local EnumKey;
+
+            pcall(function() EnumKey = Enum.KeyCode[Key] end);
+
+            if not EnumKey then return; end;
+
+            VirtualInputManager:SendKeyEvent(false, EnumKey, false, game);
+        end;
+    end;
+
+    return Manager;
+end;
+
+function Setup:InputRecorder()
+    local Manager = {};
+
+    function Manager:Record(OnUP, Settings)
+        if not Settings then return; end;
+        local UserInputService = game:GetService("UserInputService");
+        local Callback = Settings['Callback'];
+        local Valid = Settings['Inputs'];
+        local Type = Settings['Type'];
+        local Break = Settings['Break'];
+        local CancelKeys = Settings['CancelKeys'] or { "Escape", "Backspace" };
+        local Recorder;
+
+        if not Callback then return; end;
+
+        local function OnResponse(Input, isTyping)
+            if (not Input) or (isTyping) then return; end;
+
+            local Keycode = Input['Keycode'];
+            local UserInputType = Input['UserInputType'];
+
+            if not Keycode then return; end;
+
+            local KeyName = Keycode.Name;
+
+            if KeyName == "Unknown" then
+                if Type == "KeyCode" then return; end;
+
+                KeyName = tostring(UserInputType);
+            end;
+
+            if table.find(CancelKeys, KeyName) then
+                if Recorder then
+                    Recorder:Disconnect();
+                    return;
+                end;
+            end;
+
+            if Valid then
+                if table.find(Valid, KeyName) then
+                    Callback(KeyName);
+                else
+                    for i, v in next, (Valid) do
+                        if string.lower(v) == string.lower(KeyName) then
+                            Callback(KeyName);
+                        end;
+                    end;
+                end;
+            else
+                Callback(KeyName);
+            end;
+
+            if Break and Recorder then
+                Recorder:Disconnect();
+            end;
+        end;
+
+        if OnUP then
+            Recorder = UserInputService.InputEnded:Connect(OnResponse);
+        else
+            Recorder = UserInputService.InputBegan:Connect(OnResponse);
+        end;
+
+        return Recorder;
+    end;
+
+    return Manager;
+end;
+
+return Setup;
