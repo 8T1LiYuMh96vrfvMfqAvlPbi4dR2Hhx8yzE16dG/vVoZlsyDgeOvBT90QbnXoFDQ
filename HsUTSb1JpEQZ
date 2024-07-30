@@ -296,9 +296,7 @@ function Setup:VirtualInputManager()
     function Manager:Hold(Key)
         if typeof(Key) == 'string' then
             local EnumKey;
-
             pcall(function() EnumKey = Enum.KeyCode[Key] end);
-
             if not EnumKey then return; end;
 
             VirtualInputManager:SendKeyEvent(true, EnumKey, false, game);
@@ -308,9 +306,7 @@ function Setup:VirtualInputManager()
     function Manager:Release(Key)
         if typeof(Key) == 'string' then
             local EnumKey;
-
             pcall(function() EnumKey = Enum.KeyCode[Key] end);
-
             if not EnumKey then return; end;
 
             VirtualInputManager:SendKeyEvent(false, EnumKey, false, game);
@@ -323,6 +319,7 @@ end;
 function Setup:InputRecorder()
     local Manager = {};
 
+    Manager.Pressed = { };
     function Manager:Record(OnUP, Settings)
         if not Settings then return; end;
         local UserInputService = game:GetService("UserInputService");
@@ -340,9 +337,7 @@ function Setup:InputRecorder()
 
             local Keycode = Input['KeyCode'];
             local UserInputType = Input['UserInputType'];
-
             if not Keycode then return; end;
-
             local KeyName = Keycode.Name;
 
             if KeyName == "Unknown" then
@@ -382,6 +377,13 @@ function Setup:InputRecorder()
         else
             Recorder = UserInputService.InputBegan:Connect(OnResponse);
         end;
+
+        local function UpdatePressed(Input, Pressed)
+            Manager.PressedKeys[Input] = Pressed;
+        end;
+
+        UserInputService.InputBegan:Connect(UpdatePressed, true);
+        UserInputService.InputEnded:Connect(UpdatePressed, false);
 
         return Recorder;
     end;
