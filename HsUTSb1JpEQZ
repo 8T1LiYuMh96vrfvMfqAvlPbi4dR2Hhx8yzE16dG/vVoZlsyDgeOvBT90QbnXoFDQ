@@ -313,6 +313,11 @@ function Setup:VirtualInputManager()
         end;
     end;
 
+    function Manager:Move(x, y)
+        if (not x) or (not y) then return; end;
+        VirtualInputManager:SendMouseMoveEvent(x, y, game)
+    end;
+
     return Manager;
 end;
 
