@@ -384,12 +384,12 @@ function Setup:InputRecorder()
 
         UserInputService.InputBegan:Connect(function(input, proc)
             if not proc then
-                UpdatePressed(input.KeyCode, true);
+                UpdatePressed(input.KeyCode.Name, true);
             end;
         end);
         UserInputService.InputEnded:Connect(function(input, proc)
             if not proc then
-                UpdatePressed(input.KeyCode, false);
+                UpdatePressed(input.KeyCode.Name, false);
             end;
         end);
 
