@@ -319,10 +319,11 @@ end;
 function Setup:InputRecorder()
     local Manager = {};
 
+    local UserInputService = game:GetService("UserInputService");
+
     Manager.Pressed = { };
     function Manager:Record(OnUP, Settings)
         if not Settings then return; end;
-        local UserInputService = game:GetService("UserInputService");
         local Callback = Settings['Callback'];
         local Valid = Settings['Inputs'];
         local Type = Settings['Type'];
@@ -378,23 +379,20 @@ function Setup:InputRecorder()
             Recorder = UserInputService.InputBegan:Connect(OnResponse);
         end;
 
-        local function UpdatePressed(Input, Pressed)
-            Manager.PressedKeys[Input] = Pressed;
-        end;
-
-        UserInputService.InputBegan:Connect(function(input, proc)
-            if not proc then
-                UpdatePressed(input.KeyCode.Name, true);
-            end;
-        end);
-        UserInputService.InputEnded:Connect(function(input, proc)
-            if not proc then
-                UpdatePressed(input.KeyCode.Name, false);
-            end;
-        end);
-
         return Recorder;
     end;
+
+    UserInputService.InputBegan:Connect(function(input, proc)
+        if not proc then
+            Manager.PressedKeys[input.KeyCode.Name] = true;
+        end;
+    end);
+    
+    UserInputService.InputEnded:Connect(function(input, proc)
+        if not proc then
+            Manager.PressedKeys[input.KeyCode.Name] = false;
+        end;
+    end);
 
     return Manager;
 end;
