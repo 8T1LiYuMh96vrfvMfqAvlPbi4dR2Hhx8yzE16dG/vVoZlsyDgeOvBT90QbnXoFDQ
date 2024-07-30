@@ -382,8 +382,16 @@ function Setup:InputRecorder()
             Manager.PressedKeys[Input] = Pressed;
         end;
 
-        UserInputService.InputBegan:Connect(UpdatePressed, true);
-        UserInputService.InputEnded:Connect(UpdatePressed, false);
+        UserInputService.InputBegan:Connect(function(input, proc)
+            if not proc then
+                UpdatePressed(input.KeyCode, true);
+            end;
+        end);
+        UserInputService.InputEnded:Connect(function(input, proc)
+            if not proc then
+                UpdatePressed(input.KeyCode, false);
+            end;
+        end);
 
         return Recorder;
     end;
