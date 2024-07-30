@@ -384,13 +384,13 @@ function Setup:InputRecorder()
 
     UserInputService.InputBegan:Connect(function(input, proc)
         if not proc then
-            Manager.PressedKeys[input.KeyCode.Name] = true;
+            Manager.Pressed[input.KeyCode.Name] = true;
         end;
     end);
     
     UserInputService.InputEnded:Connect(function(input, proc)
         if not proc then
-            Manager.PressedKeys[input.KeyCode.Name] = false;
+            Manager.Pressed[input.KeyCode.Name] = false;
         end;
     end);
 
