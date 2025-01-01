@@ -355,6 +355,7 @@ function Setup:InputRecorder()
             if table.find(CancelKeys, KeyName) then
                 if Recorder then
                     Recorder:Disconnect();
+                    Callback();
                     return;
                 end;
             end;
