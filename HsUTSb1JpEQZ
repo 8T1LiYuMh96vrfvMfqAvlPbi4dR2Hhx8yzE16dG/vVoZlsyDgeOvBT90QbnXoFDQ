@@ -388,6 +388,17 @@ function Setup:InputRecorder()
         return Recorder;
     end;
 
+    function Manager:Bind(Key, Callback, OnUP)
+        if (not Key) or (not Callback) then return; end;
+
+        return Manager:Record(OnUP, {
+            Inputs = { Key };
+            CancelKeys = { };
+
+            Callback = Callback;
+        });
+    end;
+
     UserInputService.InputBegan:Connect(function(input, proc)
         if not proc then
             Manager.Pressed[input.KeyCode.Name] = true;
