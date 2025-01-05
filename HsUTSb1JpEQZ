@@ -334,12 +334,13 @@ function Setup:InputRecorder()
         local Type = Settings['Type'];
         local Break = Settings['Break'];
         local CancelKeys = Settings['CancelKeys'] or { "Escape", "Backspace" };
+        local IgnoreProc = Settings['IgnoreProc'];
         local Recorder;
 
         if not Callback then return; end;
 
         local function OnResponse(Input, isTyping)
-            if (not Input) or (isTyping) then return; end;
+            if (not Input) or (isTyping and not IgnoreProc) then return; end;
 
             local Keycode = Input['KeyCode'];
             local UserInputType = Input['UserInputType'];
@@ -388,12 +389,13 @@ function Setup:InputRecorder()
         return Recorder;
     end;
 
-    function Manager:Bind(Key, Callback, OnUP)
+    function Manager:Bind(Key, Callback, OnUP, IgnoreProc)
         if (not Key) or (not Callback) then return; end;
 
         return Manager:Record(OnUP, {
             Inputs = { Key };
             CancelKeys = { };
+            IgnoreProc = IgnoreProc;
 
             Callback = Callback;
         });
