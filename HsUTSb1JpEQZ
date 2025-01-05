@@ -349,7 +349,7 @@ function Setup:InputRecorder()
             if KeyName == "Unknown" then
                 if Type == "KeyCode" then return; end;
 
-                KeyName = Input.UserInputType.Name;
+                KeyName = UserInputType.Name;
             end;
 
             if table.find(CancelKeys, KeyName) then
