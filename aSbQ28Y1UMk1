@@ -1498,6 +1498,7 @@ function Library:CreateWindow(WINFO)
                     AnchorPoint = Vector2.new(1, 0),
                     Position = UDim2.new(1, 0, 0, 0),
                     Size = UDim2.new(.4, 0, 1, 0),
+                    ZIndex = 10;
                 }, { BackgroundColor3 = "Background2" });
 
                 Library:ApplyCorner(DownFrame, 6);
@@ -1519,6 +1520,7 @@ function Library:CreateWindow(WINFO)
                     AnchorPoint = Vector2.new(1, .5),
                     Position = UDim2.new(1, -2, .5, 0),
                     Size = UDim2.new(0, 5, 0, 5),
+                    ZIndex = 11
                 }, { BackgroundColor3 = "Text" }), 10);
 
                 local DF_Value = Library.Create("TextLabel", {
@@ -1528,7 +1530,8 @@ function Library:CreateWindow(WINFO)
                     TextSize = 11,
                     Text = "None",
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    ClipsDescendants = true
+                    ClipsDescendants = true,
+                    ZIndex = 11
                 }, { FontFace = "Font", TextColor3 = "Text" });
 
                 local DF_Items = Library.Create("ScrollingFrame", {
@@ -1541,6 +1544,7 @@ function Library:CreateWindow(WINFO)
                     CanvasSize = UDim2.new(0, 0, 0, 0),
                     ScrollBarThickness = 1,
                     Visible = false,
+                    ZIndex = 11
                 }, { ScrollBarImageColor3 = "Highlight" });
 
                 Library:ApplyPadding(DF_Items, 5);
@@ -1600,6 +1604,7 @@ function Library:CreateWindow(WINFO)
                         Parent = DF_Items,
                         Size = UDim2.new(1, 0, 0, 20),
                         BackgroundTransparency = 1,
+                        ZIndex = 11;
                     });
 
                     Library:ApplyCorner(OptionFrame, 4);
@@ -1608,6 +1613,7 @@ function Library:CreateWindow(WINFO)
                         BackgroundTransparency = 1,
                         Size = UDim2.new(1, 0, 1, 0),
                         Text = Option,
+                        ZIndex = 11
                     }, { FontFace = "Font", TextColor3 = "Text" }), 10);
 
                     Options[Option] = { OptionFrame, Library:ApplyStroke(OptionFrame, "Accent1", 1, "Round") };
