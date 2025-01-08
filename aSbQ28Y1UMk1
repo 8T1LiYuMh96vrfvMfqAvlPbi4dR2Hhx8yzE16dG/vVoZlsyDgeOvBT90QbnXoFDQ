@@ -1528,6 +1528,7 @@ function Library:CreateWindow(WINFO)
                     TextSize = 11,
                     Text = "None",
                     TextXAlignment = Enum.TextXAlignment.Left,
+                    ClipsDescendants = true
                 }, { FontFace = "Font", TextColor3 = "Text" });
 
                 local DF_Items = Library.Create("ScrollingFrame", {
@@ -1570,7 +1571,7 @@ function Library:CreateWindow(WINFO)
                     end);
                 end;
 
-                function ToggleOption(Option)
+                local function ToggleOption(Option)
                     if Multi then
                         Drop.Value = Drop.Value or {};
 
