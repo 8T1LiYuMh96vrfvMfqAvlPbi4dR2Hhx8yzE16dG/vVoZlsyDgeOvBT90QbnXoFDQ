@@ -1,4 +1,5 @@
 -- New UI
+print("v1")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -1667,7 +1668,7 @@ function Library:CreateWindow(WINFO)
                         DF_Value.ZIndex = 1;
                         DF_Items.ZIndex = 1;
                         FillerClick.ZIndex = 0;
-                        
+
                         TweenService:Create(DownFrame,
                             TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                             { Size = UDim2.new(.4, 0, 1, 0) }):Play();
