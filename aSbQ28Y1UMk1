@@ -805,7 +805,9 @@ function Library:CreateWindow(WINFO)
                 });
 
                 function Button.Fire()
-                    Button.Callback();
+                    task.spawn(function()
+                        Button.Callback();
+                    end);
                 end;
 
                 function Button.ChangeText(NewText)
@@ -923,19 +925,19 @@ function Library:CreateWindow(WINFO)
                             { Position = UDim2.new(.1, 0, .5, 0) }):Play();
                         Library:Register(TGF_Slider, { BackgroundColor3 = "Background2" }, true);
                     end;
+
+                    task.spawn(function()
+                        Toggle.Callback(Toggle.Value);
+                    end);
                 end;
 
                 function Toggle.Fire()
                     Toggle.Value = not Toggle.Value;
-                    Toggle.Callback(Toggle.Value);
-
                     Update();
                 end;
 
                 function Toggle:SetValue(Value)
                     Toggle.Value = Value or false;
-                    Toggle.Callback(Toggle.Value);
-
                     Update();
                 end;
 
@@ -973,7 +975,7 @@ function Library:CreateWindow(WINFO)
 
                 local BF_Title = Library.Create("TextLabel", {
                     Parent = BF,
-                    Size = UDim2.new(.75, 0, (Binder.Subtext == "" and 1), 0),
+                    Size = UDim2.new(.75, 0, (Binder.Subtext == "" and 1) or .5, 0),
                     BackgroundTransparency = 1,
                     Text = Binder.Text,
                     TextXAlignment = (Binder.Alignment and Enum.TextXAlignment[Binder.Alignment]) or
@@ -1036,7 +1038,9 @@ function Library:CreateWindow(WINFO)
                     if not Key then return; end;
 
                     local function Fire()
-                        Binder.Callback();
+                        task.spawn(function()
+                            Binder.Callback();
+                        end);
                     end;
 
                     Old = InputService:Record(false, {
@@ -1116,7 +1120,7 @@ function Library:CreateWindow(WINFO)
 
                 local IF_Title = Library.Create("TextLabel", {
                     Parent = IF,
-                    Size = UDim2.new(.75, 0, (InputBox.Subtext == "" and 1), 0),
+                    Size = UDim2.new(.75, 0, (InputBox.Subtext == "" and 1) or .5, 0),
                     BackgroundTransparency = 1,
                     Text = InputBox.Text,
                     TextXAlignment = (InputBox.Alignment and Enum.TextXAlignment[InputBox.Alignment]) or
@@ -1181,7 +1185,9 @@ function Library:CreateWindow(WINFO)
                 function InputBox:SetValue(Value)
                     InputBox.Value = Value;
                     IF_Value.Text = Value or "";
-                    InputBox.Callback(Value);
+                    task.spawn(function()
+                        InputBox.Callback(Value);
+                    end);
                 end;
 
                 IF_Value.Focused:Connect(function()
@@ -1306,7 +1312,9 @@ function Library:CreateWindow(WINFO)
                     local Converted = string.format("%." .. tostring(Slider.Floats) .. "f", Value);
 
                     SLF_Value.Text = (tonumber(Converted) % 1 == 0 and tostring(math.floor(Value))) or Converted;
-                    Slider.Callback(tonumber(Converted));
+                    task.spawn(function()
+                        Slider.Callback(tonumber(Converted));
+                    end);
                 end;
 
                 local function Start()
@@ -1453,7 +1461,7 @@ function Library:CreateWindow(WINFO)
 
                 local DF_Title = Library.Create("TextLabel", {
                     Parent = DF,
-                    Size = UDim2.new(.75, 0, (Drop.Subtext == "" and 1), 0),
+                    Size = UDim2.new(.75, 0, (Drop.Subtext == "" and 1) or .5, 0),
                     BackgroundTransparency = 1,
                     Text = Drop.Text,
                     TextXAlignment = (Drop.Alignment and Enum.TextXAlignment[Drop.Alignment]) or
@@ -1557,7 +1565,9 @@ function Library:CreateWindow(WINFO)
                         DF_Value.Text = Drop.Value or "None";
                     end;
 
-                    Drop.Callback(Drop.Value);
+                    task.spawn(function()
+                        Drop.Callback(Drop.Value);
+                    end);
                 end;
 
                 function ToggleOption(Option)
