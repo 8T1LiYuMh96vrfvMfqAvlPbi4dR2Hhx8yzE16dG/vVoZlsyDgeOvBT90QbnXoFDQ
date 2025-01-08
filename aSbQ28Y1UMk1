@@ -1,5 +1,5 @@
 -- New UI
-print("v1")
+print("v1.01")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -1362,10 +1362,13 @@ function Library:CreateWindow(WINFO)
                 EntryLog.Default = EntryLog.Default or {}; -- { "Log1", "Log2", "Log3" }
                 EntryLog.Logs = {};
 
-                local LF = Library.Create("Frame", {
+                local LF = Library.Create("ScrollingFrame", {
                     Parent = SectionMain,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(1, 0, 0, 60),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                    ScrollBarThickness = 1;
+                    CanvasSize = UDim2.new(0, 0, 0, 0);
                 });
 
                 Library:ApplyStroke(LF, "Accent1", 1, "Round");
