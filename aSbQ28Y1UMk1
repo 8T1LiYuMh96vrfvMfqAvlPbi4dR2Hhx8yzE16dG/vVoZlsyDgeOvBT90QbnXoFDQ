@@ -1498,7 +1498,6 @@ function Library:CreateWindow(WINFO)
                     AnchorPoint = Vector2.new(1, 0),
                     Position = UDim2.new(1, 0, 0, 0),
                     Size = UDim2.new(.4, 0, 1, 0),
-                    ZIndex = 10;
                 }, { BackgroundColor3 = "Background2" });
 
                 Library:ApplyCorner(DownFrame, 6);
@@ -1515,13 +1514,14 @@ function Library:CreateWindow(WINFO)
                     Size = UDim2.new(1, 0, 0, 30),
                 });
 
-                Library:ApplyCorner(Library.Create("Frame", {
+                local DF_Circle = Library.Create("Frame", {
                     Parent = DF_Visuals,
                     AnchorPoint = Vector2.new(1, .5),
                     Position = UDim2.new(1, -2, .5, 0),
                     Size = UDim2.new(0, 5, 0, 5),
-                    ZIndex = 11
-                }, { BackgroundColor3 = "Text" }), 10);
+                }, { BackgroundColor3 = "Text" });
+
+                Library:ApplyCorner(DF_Circle, 100);
 
                 local DF_Value = Library.Create("TextLabel", {
                     Parent = DF_Visuals,
@@ -1531,7 +1531,6 @@ function Library:CreateWindow(WINFO)
                     Text = "None",
                     TextXAlignment = Enum.TextXAlignment.Left,
                     ClipsDescendants = true,
-                    ZIndex = 11
                 }, { FontFace = "Font", TextColor3 = "Text" });
 
                 local DF_Items = Library.Create("ScrollingFrame", {
@@ -1544,7 +1543,6 @@ function Library:CreateWindow(WINFO)
                     CanvasSize = UDim2.new(0, 0, 0, 0),
                     ScrollBarThickness = 1,
                     Visible = false,
-                    ZIndex = 11
                 }, { ScrollBarImageColor3 = "Highlight" });
 
                 Library:ApplyPadding(DF_Items, 5);
@@ -1604,7 +1602,7 @@ function Library:CreateWindow(WINFO)
                         Parent = DF_Items,
                         Size = UDim2.new(1, 0, 0, 20),
                         BackgroundTransparency = 1,
-                        ZIndex = 11;
+                        ZIndex = 11
                     });
 
                     Library:ApplyCorner(OptionFrame, 4);
@@ -1651,11 +1649,19 @@ function Library:CreateWindow(WINFO)
                 DF_Click.MouseButton1Up:Connect(function()
                     Listing = not Listing;
                     if Listing then
+                        DownFrame.ZIndex = 10;
+                        DF_Circle.ZIndex = 10;
+                        DF_Value.ZIndex = 10;
+                        DF_Items.ZIndex = 10;
                         TweenService:Create(DownFrame,
                             TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                             { Size = UDim2.new(.4, 0, 1, 75) }):Play();
                         DF_Items.Visible = true;
                     else
+                        DownFrame.ZIndex = 0;
+                        DF_Circle.ZIndex = 0;
+                        DF_Value.ZIndex = 0;
+                        DF_Items.ZIndex = 0;
                         TweenService:Create(DownFrame,
                             TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                             { Size = UDim2.new(.4, 0, 1, 0) }):Play();
