@@ -1617,6 +1617,7 @@ function Library:CreateWindow(WINFO)
                     Options[Option] = { OptionFrame, Library:ApplyStroke(OptionFrame, "Accent1", 1, "Round") };
 
                     local OptionClick = Library:ApplyClick(OptionFrame);
+                    OptionClick.ZIndex = 12;
                     OptionClick.MouseButton1Up:Connect(function()
                         ToggleOption(Option);
                     end);
