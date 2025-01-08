@@ -1658,10 +1658,10 @@ function Library:CreateWindow(WINFO)
                             { Size = UDim2.new(.4, 0, 1, 75) }):Play();
                         DF_Items.Visible = true;
                     else
-                        DownFrame.ZIndex = 0;
-                        DF_Circle.ZIndex = 0;
-                        DF_Value.ZIndex = 0;
-                        DF_Items.ZIndex = 0;
+                        DownFrame.ZIndex = 1;
+                        DF_Circle.ZIndex = 1;
+                        DF_Value.ZIndex = 1;
+                        DF_Items.ZIndex = 1;
                         TweenService:Create(DownFrame,
                             TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                             { Size = UDim2.new(.4, 0, 1, 0) }):Play();
