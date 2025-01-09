@@ -176,9 +176,11 @@ local randomJoinTeam = (function()
         teamChoice = teamChoice == "Home" and "Away" or "Home" 
     end
     local positions = {"CF", "CM", "LW", "RW", "GK"}
+    local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
     pcall(function()
         local teamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService.RE
 
+        if gameStateValue.Value == "Playing" then
         for _, position in ipairs(positions) do
             teamService.Select:FireServer(teamChoice, position) 
             task.wait(0.2)
@@ -191,6 +193,9 @@ local randomJoinTeam = (function()
                 break
             end
         end
+    else 
+        print("Not in Match")
+    end
     end)
 end)
 
