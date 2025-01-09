@@ -1,1 +1,549 @@
--- a
+-- // Vars
+repeat task.wait(2.5) until game:IsLoaded()
+print("Loading Script for "..game.Name)
+print("v1.0 "..game.Name)
+
+local LP = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local CHAR = LP.Character or LP.CharacterAdded:Wait()
+local HRP = CHAR:WaitForChild("HumanoidRootPart")
+local TS = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local RUN_S = game:GetService("RunService")
+local HTTP = game:GetService("HttpService")
+local DELAY = math.random(1,10)
+local ENV = getgenv()
+local Football = workspace:WaitForChild("Football")
+local BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox")
+
+local Settings = {
+    AutoLoad = false,
+    Debug = false,
+    AutoFarm = true,
+    NoClip = true,
+    selectedTweenSpeed = 0.5,
+    stay_InGoalDelay = 3,
+    isShooting = false,
+    ESP = {
+        NameESP = false,
+        NameSize = 10,
+        BallTracerESP = false,
+        BallESP = false,
+    }
+}
+local Cursor
+local connection
+
+-- // Functions
+local AutoLoadScript_Brrr = (function()
+    if Settings.AutoLoad then
+    pcall(function()
+        repeat task.wait() until game:IsLoaded() and CHAR
+
+        local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport
+        queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR")())]])
+    end)
+else
+    print("[TEMPA] Cant Queue Script")
+    end
+end)
+local NoClip = (function()
+    if Settings.NoClip then
+    for _, v in pairs(workspace.SmallSquare:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = false
+        end
+    end
+    for _, v in pairs(workspace.Goals:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = false
+        end
+    end
+else 
+    for _, v in pairs(workspace.SmallSquare:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = true
+        end
+    end
+
+    for _, v in pairs(workspace.Goals:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = true
+            end
+        end
+    end
+end)
+local Shoot = (function()
+    if not Settings.isShooting then
+        Settings.isShooting = true
+    task.wait(0.5)
+    local args = {
+        [1] = 40,
+        [4] = Vector3.new(0,0,0)
+    }
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("BallService"):WaitForChild("RE"):WaitForChild("Shoot"):FireServer(unpack(args))  
+    task.wait(1) 
+    Settings.isShooting = false
+    end
+end)
+local AutoFarm = (function()
+    local goalAway = CFrame.new(-239, 11, -49)
+    local goalHome = CFrame.new(316, 11, -47)
+    ENV.AutoFarm__ = true
+
+    if Settings.AutoFarm then
+        addAutofarmLog("Starting Autofarm..")
+        pcall(function()
+            local Found_Team = nil
+            local teamsFolder = RS:WaitForChild("Teams")
+            local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+
+            for _, team in pairs(teamsFolder:GetChildren()) do
+                if team.Name == "HomeTeam" then
+                    for _, obj in pairs(team:GetChildren()) do
+                        if obj:IsA("ObjectValue") and obj.Value == game.Players.LocalPlayer then
+                            Found_Team = "HomeTeam"
+                            addAutofarmLog("Team [Home]")
+                            break
+                        end
+                    end
+                end
+                if team.Name == "AwayTeam" then
+                    for _, obj in pairs(team:GetChildren()) do
+                        if obj:IsA("ObjectValue") and obj.Value == game.Players.LocalPlayer then
+                            Found_Team = "AwayTeam"
+                            addAutofarmLog("Team [Away]")
+                            break
+                        end
+                    end
+                end
+            end
+            local function isGamePlaying()
+                return gameStateValue.Value == "Playing" 
+            end
+
+            gameStateValue:GetPropertyChangedSignal("Value"):Connect(function()
+                if not isGamePlaying() then
+                    ENV.AutoFarm__ = false
+                end
+            end)
+
+            if Found_Team then
+                while ENV.AutoFarm__ do
+                    if not isGamePlaying() then break end
+
+                    if Football and BallHitbox then
+                        repeat
+                            if not isGamePlaying() then break end 
+                            HRP.CFrame = BallHitbox.CFrame
+                            task.wait(0.5)
+                        until BallHitbox:IsDescendantOf(LP.Character)
+                        if not isGamePlaying() then break end
+                    end
+
+                    if Football.Parent == LP.Character then
+                        local goalCFrame = Found_Team == "HomeTeam" and goalAway or goalHome
+                        HRP.CFrame = goalCFrame
+                        addAutofarmLog("Teleported to Goal..")
+                        task.spawn(Shoot)
+                        addAutofarmLog("Attempted Shooting..")
+
+                        local startTime = os.clock()
+                        while os.clock() - startTime < Settings.stay_InGoalDelay do
+                            if not isGamePlaying() then break end 
+                            HRP.CFrame = goalCFrame
+                            task.wait()
+                            task.spawn(Shoot)
+                        end
+                    end
+                end
+            end
+
+            if not isGamePlaying() then
+                ENV.AutoFarm__ = false
+                addAutofarmLog("Match Finished..")
+            end
+        end)
+    end
+end)
+
+-- // UI
+local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
+local Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/aSbQ28Y1UMk1"))();
+
+local Window = Library:CreateWindow({
+    Title = "Window";
+    Icon = { ID, Size } 
+});
+
+local Dashboard_Tab = Window:CreateTab({
+    Title = "Dashboard";
+    Icon = "rbxassetid://18182790592";
+});
+local Misc_Tab = Window:CreateTab({
+    Title = "Miscellaneous";
+    Icon = "rbxassetid://118024518398224";
+});
+local ESP_Tab = Window:CreateTab({
+    Title = "ESP";
+    Icon = "rbxassetid://103616006830756";
+});
+local Config_Tab = Window:CreateTab({
+    Title = "Config";
+    Icon = "rbxassetid://128342900381309";
+});
+
+local Section_Config = Config_Tab:CreateSection({
+    Title = "Other";
+    Side = "Left"; 
+});
+
+local Section2_Config = Config_Tab:CreateSection({
+    Title = "Cursor Settings";
+    Side = "Right"; 
+});
+
+local Section3_Info = Config_Tab:CreateSection({
+    Title = "Information";
+    Side = "Left"; 
+});
+
+local Section_Dashboard = Dashboard_Tab:CreateSection({
+    Title = "Farming";
+    Side = "Left"; 
+});
+local Section_ESP = ESP_Tab:CreateSection({
+    Title = "Player ESP";
+    Side = "Left"; 
+});
+local Section_ESP_Ball = ESP_Tab:CreateSection({
+    Title = "Ball ESP";
+    Side = "Left"; 
+});
+local Section_BallConfig = Dashboard_Tab:CreateSection({
+    Title = "Ball Settings";
+    Side = "Right"; 
+});
+
+
+local AutoFarm_Goals = Section_Dashboard:CreateToggle({
+    Text = "Auto Farm";
+    Subtext = "Scores on Enemy Goal";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(Value)
+        ENV.AutoFarm__ = Value
+
+        if Settings.Debug then 
+            print("[DEBUG] Autofarm is ", Value)
+        end
+
+        if Value then
+            task.spawn(function()
+                while ENV.AutoFarm__ do
+                    task.wait(0.1)
+                    AutoFarm()
+                end
+            end)
+        end
+    end;
+});
+
+local Slider_Delay = Section_Dashboard:CreateSlider({
+    Text = "Stay in Goal";
+    Subtext = "Delays Ball Checking";
+    Alignment = "Left"; 
+    Default = 3; 
+    Floats = 1; 
+    Limits = { 1, 5 }; 
+    Callback = function(Value)
+    if Settings.Debug then
+        print("[DEBUG] Current Stay in Goal Value ", Value)
+    end
+
+    Settings.stay_InGoalDelay = Value;
+    end;
+});
+
+local AutoFarm_Goals = Section_Dashboard:CreateToggle({
+    Text = "No Clip";
+    Subtext = "Must Enable for Autofarm!";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(Value)
+        Settings.NoClip = Value
+
+        if Settings.Debug then 
+            print("[DEBUG] No Clip is ", Value)
+        end
+
+        NoClip()
+    end;
+});
+
+local EntryLog = Section_Dashboard:CreateLog({
+    Default = { };
+});
+
+function addAutofarmLog(entryText)
+    EntryLog:AddEntry(entryText)
+end
+
+local UI_ToggleKeybind = Section_Config:CreateKeybind({
+    Text = "Toggle UI";
+    Subtext = "Default [N] to Toggle";
+    Alignment = "Left"; 
+    Default = "N"; 
+    Callback = function(v) 
+        if Settings.Debug then
+            print("[DEBUG] Toggled UI ", v)
+        end
+
+        Window:Visibility()
+    end;
+});
+
+local AutoLoad_Toggle = Section_Config:CreateToggle({
+    Text = "Auto Load";
+    Subtext = "Auto Load on Teleport";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(Value)
+        Settings.AutoLoad = Value
+
+        if Settings.Debug then 
+            print("[DEBUG] Auto Load is ", Value)
+        end
+
+        if Value then
+            AutoLoadScript_Brrr()
+        end
+    end;
+});
+
+local Debug_Toggle = Section_Config:CreateToggle({
+    Text = "Debug Mode";
+    Subtext = "For Debugging Purposes";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(v) 
+        ENV.Debug = v
+        if ENV.Debug then
+            Settings.Debug = true
+            print("- Debug Mode Enabled -")
+        else
+            Settings.Debug = false
+            print("- Debug Mode Disabled -")
+        end
+    end;
+});
+
+local FPS_NoCapButton = Section_Config:CreateButton({
+    Text = "Unlock Fps";
+    Alignment = "Left"; 
+    Callback = function(Value) 
+        if Settings.Debug then
+            print("[DEBUG] Unlock Fps is ", Value)
+        end
+
+        setfpscap(9e9)
+    end;
+});
+
+local Button_Exit = Section_Config:CreateButton({
+    Text = "Exit UI";
+    Alignment = "Left"; 
+    Callback = function() 
+    Window:Exit();
+    end;
+});
+
+local Cursor_Toggle = Section2_Config:CreateToggle({
+    Text = "Enable Cursor";
+    Subtext = "Shows a White circle Cursor";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        ENV.ShowCursor = v
+
+        if ENV.ShowCursor then
+            Cursor = Drawing.new("Circle")
+            Cursor.Visible = true
+            Cursor.Color = Color3.new(1, 1, 1)
+            Cursor.Thickness = 2
+            Cursor.Radius = 5
+
+            connection = RUN_S.RenderStepped:Connect(function()
+                local mousePosition = UIS:GetMouseLocation()
+                Cursor.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+            end)
+        else
+            if Cursor then
+                Cursor:Remove()
+                Cursor = nil
+            end
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+        end
+    end;
+})
+
+local Slider_Thick = Section2_Config:CreateSlider({
+    Text = "Thickness";
+    Subtext = "Change the Cursor Thicker-Thinner";
+    Alignment = "Left"; 
+    Default = 2; 
+    Floats = 1; 
+    Limits = { 1, 20 }; 
+    Callback = function(Value)
+        if Cursor then
+            Cursor.Thickness = Value
+        end
+    end;
+});
+
+local Slider_Rad = Section2_Config:CreateSlider({
+    Text = "Radius";
+    Subtext = "Change the Cursor Radius";
+    Alignment = "Left";
+    Default = 5; 
+    Floats = 1; 
+    Limits = { 0, 20 }; 
+    Callback = function(Value)
+        if Cursor then
+            Cursor.Radius = Value
+        end
+    end;
+});
+
+local EXEC = getexecutorname() or "N/A"
+local Exec_Label = Section3_Info:CreateLabel({
+    Text = "Executor: "..EXEC;
+    Alignment = "Left"; 
+})
+
+local Discord_Label = Section3_Info:CreateLabel({
+    Text = "https://discord.gg/xUsMKaUM";
+    Alignment = "Left"; -- Enum.TextXAlignment
+});
+
+local NameESP_Toggle = Section_ESP:CreateToggle({
+    Text = "Show Names",
+    Subtext = "Shows their Username",
+    Default = Settings.ESP.NameESP,
+    Callback = function(Value)
+        Settings.ESP.NameESP = Value
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character then
+                local head = player.Character:FindFirstChild("Head")
+                if head then
+                    local billboard = head:FindFirstChild("NameESP") or Instance.new("BillboardGui")
+                    billboard.Name = "NameESP"
+                    billboard.Adornee = head
+                    billboard.Size = UDim2.new(2, 0, 1, 0)  
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)  
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = billboard:FindFirstChild("TextLabel") or Instance.new("TextLabel")
+                    textLabel.Name = "TextLabel"  
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.Text = player.Name
+                    textLabel.TextSize = Settings.ESP.NameSize 
+                    textLabel.TextColor3 = Color3.new(1, 1, 1)
+                    textLabel.Font = Enum.Font.SourceSansBold
+                    textLabel.BackgroundTransparency = 1  
+
+                    textLabel.Parent = billboard
+
+                    if Value then
+                        billboard.Parent = head  
+                    else
+                        billboard:Destroy()  
+                    end
+                end
+            end
+        end
+    end
+})
+
+Section_ESP:CreateSlider({
+    Text = "Name Size",
+    Default = Settings.ESP.NameSize,
+    Limits = {10, 100},
+    Callback = function(Value)
+        Settings.ESP.NameSize = Value
+        for _, player in pairs(game.Players:GetPlayers()) do
+            local head = player.Character and player.Character:FindFirstChild("Head")
+            if head then
+                local billboard = head:FindFirstChild("NameESP")
+                if billboard then
+                    local textLabel = billboard:FindFirstChild("TextLabel")
+                    if textLabel then
+                        textLabel.TextSize = Value  
+                    end
+                end
+            end
+        end
+    end
+})
+
+local Tracer_Toggle = Section_ESP_Ball:CreateToggle({
+    Text = "Show Ball Tracer",
+    Subtext = "Line to ball",
+    Default = Settings.ESP.BallTracerESP,
+    Callback = function(Value)
+        Settings.ESP.BallTracerESP = Value
+        local ball = Football  
+        local character = LP.Character
+        local hrp_check = character and character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+
+        if ball and hrp_check then
+            local tracer = Drawing.new("Line")
+            tracer.Color = Color3.new(1, 0, 0)
+            tracer.Thickness = 2
+            tracer.Visible = false
+
+            game:GetService("RunService").RenderStepped:Connect(function()
+                if Settings.ESP.BallTracerESP and ball and ball.Parent and hrp_check and ball.Parent.Parent then
+                    local ballPosition = ball.Position
+                    local rootPartPosition = hrp_check.Position
+
+                    local screenPositionStart = workspace.CurrentCamera:WorldToViewportPoint(rootPartPosition)
+                    local screenPositionEnd = workspace.CurrentCamera:WorldToViewportPoint(ballPosition)
+
+                    tracer.From = Vector2.new(screenPositionStart.X, screenPositionStart.Y)
+                    tracer.To = Vector2.new(screenPositionEnd.X, screenPositionEnd.Y)
+                    tracer.Visible = true
+                else
+                    tracer.Visible = false
+                end
+            end)
+        end
+    end
+})
+
+local Ball_Toggle = Section_ESP_Ball:CreateToggle({
+    Text = "Show Ball",
+    Subtext = "Highlights the ball",
+    Default = Settings.ESP.BallESP,
+    Callback = function(Value)
+        Settings.ESP.BallESP = Value
+        local ball = Football  
+        if ball then
+            local highlight = ball:FindFirstChild("BallESP") or Instance.new("Highlight")
+            highlight.Name = "BallESP"
+            highlight.Adornee = ball
+            highlight.FillColor = Color3.new(1, 0, 0)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineColor = Color3.new(1, 1, 1)
+            highlight.OutlineTransparency = 0.1
+            if Value then
+                highlight.Parent = ball
+            else
+                highlight:Destroy()
+            end
+        end
+    end
+})
