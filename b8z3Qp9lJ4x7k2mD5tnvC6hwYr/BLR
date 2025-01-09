@@ -189,7 +189,7 @@ local randomJoinTeam = (function()
             local newTeam = currentPlayer.Team
 
             if newTeam and newTeam.Name == teamChoice then
-                print("[Kaos Hub] Successfully joined " .. teamChoice .. " as " .. position)
+                print("[TEMPA] Successfully joined " .. teamChoice .. " as " .. position)
                 break
             end
         end
