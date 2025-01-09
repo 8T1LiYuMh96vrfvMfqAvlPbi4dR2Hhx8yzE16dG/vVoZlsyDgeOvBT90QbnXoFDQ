@@ -166,30 +166,31 @@ local AutoFarm = (function()
     end
 end)
 local randomJoinTeam = (function()
-    local currentTeam = LP.Team
+    local player = game:GetService("Players").LocalPlayer
+    local currentTeam = player.Team
     local teamChoice
-    local positions = {"CF", "CM", "LW", "RW", "GK"}
-    local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
-    local teamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService.RE
-
     if currentTeam and (currentTeam.Name == "Home" or currentTeam.Name == "Away") then
         teamChoice = currentTeam.Name == "Home" and "Away" or "Home"
     else
         teamChoice = math.random(1, 2) == 1 and "Home" or "Away"
         teamChoice = teamChoice == "Home" and "Away" or "Home" 
     end
+    local positions = {"CF", "CM", "LW", "RW", "GK"}
     pcall(function()
+        local teamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService.RE
+
         for _, position in ipairs(positions) do
-            if gameStateValue.Value == "Intermission" then
             teamService.Select:FireServer(teamChoice, position) 
             task.wait(0.2)
-            local newTeam = LP.Team
+
+            local currentPlayer = game:GetService("Players").LocalPlayer
+            local newTeam = currentPlayer.Team
+
             if newTeam and newTeam.Name == teamChoice then
-                print("[TEMPA] Successfully joined " .. teamChoice .. " as " .. position)
+                print("[Kaos Hub] Successfully joined " .. teamChoice .. " as " .. position)
                 break
             end
         end
-    end
     end)
 end)
 
@@ -312,13 +313,14 @@ local JoinTeam_Toggle = Section_Dashboard:CreateToggle({
     Alignment = "Left";
     Default = false;
     Callback = function(Value)
-        ENV.RandomTeam = Value
+        ENV.Randommm = Value
+
         if Settings.Debug then 
             print("[DEBUG] Auto Join Match is ", Value)
         end
 
         task.spawn(function() 
-            if ENV.RandomTeam then
+            if ENV.Randommm then
                 randomJoinTeam()
                 task.wait()
             end
