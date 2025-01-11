@@ -1,8 +1,10 @@
 -- // Vars
 repeat task.wait(2.5) until game:IsLoaded()
+
 print("Loading Script for "..game.Name)
 
 local LP = game:GetService("Players").LocalPlayer
+local TS_S = game:GetService("TeleportService")
 local UIS = game:GetService("UserInputService")
 local CHAR = LP.Character or LP.CharacterAdded:Wait()
 local HRP = CHAR:WaitForChild("HumanoidRootPart")
@@ -10,10 +12,27 @@ local TS = game:GetService("TweenService")
 local RS = game:GetService("ReplicatedStorage")
 local RUN_S = game:GetService("RunService")
 local HTTP = game:GetService("HttpService")
-local DELAY = math.random(1,10)
+local DELAY = math.random(5,10)
 local ENV = getgenv()
-local Football = workspace:WaitForChild("Football")
+
+-- // Ingame
+local Football = workspace:FindFirstChild("Football")
 local BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox")
+local PlayerStats = cloneref(LP:WaitForChild("PlayerStats"))
+local InFlow = cloneref(PlayerStats:WaitForChild("InFlow"))
+local Flow = cloneref(PlayerStats:WaitForChild("Flow"))
+local RunService = cloneref(game:GetService("RunService"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local Packages = cloneref(ReplicatedStorage:WaitForChild("Packages"))
+local Controllers = cloneref(ReplicatedStorage:WaitForChild("Controllers"))
+local Knit = cloneref(Packages:WaitForChild("Knit"))
+local Services = cloneref(Knit:WaitForChild("Services"))
+local StaminaService = cloneref(Services:WaitForChild("StaminaService"))
+local StaminaRE = cloneref(StaminaService:WaitForChild("RE"))
+local DecreaseStamina = cloneref(StaminaRE:WaitForChild("DecreaseStamina"))
+local AbilityController = require(Controllers:WaitForChild("AbilityController"))
+local Players = game:GetService("Players")
+local RagdollConnection 
 
 local Settings = {
     AutoLoad = false,
@@ -23,6 +42,8 @@ local Settings = {
     selectedTweenSpeed = 0.5,
     stay_InGoalDelay = 3,
     isShooting = false,
+    isNoCdEnabled = false,
+    WantedFlow = nil,
     ESP = {
         NameESP = false,
         NameSize = 10,
@@ -81,52 +102,48 @@ local Shoot = (function()
         [4] = Vector3.new(0,0,0)
     }
     game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("BallService"):WaitForChild("RE"):WaitForChild("Shoot"):FireServer(unpack(args))  
-    task.wait(1) 
+    task.wait(0.5) 
     Settings.isShooting = false
     end
 end)
+local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+function isGamePlaying()
+    return gameStateValue.Value == "Playing" 
+end
 local AutoFarm = (function()
-    local goalAway = CFrame.new(-239, 11, -49)
-    local goalHome = CFrame.new(316, 11, -47)
+    local goalAway = CFrame.new(-242, 11, -33)
+    local goalHome = CFrame.new(319, 11, -61)
     ENV.AutoFarm__ = true
-
     if Settings.AutoFarm then
+        if isGamePlaying() then
         addAutofarmLog("Starting Autofarm..")
+        end
         pcall(function()
             local Found_Team = nil
             local teamsFolder = RS:WaitForChild("Teams")
             local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
 
             for _, team in pairs(teamsFolder:GetChildren()) do
-                if team.Name == "HomeTeam" then
+                if team.Name == "HomeTeam" or team.Name == "AwayTeam" then
                     for _, obj in pairs(team:GetChildren()) do
                         if obj:IsA("ObjectValue") and obj.Value == game.Players.LocalPlayer then
-                            Found_Team = "HomeTeam"
-                            addAutofarmLog("Team [Home]")
+                            Found_Team = team.Name
+                            addAutofarmLog("Team: "..team.Name)
                             break
                         end
                     end
-                end
-                if team.Name == "AwayTeam" then
-                    for _, obj in pairs(team:GetChildren()) do
-                        if obj:IsA("ObjectValue") and obj.Value == game.Players.LocalPlayer then
-                            Found_Team = "AwayTeam"
-                            addAutofarmLog("Team [Away]")
-                            break
-                        end
-                    end
+                    if Found_Team then break
+                else
+                    addAutofarmLog("Waiting ".. DELAY .."sec")
+                    task.wait(DELAY)
                 end
             end
-            local function isGamePlaying()
-                return gameStateValue.Value == "Playing" 
-            end
-
+        end
             gameStateValue:GetPropertyChangedSignal("Value"):Connect(function()
                 if not isGamePlaying() then
                     ENV.AutoFarm__ = false
                 end
             end)
-
             if Found_Team then
                 while ENV.AutoFarm__ do
                     if not isGamePlaying() then break end
@@ -139,7 +156,6 @@ local AutoFarm = (function()
                         until BallHitbox:IsDescendantOf(LP.Character)
                         if not isGamePlaying() then break end
                     end
-
                     if Football.Parent == LP.Character then
                         local goalCFrame = Found_Team == "HomeTeam" and goalAway or goalHome
                         HRP.CFrame = goalCFrame
@@ -157,10 +173,9 @@ local AutoFarm = (function()
                     end
                 end
             end
-
             if not isGamePlaying() then
                 ENV.AutoFarm__ = false
-                addAutofarmLog("Match Finished..")
+                addAutofarmLog("Match Finished;")
             end
         end)
     end
@@ -179,12 +194,10 @@ local randomJoinTeam = (function()
     local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
     pcall(function()
         local teamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService.RE
-
         if gameStateValue.Value == "Playing" then
         for _, position in ipairs(positions) do
             teamService.Select:FireServer(teamChoice, position) 
             task.wait(0.2)
-
             local currentPlayer = game:GetService("Players").LocalPlayer
             local newTeam = currentPlayer.Team
 
@@ -197,6 +210,72 @@ local randomJoinTeam = (function()
         print("Not in Match")
     end
     end)
+end)
+local teleportToFootball = (function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local ball = workspace:WaitForChild("Football")
+    if character and ball then
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+        rootPart.CFrame = CFrame.new(ball.Position)
+    end
+end)
+local monitorRagdoll = (function()
+    local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
+    if RagdollConnection then
+        RagdollConnection:Disconnect() 
+    end
+    RagdollConnection = IsRagdoll:GetPropertyChangedSignal("Value"):Connect(function()
+        if ENV.AntiRagdoll and IsRagdoll.Value == true then
+            if IsRagdoll.Value == true then
+                IsRagdoll.Value = false
+            end
+        end
+    end)
+end)
+local enableInfiniteStamina = (function()
+    local stats = game.Players.LocalPlayer:WaitForChild("PlayerStats")
+
+        local staminaService = RS:FindFirstChild("StaminaService")
+        if staminaService then
+            local decreaseStamina = staminaService.RE.DecreaseStamina
+            decreaseStamina:FireServer(math.sqrt(-1)) 
+        end
+        stats.Stamina.Value = 100
+end)
+local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
+local RagdollConnection 
+local disableRagdoll = (function()
+    if IsRagdoll.Value == true then
+        IsRagdoll.Value = false
+    end
+end)
+local monitorRagdoll = (function()
+    if RagdollConnection then
+        RagdollConnection:Disconnect() 
+    end
+    RagdollConnection = IsRagdoll:GetPropertyChangedSignal("Value"):Connect(function()
+        if ENV.AntiRagdoll and IsRagdoll.Value == true then
+            disableRagdoll()
+        end
+    end)
+end)
+local enableAntiRagdoll = (function()
+    monitorRagdoll()
+    disableRagdoll() 
+
+    LP.CharacterAdded:Connect(function(newCharacter)
+        CHAR = newCharacter
+        IsRagdoll = cloneref(newCharacter:WaitForChild("IsRagdoll"))
+        monitorRagdoll()
+        disableRagdoll()
+    end)
+end)
+local disableAntiRagdoll = (function()
+    if RagdollConnection then
+        RagdollConnection:Disconnect()
+        RagdollConnection = nil
+    end
 end)
 
 -- // UI
@@ -217,7 +296,7 @@ local Misc_Tab = Window:CreateTab({
     Icon = "rbxassetid://118024518398224";
 });
 local ESP_Tab = Window:CreateTab({
-    Title = "ESP";
+    Title = "Esp";
     Icon = "rbxassetid://103616006830756";
 });
 local Config_Tab = Window:CreateTab({
@@ -256,6 +335,14 @@ local Section_BallConfig = Dashboard_Tab:CreateSection({
     Title = "Ball Settings";
     Side = "Right"; 
 });
+local Section_Flow = Misc_Tab:CreateSection({
+    Title = "Temp-Unlocks",
+    Side = "Right"
+})
+local Section_Other = Misc_Tab:CreateSection({
+    Title = "Other",
+    Side = "Left"
+})
 
 local AutoFarm_Goals = Section_Dashboard:CreateToggle({
     Text = "Auto Farm";
@@ -326,7 +413,7 @@ local JoinTeam_Toggle = Section_Dashboard:CreateToggle({
 
         task.spawn(function() 
             if ENV.Randommm then
-                randomJoinTeam()
+                pcall(randomJoinTeam)
                 task.wait()
             end
          end)
@@ -340,6 +427,38 @@ local EntryLog = Section_Dashboard:CreateLog({
 function addAutofarmLog(entryText)
     EntryLog:AddEntry(entryText)
 end
+
+local Button_FlingBall = Section_BallConfig:CreateButton({
+    Text = "Fling Ball [Have Ball]";
+    Alignment = "Left"; 
+    Callback = function()
+    game:GetService("Workspace").Football.Velocity = Vector3.new(500, 200, 1000);
+    end;
+});
+
+local Button_VoidBall = Section_BallConfig:CreateButton({
+    Text = "Void Ball [Have Ball]";
+    Alignment = "Left"; 
+    Callback = function()
+    Football:Destroy();
+    end;
+});
+
+local Button_TakeBall = Section_BallConfig:CreateButton({
+    Text = "Give Ball";
+    Alignment = "Left"; 
+    Callback = function()
+    Football.Position = HRP.Position
+    end;
+});
+
+local Button_TpTOBall = Section_BallConfig:CreateButton({
+    Text = "Take Ball";
+    Alignment = "Left"; 
+    Callback = function() 
+    teleportToFootball()
+    end;
+});
 
 local UI_ToggleKeybind = Section_Config:CreateKeybind({
     Text = "Toggle UI";
@@ -478,7 +597,7 @@ local Exec_Label = Section3_Info:CreateLabel({
 
 local Discord_Label = Section3_Info:CreateLabel({
     Text = "https://discord.gg/xUsMKaUM";
-    Alignment = "Left"; -- Enum.TextXAlignment
+    Alignment = "Left"; 
 });
 
 local NameESP_Toggle = Section_ESP:CreateToggle({
@@ -598,4 +717,96 @@ local Ball_Toggle = Section_ESP_Ball:CreateToggle({
             end
         end
     end
+})
+
+local InputBox = Section_Flow:CreateInput({
+    Text = "Enter desired Flow";
+    Subtext = "Only temporary while in Server";
+    Alignment = "Left"; 
+    Default = ""; 
+    Placeholder = "";
+    Callback = function(Value)
+    Settings.WantedFlow = Value
+
+    InFlow:GetPropertyChangedSignal("Value"):Connect(function()
+        if InFlow.Value then return end 
+        task.wait()
+        InFlow.Value = true
+    end)
+    InFlow.Value = true
+    
+    Flow:GetPropertyChangedSignal("Value"):Connect(function()
+        if Flow.Value == Settings.WantedFlow then return end 
+        task.wait()
+        Flow.Value = Settings.WantedFlow
+    end)
+    Flow.Value = Settings.WantedFlow
+    end;
+});
+
+local Toggle_NoCd = Section_Other:CreateToggle({
+    Text = "Skills no Cooldown",
+    Subtext = "Disables cooldowns for your abilities",
+    Alignment = "Left", 
+    Default = false,
+    Callback = function(Value)
+        if Settings.Debug then 
+            print("[DEBUG] No Cooldown Skills is ", Value)
+        end
+
+        Settings.isNoCdEnabled = Value
+    end
+})
+
+RunService.Heartbeat:Connect(function(Delta)
+    if not AbilityController.AbilityOne then return end
+    if Settings.isNoCdEnabled then
+        Delta *= 1.5
+        AbilityController.AbilityOne -= Delta
+        AbilityController.AbilityTwo -= Delta
+        AbilityController.AbilityThree -= Delta
+    end
+end)
+
+local Toggle_InfStamina = Section_Other:CreateToggle({
+    Text = "Infinite Stamina";
+    Subtext = "No more stamina!!";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(Value)
+        ENV.DecreaseStamina = Value
+
+        task.spawn(function()
+            while ENV.DecreaseStamina do
+            if ENV.DecreaseStamina == true then
+                task.wait()
+                enableInfiniteStamina() 
+            else
+                break;
+            end
+        end
+        end)
+    end;
+});
+
+local Toggle_AntiRag = Section_Other:CreateToggle({
+    Text = "Anti Ragdoll";
+    Subtext = "Makes you move while in Ragdoll";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(Value)
+        ENV.AntiRagdoll = Value 
+
+        if Settings.Debug then
+            print("[DEBUG] Anti Ragdoll is ", Value)
+        end
+
+        task.spawn(function()
+            if ENV.AntiRagdoll then
+                enableAntiRagdoll() 
+            else
+                disableAntiRagdoll() 
+            end
+        end)
+    end;
 })
