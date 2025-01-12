@@ -1,12 +1,14 @@
 -- New UI
-print("v1.2")
+print("v1.5")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
 local InputService = Setup:InputRecorder();
+local FileService = Setup:File();
 Setup:ClientController();
 Setup:Basics();
 
+local HttpService = game:GetService("HttpService");
 local Mouse = client:GetMouse();
 
 local RGB = Color3.fromRGB;
@@ -18,6 +20,8 @@ local Library = {
 
         Toggles = {},
         Binds = {},
+
+        Flags = {}
     },
 
     Theme = "Default",
@@ -51,6 +55,39 @@ local Library = {
         ["Themes"] = "\\Themes",
     },
 };
+
+do -- Save / Load
+    function Library:Save()
+        local Folder = Library.Paths["Folder"];
+        FileService:CreateFolder(Folder);
+        local Path = Folder .. Library.Paths["Data"]..".json";
+
+        local SaveData = {};
+        for i, v in pairs(self.Created.Flags) do
+            if v.Value then
+                SaveData[i] = v.Value;
+            end;
+        end;
+
+        FileService:Write(Path, HttpService:JSONEncode(SaveData))
+    end;
+
+    function Library:Load()
+        local Folder = Library.Paths["Folder"];
+        FileService:CreateFolder(Folder);
+        local Path = Folder .. Library.Paths["Data"]..".json";
+
+        local LoadData = FileService:Read(Path);
+        if not LoadData then return; end;
+
+        LoadData = HttpService:JSONDecode(LoadData);
+        for i, v in pairs(LoadData) do
+            if Library.Created.Flags[i] then
+                Library.Created.Flags[i]:Load(v);
+            end;
+        end;
+    end;
+end;
 
 do -- Colorize
     function Library:Register(Obj, Properties, Tween)
@@ -400,11 +437,15 @@ local SubFunctions; SubFunctions = {
         nself.Alignment = nself.Alignment or "Left";
         nself.Default = nself.Default or false;
         nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or false;
         table.insert(Library.Created.Toggles, nself);
 
         local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
 
         -- UI
         local Background = Library.Create("Frame", {
@@ -475,7 +516,7 @@ local SubFunctions; SubFunctions = {
 
             Title.Text = nself.Text;
             Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
-            .Left;
+                .Left;
             Description.Text = nself.Subtext;
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
@@ -549,9 +590,10 @@ local SubFunctions; SubFunctions = {
             return Settings;
         end;
 
-        nself.Switch = function(nself) task.spawn(nself.SetValue, nself, not nself.Value); end;
-        nself.Unload = function(nself) nself:SetValue(false) end;
-        nself.Fire = function(nself) task.spawn(nself.Callback, nself.Value); end;
+        nself.Switch = function(self) task.spawn(self.SetValue, self, not self.Value); end;
+        nself.Unload = function(self) self:SetValue(false) end;
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = nself.SetValue;
         Update();
 
         local Click = Library:ApplyClick(Background);
@@ -566,19 +608,24 @@ local SubFunctions; SubFunctions = {
         return nself;
     end,
 
-    CreateKeybind = function(nself, INFO)
-        local ParentUI, isSetting = nself.UI, nself.isSetting;
+    CreateKeybind = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
         if not ParentUI then return; end;
 
-        nself = INFO or {};
+        local nself = INFO or {};
         nself.Text = nself.Text or "Keybind";
         nself.Subtext = nself.Subtext or ""
         nself.Alignment = nself.Alignment or "Left";
         nself.Default = nself.Default or nil;
         nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or nil;
         table.insert(Library.Created.Binds, nself);
+
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
 
         -- UI
         local Background = Library.Create("Frame", {
@@ -643,7 +690,7 @@ local SubFunctions; SubFunctions = {
             ValueLabel.Text = nself.Value or "";
             Title.Text = nself.Text;
             Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
-            .Left;
+                .Left;
             Description.Text = nself.Subtext;
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
@@ -717,6 +764,7 @@ local SubFunctions; SubFunctions = {
 
         nself.Unload = function(self) self:SetKey() end;
         nself.Fire = function(self) task.spawn(self.Callback); end;
+        nself.Load = nself.SetKey;
         nself:SetKey(nself.Default);
 
         local Click = Library:ApplyClick(Background);
@@ -733,6 +781,7 @@ local SubFunctions; SubFunctions = {
         nself.Text = nself.Text or "Slider";
         nself.Alignment = nself.Alignment or "Left";
         nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
         nself.Floats = nself.Floats or 0;
         nself.Default = nself.Default or 0;
@@ -742,6 +791,10 @@ local SubFunctions; SubFunctions = {
         nself.Increment = nself.Increment or 1;
 
         nself.Value = math.clamp(nself.Default, unpack(nself.Limits)) or 0;
+
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
 
         -- UI
         local Background = Library.Create("Frame", {
@@ -778,7 +831,7 @@ local SubFunctions; SubFunctions = {
             Parent = Subframe,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
-            Text = tostring(nself.Value), -- Changed from Slider.Value to nself.Value // Samir
+            Text = tostring(nself.Value),
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(ValueBox, 14);
@@ -826,7 +879,7 @@ local SubFunctions; SubFunctions = {
             ValueBox.Text = (tonumber(Converted) % 1 == 0 and tostring(math.floor(Value))) or Converted;
             Title.Text = nself.Text;
             Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
-            .Left;
+                .Left;
         end;
 
         local function Start()
@@ -868,6 +921,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = nself.SetValue;
         Update();
 
         ValueBox.FocusLost:Connect(function()
@@ -892,9 +946,15 @@ local SubFunctions; SubFunctions = {
         nself.Default = nself.Default or "";
         nself.Placeholder = nself.Placeholder or "";
         nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or "";
         local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
+
         -- UI
         local Background = Library.Create("Frame", {
             Parent = ParentUI,
@@ -949,7 +1009,7 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             TextSize = 14,
-            Text = InputBox.Value or "",
+            Text = nself.Value or "",
             PlaceholderText = InputBox.Placeholder,
             TextXAlignment = Enum.TextXAlignment.Left,
             ClearTextOnFocus = false,
@@ -966,7 +1026,7 @@ local SubFunctions; SubFunctions = {
             ValueBox.Text = nself.Value or "";
             Title.Text = nself.Text;
             Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
-            .Left;
+                .Left;
             Description.Text = nself.Subtext;
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
@@ -993,6 +1053,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = nself.SetValue;
 
         ValueBox.Focused:Connect(function()
             local Info = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
@@ -1027,9 +1088,14 @@ local SubFunctions; SubFunctions = {
         nself.Multi = nself.Multi or false;
         nself.Default = nself.Default or nil;
         nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or nil;
         local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
 
         -- UI
         local Background = Library.Create("Frame", {
@@ -1162,6 +1228,7 @@ local SubFunctions; SubFunctions = {
                 end;
             end;
 
+            nself:Fire();
             Update();
         end;
 
@@ -1216,6 +1283,9 @@ local SubFunctions; SubFunctions = {
             nself.Value = Value;
             Update();
         end;
+
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = nself.SetValue;
 
         local Click = Library:ApplyClick(Background);
 
