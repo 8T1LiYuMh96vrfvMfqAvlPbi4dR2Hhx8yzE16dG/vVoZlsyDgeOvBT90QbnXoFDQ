@@ -1,5 +1,5 @@
 -- New UI
-print("v1.01")
+print("v1.1")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -244,6 +244,1015 @@ do -- Creation
     end;
 end;
 
+local function MouseInBounds(Position, Size)
+    if (not Position) or (not Size) then return; end;
+    local x, y = Mouse.X, Mouse.Y;
+    local px, py = Position.X, Position.Y;
+    local sx, sy = Size.X, Size.Y;
+
+    return (x > px and x < px + sx and y > py and y < py + sy);
+end;
+
+local function BuildConnection(func, ...)
+    local args = { ... };
+    local function newFunc()
+        func(unpack(args));
+    end;
+
+    return newFunc;
+end;
+
+local SubFunctions; SubFunctions = {
+    CreateLabel = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Label";
+        nself.Alignment = nself.Alignment or "Center";
+
+        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
+            BackgroundTransparency = 1,
+        });
+
+        local Label = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = nself.Text,
+            TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
+                Enum.TextXAlignment.Center,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Label, (isSetting and 14) or 18);
+
+        local function Update()
+            Label.Text = nself.Text or "";
+            Label.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+                .Center;
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        return nself;
+    end,
+
+    CreateButton = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Button";
+        nself.Alignment = nself.Alignment or "Center";
+        nself.Callback = nself.Callback or function(...) end;
+
+        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
+        }, { BackgroundColor3 = "Background2" });
+
+        local Stroke = Library:ApplyStroke(Background, "Accent1", 1, "Round");
+        Library:ApplyCorner(Background, 4);
+
+        local Label = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Label, (isSetting and 11) or 15);
+        Library.Create("UIPadding", {
+            Parent = Label,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        -- Functions
+        local function Update()
+            Label.Text = nself.Text or "";
+            Label.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+                .Center;
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        nself.Fire = function(self) task.spawn(self.Callback); end;
+        Update();
+
+        -- Mouse Actions
+        local Click = Library:ApplyClick(Background);
+
+        Click.MouseEnter:Connect(function()
+            Library:Register(Background, { BackgroundColor3 = "Background" }, true);
+            Library:Register(Stroke, { Color = "Hover" }, true);
+        end);
+
+        Click.MouseLeave:Connect(function()
+            Library:Register(Background, { BackgroundColor3 = "Background2" }, true);
+            Library:Register(Stroke, { Color = "Accent1" }, true);
+        end);
+
+        Click.MouseButton1Down:Connect(function()
+            Library:Register(Background, { BackgroundColor3 = "Background" }, true);
+            Library:Register(Stroke, { Color = "Selected" }, true);
+        end);
+
+        Click.MouseButton1Up:Connect(function()
+            nself:Fire();
+            Library:Register(Background, { BackgroundColor3 = "Background" }, true);
+            Library:Register(Stroke, { Color = "Hover" }, true);
+        end);
+
+
+        return nself;
+    end,
+
+    CreateToggle = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Toggle";
+        nself.Subtext = nself.Subtext or "";
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Default = nself.Default or false;
+        nself.Callback = nself.Callback or function(...) end;
+
+        nself.Value = nself.Default or false;
+        table.insert(Library.Created.Toggles, nself);
+
+        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Description = Library.Create("TextLabel", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(0, 1),
+            Size = UDim2.new(.75, 0, .5, 0),
+            Position = UDim2.new(0, 0, 1, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Subtext" });
+
+        Library:ApplyTextSize(Description, (isSetting and 10) or 14);
+        Library.Create("UIPadding", {
+            Parent = Description,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        -- Visuals
+        local Slider = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, .5),
+            Position = UDim2.new(1, 0, .5, 0),
+            Size = UDim2.new(1, 0, .66, 0),
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyRatio(Slider, 2, "Height");
+        Library:ApplyCorner(Slider, 10);
+        Library:ApplyStroke(Slider, "Accent1", 1, "Round");
+
+        local Circle = Library.Create("Frame", {
+            Parent = Slider,
+            AnchorPoint = Vector2.new(0, .5),
+            Position = UDim2.new(.1, 0, .5, 0),
+            Size = UDim2.new(.4, 0, .8, 0),
+        }, { BackgroundColor3 = "Text" });
+
+        Library:ApplyCorner(Circle, 10);
+
+        -- Functions
+        local function Update()
+            local TweenInfo = TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+            local Color, Position = (nself.Value and "Highlight") or "Background2",
+                UDim2.new((nself.Value and .55) or .1, 0, .5, 0);
+
+            TweenService:Create(Circle, TweenInfo, { Position = Position }):Play();
+            Library:Register(Slider, { BackgroundColor3 = Color }, true);
+
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+            .Left;
+            Description.Text = nself.Subtext;
+            Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
+                Enum.TextXAlignment.Left;
+        end;
+
+        function nself:SetValue(nv)
+            nself.Value = nv or false;
+            nself:Fire();
+            Update();
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:ChangeSubtext(nv)
+            nself.Subtext = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        local SettingsUI = nil;
+        function nself:CreateSettings()
+            if SettingsUI then return; end;
+            local Settings = { isSetting = true };
+
+            Settings.UI = Library.Create("ScrollingFrame", {
+                Parent = Library.ScreenUI,
+                Size = UDim2.new(0, 150, 0, 100),
+                Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                Visible = false,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ClipsDescendants = true,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 1,
+                ZIndex = 999
+            }, { BackgroundColor3 = "Background2" });
+
+            Library:ApplyCorner(Settings.UI, 4);
+            Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+            Library:ApplyPadding(Settings.UI, 7);
+            Library.Create("UIListLayout", {
+                Parent = Settings.UI,
+                Padding = UDim.new(0, 5),
+            });
+
+            SettingsUI = Settings.UI;
+            InputService:Bind("MouseButton1", function()
+                local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+            end, false, true);
+
+            SettingsUI.ChildAdded:Connect(function(child)
+                pcall(function()
+                    child.ZIndex = 999;
+                end);
+                task.wait();
+                for _, v in pairs(child:GetDescendants()) do
+                    pcall(function()
+                        v.ZIndex = 999;
+                    end);
+                end;
+            end);
+
+            setmetatable(Settings, { __index = SubFunctions })
+            return Settings;
+        end;
+
+        nself.Switch = function(nself) task.spawn(nself.SetValue, nself, not nself.Value); end;
+        nself.Unload = function(nself) nself:SetValue(false) end;
+        nself.Fire = function(nself) task.spawn(nself.Callback, nself.Value); end;
+        Update();
+
+        local Click = Library:ApplyClick(Background);
+        Click.MouseButton1Up:Connect(BuildConnection(nself.Switch, nself));
+        Click.MouseButton2Up:Connect(function()
+            if SettingsUI then
+                SettingsUI.Visible = true;
+                SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
+            end;
+        end);
+
+        return nself;
+    end,
+
+    CreateKeybind = function(nself, INFO)
+        local ParentUI, isSetting = nself.UI, nself.isSetting;
+        if not ParentUI then return; end;
+
+        nself = INFO or {};
+        nself.Text = nself.Text or "Keybind";
+        nself.Subtext = nself.Subtext or ""
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Default = nself.Default or nil;
+        nself.Callback = nself.Callback or function(...) end;
+
+        nself.Value = nself.Default or nil;
+        table.insert(Library.Created.Binds, nself);
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Description = Library.Create("TextLabel", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(0, 1),
+            Size = UDim2.new(.75, 0, .5, 0),
+            Position = UDim2.new(0, 0, 1, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Subtext" });
+
+        Library:ApplyTextSize(Description, (isSetting and 10) or 14);
+        Library.Create("UIPadding", {
+            Parent = Description,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Subframe = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, .5),
+            Position = UDim2.new(1, 0, .5, 0),
+            Size = UDim2.new(.1, 0, .75, 0),
+            AutomaticSize = Enum.AutomaticSize.X,
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyCorner(Subframe, 4);
+        Library:ApplyStroke(Subframe, "Accent1", 1, "Round");
+        Library:ApplyPadding(Subframe, 5);
+
+        local ValueLabel = Library.Create("TextLabel", {
+            Parent = Subframe,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            TextSize = (isSetting and 10) or 14,
+            Text = nself.Value or "",
+            AutomaticSize = Enum.AutomaticSize.X,
+            RichText = true,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        -- Functions
+        local function Update()
+            ValueLabel.Text = nself.Value or "";
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+            .Left;
+            Description.Text = nself.Subtext;
+            Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
+                Enum.TextXAlignment.Left;
+        end;
+
+        local Old;
+        function nself:SetKey(Key)
+            nself.Value = Key;
+            Update();
+
+            if Old then Old:Disconnect(); end; Old = nil;
+            if not Key then return; end;
+
+            Old = InputService:Record(false, {
+                Type = "KeyCode",
+                CancelKeys = {},
+                Inputs = { Key },
+
+                Callback = BuildConnection(nself.Fire, nself),
+            });
+        end;
+
+        local Doing = false;
+        function nself.Start()
+            if Doing then return; end;
+            Doing = true;
+            local Found = false;
+            local function Recieved(Key)
+                nself:SetKey(Key);
+                Found = true;
+                Doing = false;
+            end;
+
+            InputService:Record(false, {
+                Type = "KeyCode",
+                Break = true,
+
+                Callback = Recieved,
+            });
+
+            task.spawn(function()
+                while not Found do
+                    for i = 1, 3 do
+                        if Found then break; end;
+                        if i == 1 then
+                            ValueLabel.Text = ". "; task.wait(.5); continue;
+                        end;
+
+                        ValueLabel.Text = ValueLabel.Text .. ". ";
+
+                        task.wait(.5);
+                    end;
+                end;
+            end);
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:ChangeSubtext(nv)
+            nself.Subtext = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        nself.Unload = function(self) self:SetKey() end;
+        nself.Fire = function(self) task.spawn(self.Callback); end;
+        nself:SetKey(nself.Default);
+
+        local Click = Library:ApplyClick(Background);
+        Click.MouseButton1Up:Connect(nself.Start);
+
+        return nself;
+    end,
+
+    CreateSlider = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Slider";
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Callback = nself.Callback or function(...) end;
+
+        nself.Floats = nself.Floats or 0;
+        nself.Default = nself.Default or 0;
+        nself.Limits = nself.Limits or { 0, 100 }; -- Min / Max
+        nself.Limits[1] = nself.Limits[1] or 0;
+        nself.Limits[2] = nself.Limits[2] or 100;
+        nself.Increment = nself.Increment or 1;
+
+        nself.Value = math.clamp(nself.Default, unpack(nself.Limits)) or 0;
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Subframe = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(.2, 0, .5, 0),
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyCorner(Subframe, 4);
+        Library:ApplyStroke(Subframe, "Accent1", 1, "Round");
+
+        local ValueBox = Library.Create("TextBox", {
+            Parent = Subframe,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Text = tostring(Slider.Value),
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(ValueBox, 14);
+
+        local Slider_Back = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(.5, 1),
+            Position = UDim2.new(.5, 0, 1, 0),
+            Size = UDim2.new(1, 0, .185, 0),
+
+        }, { BackgroundColor3 = "Tone" });
+
+        Library:ApplyCorner(Slider_Back, 10);
+        Library:ApplyStroke(Slider_Back, "Accent1", 1, "Round");
+
+        local Slider_Fill = Library.Create("Frame", {
+            Parent = Slider_Back,
+            Size = UDim2.new(0, 0, 1, 0),
+        }, { BackgroundColor3 = "Highlight" });
+
+        Library:ApplyCorner(Slider_Fill, 10);
+
+        local SliderCircle = Library.Create("Frame", {
+            Parent = Slider_Fill,
+            AnchorPoint = Vector2.new(1, .5),
+            Size = UDim2.new(1, 0, 1.85, 0),
+            Position = UDim2.new(1, 0, .5, 0),
+        }, { BackgroundColor3 = "Text" });
+
+        Library:ApplyCorner(SliderCircle, 10);
+        Library:ApplyRatio(SliderCircle, 1, "Height", true);
+
+        local Click = Library:ApplyClick(Slider_Back);
+        Click.ZIndex = 2;
+        local isSliding = false;
+
+        local function Update()
+            nself.Value = math.clamp(nself.Value, unpack(nself.Limits));
+            local Value = nself.Value;
+            local Percent = (nself.Value / nself.Limits[2]);
+            local TweenInfo = TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+            TweenService:Create(Slider_Fill, TweenInfo, { Size = UDim2.new(Percent, 0, 1, 0) }):Play();
+
+            local Converted = string.format("%." .. tostring(nself.Floats) .. "f", Value);
+            ValueBox.Text = (tonumber(Converted) % 1 == 0 and tostring(math.floor(Value))) or Converted;
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+            .Left;
+        end;
+
+        local function Start()
+            isSliding = true;
+
+            while isSliding do
+                local absPX, absSX = Slider_Back.AbsolutePosition.X, Slider_Back.AbsoluteSize.X;
+                local x = Mouse.X;
+
+                local Percent = (x - absPX) / absSX;
+                Percent = math.clamp(Percent, 0, 1);
+                local Value = (nself.Limits[2] * Percent);
+                Value = math.floor(((Value / (tonumber(nself.Increment) or 1)) * (tonumber(nself.Increment) or 1)) + .5);
+
+                nself.Value = Value;
+                Update();
+
+                RunService.Heartbeat:Wait();
+            end
+        end;
+
+        local function End()
+            isSliding = false;
+        end;
+
+        function nself:SetValue(nv)
+            nself.Value = nv or -math.huge;
+            Update();
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        Update();
+
+        ValueBox.FocusLost:Connect(function()
+            local BoxVal = tonumber(ValueBox.Text);
+            nself:SetValue(BoxVal);
+        end);
+
+        Click.MouseButton1Down:Connect(Start);
+        InputService:Bind("MouseButton1", End, true, true);
+
+        return nself;
+    end,
+
+    CreateInput = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Input Box";
+        nself.Subtext = nself.Subtext or ""
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Default = nself.Default or "";
+        nself.Placeholder = nself.Placeholder or "";
+        nself.Callback = nself.Callback or function(...) end;
+
+        nself.Value = nself.Default or "";
+        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Description = Library.Create("TextLabel", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(0, 1),
+            Size = UDim2.new(.75, 0, .5, 0),
+            Position = UDim2.new(0, 0, 1, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Subtext" });
+
+        Library:ApplyTextSize(Description, (isSetting and 10) or 14);
+        Library.Create("UIPadding", {
+            Parent = Description,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Subframe = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, .5),
+            Position = UDim2.new(1, 0, .5, 0),
+            Size = UDim2.new(.25, 0, .75, 0),
+            ClipsDescendants = true,
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyCorner(Subframe, 4);
+        Library:ApplyStroke(Subframe, "Accent1", 1, "Round");
+        Library:ApplyPadding(Subframe, 5);
+
+        local ValueBox = Library.Create("TextBox", {
+            Parent = Subframe,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            TextSize = 14,
+            Text = InputBox.Value or "",
+            PlaceholderText = InputBox.Placeholder,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ClearTextOnFocus = false,
+            RichText = true,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library.Create("UIPadding", {
+            Parent = ValueBox,
+            PaddingLeft = UDim.new(0, 2),
+            PaddingRight = UDim.new(0, 2),
+        });
+
+        local function Update()
+            ValueBox.Text = nself.Value or "";
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+            .Left;
+            Description.Text = nself.Subtext;
+            Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
+                Enum.TextXAlignment.Left;
+        end;
+
+        function nself:SetValue(nv)
+            nself.Value = nv;
+            Update();
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:ChangeSubtext(nv)
+            nself.Subtext = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+
+        ValueBox.Focused:Connect(function()
+            local Info = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+
+            TweenService:Create(Title, TweenInfo.new(.1), { TextTransparency = 1 }):Play();
+            TweenService:Create(Description, TweenInfo.new(.1), { TextTransparency = 1 }):Play();
+            TweenService:Create(Subframe, Info, { Size = UDim2.new(1, 0, .75, 0) }):Play();
+        end);
+
+        ValueBox.FocusLost:Connect(function()
+            local Info = TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+
+            TweenService:Create(Title, TweenInfo.new(.2), { TextTransparency = 0 }):Play();
+            TweenService:Create(Description, TweenInfo.new(.2), { TextTransparency = 0 }):Play();
+            TweenService:Create(Subframe, Info, { Size = UDim2.new(.25, 0, .75, 0) }):Play();
+
+            nself:SetValue(ValueBox.Text);
+        end);
+
+        return nself;
+    end,
+
+    CreateDropdown = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Dropdown";
+        nself.Subtext = nself.Subtext or ""
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Choices = nself.Choices or {};
+        nself.Multi = nself.Multi or false;
+        nself.Default = nself.Default or nil;
+        nself.Callback = nself.Callback or function(...) end;
+
+        nself.Value = nself.Default or nil;
+        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Description = Library.Create("TextLabel", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(0, 1),
+            Size = UDim2.new(.75, 0, .5, 0),
+            Position = UDim2.new(0, 0, 1, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Subtext" });
+
+        Library:ApplyTextSize(Description, (isSetting and 10) or 14);
+        Library.Create("UIPadding", {
+            Parent = Description,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Subframe = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(.4, 0, 1, 0),
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyCorner(Subframe, 6);
+        Library:ApplyStroke(Subframe, "Accent1", 1, "Round");
+        Library.Create("UIPadding", {
+            Parent = Subframe,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Visuals = Library.Create("Frame", {
+            Parent = Subframe,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 30),
+        });
+
+        local Circle = Library.Create("Frame", {
+            Parent = Visuals,
+            AnchorPoint = Vector2.new(1, .5),
+            Position = UDim2.new(1, -2, .5, 0),
+            Size = UDim2.new(0, 5, 0, 5),
+        }, { BackgroundColor3 = "Text" });
+
+        Library:ApplyCorner(DF_Circle, 100);
+
+        local ValueLabel = Library.Create("TextLabel", {
+            Parent = Visuals,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(.8, 0, 1, 0),
+            TextSize = 11,
+            Text = "None",
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ClipsDescendants = true,
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        local ItemHolder = Library.Create("ScrollingFrame", {
+            Parent = DownFrame,
+            AnchorPoint = Vector2.new(0, 1),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 0, 1, 0),
+            Size = UDim2.new(1, 0, 0, 75),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            ScrollBarThickness = 1,
+            Visible = false,
+        }, { ScrollBarImageColor3 = "Highlight" });
+
+        Library:ApplyPadding(ItemHolder, 5);
+        Library.Create("UIListLayout", {
+            Parent = ItemHolder,
+            Padding = UDim.new(0, 5),
+        });
+
+        local Options = {};
+        local function Update()
+            for i, v in pairs(Options) do
+                if (nself.Value == i) or (typeof(nself.Value) == "table" and table.find(nself.Value, i)) then
+                    Library:Register(v[2], { Color = "Selected" }, true);
+                else
+                    Library:Register(v[2], { Color = "Accent1" }, true);
+                end;
+            end;
+
+            if typeof(nself.Value) == "table" then
+                local Concated = table.concat(nself.Value, ", ");
+                ValueLabel.Text = (Concated ~= "" and Concated) or "None";
+            else
+                ValueLabel.Text = nself.Value or "None";
+            end;
+        end;
+
+        local function ToggleOption(Option)
+            if nself.Multi then
+                nself.Value = nself.Value or {};
+
+                local Found = table.find(nself.Value, Option);
+                if Found then
+                    table.remove(nself.Value, Found);
+                else
+                    table.insert(nself.Value, Option);
+                end;
+            else
+                if nself.Value ~= Option then
+                    nself.Value = Option;
+                else
+                    nself.Value = nil;
+                end;
+            end;
+
+            Update();
+        end;
+
+        function nself:AddOption(Option)
+            if not Option then return; end;
+            Option = tostring(Option);
+
+            local OptionFrame = Library.Create("Frame", {
+                Parent = ItemHolder,
+                Size = UDim2.new(1, 0, 0, 20),
+                BackgroundTransparency = 1,
+                ZIndex = 11
+            });
+
+            Library:ApplyCorner(OptionFrame, 4);
+            Library:ApplyTextSize(Library.Create("TextLabel", {
+                Parent = OptionFrame,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Text = Option,
+                ZIndex = 11
+            }, { FontFace = "Font", TextColor3 = "Text" }), 10);
+
+            Options[Option] = { OptionFrame, Library:ApplyStroke(OptionFrame, "Accent1", 1, "Round") };
+
+            local OptionClick = Library:ApplyClick(OptionFrame);
+            OptionClick.ZIndex = 12;
+            OptionClick.MouseButton1Up:Connect(function()
+                ToggleOption(Option);
+            end);
+        end;
+
+        for _, v in pairs(nself.Choices) do
+            nself:AddOption(v);
+        end;
+        Update();
+
+        function nself:RemoveOption(Option)
+            if Option and Options[Option] then
+                Options[Option][1]:Destroy();
+                Options[Option] = nil;
+            end;
+        end;
+
+        function nself:SetValue(Value)
+            if nself.Multi and typeof(Value) ~= "table" then
+                Value = { Value };
+            elseif not nself.Multi and typeof(Value) == "table" then
+                Value = unpack(Value);
+            end;
+
+            nself.Value = Value;
+            Update();
+        end;
+
+        local Click = Library:ApplyClick(Background);
+
+        local Listing = false;
+        Click.MouseButton1Up:Connect(function()
+            Listing = not Listing;
+            if Listing then
+                Subframe.ZIndex = 10;
+                Circle.ZIndex = 10;
+                ValueLabel.ZIndex = 10;
+                ItemHolder.ZIndex = 10;
+
+                TweenService:Create(Subframe,
+                    TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    { Size = UDim2.new(.4, 0, 1, 75) }):Play();
+                ItemHolder.Visible = true;
+            end;
+        end);
+
+        InputService:Bind("MouseButton1", function()
+            if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
+                Subframe.ZIndex = 1;
+                Circle.ZIndex = 1;
+                ValueLabel.ZIndex = 1;
+                ItemHolder.ZIndex = 1;
+
+                TweenService:Create(Subframe,
+                    TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    { Size = UDim2.new(.4, 0, 1, 0) }):Play();
+                ItemHolder.Visible = false;
+            end;
+        end, true, true)
+
+        return nself;
+    end,
+};
+
 function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
     Window.Title = Window.Title or "Window";
@@ -254,6 +1263,10 @@ function Library:CreateWindow(WINFO)
         Parent = CoreGui,
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
     });
+
+    Library.ScreenUI = ScreenUI;
+    Library.Window = Window;
+    getgenv().UIUIUI = Library;
 
     local Background = Library.Create("Frame", {
         Parent = ScreenUI,
@@ -677,17 +1690,7 @@ function Library:CreateWindow(WINFO)
             Section.Title = Section.Title or "Section";
             Section.Side = Section.Side or "Left";
 
-            local SectionContents = {};
             local Sides = { ["Left"] = LeftTab, ["Right"] = RightTab };
-
-            function Section:Search(s)
-                if s == "" then return true; end;
-                local SelfContents = string.lower(table.concat(SectionContents, ";"));
-
-                if string.find(SelfContents, s) then
-                    return true;
-                end;
-            end;
 
             table.insert(Library.Created.Sections, Section);
 
@@ -696,16 +1699,6 @@ function Library:CreateWindow(WINFO)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Size = UDim2.new(1, 0, 0, 0),
                 BackgroundTransparency = 1,
-            });
-
-            function Section:Visibility(Value)
-                SF.Visible = Value or false;
-            end;
-
-            Library.Create("UIListLayout", {
-                Parent = SF,
-                SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 5)
             });
 
             Library:ApplyTextSize(Library.Create("TextLabel", {
@@ -717,14 +1710,22 @@ function Library:CreateWindow(WINFO)
                 Text = Section.Title,
             }, { FontFace = "Font", TextColor3 = "Text" }));
 
+            Library.Create("UIListLayout", {
+                Parent = SF,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 5),
+            });
+
             local SectionMain = Library.Create("Frame", {
                 Parent = SF,
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Size = UDim2.new(1, 0, 0, 0),
             }, { BackgroundColor3 = "Background2" });
 
+            Section.UI = SectionMain;
             Library:ApplyStroke(SectionMain, "Accent1", 1, "Round");
             Library:ApplyCorner(SectionMain, 6);
+
             Library.Create("UIPadding", {
                 Parent = SectionMain,
                 PaddingLeft = UDim.new(0, 14),
@@ -740,947 +1741,28 @@ function Library:CreateWindow(WINFO)
                 SortOrder = Enum.SortOrder.LayoutOrder,
             });
 
-            function Section:CreateLabel(LINFO)
-                local Label = LINFO or {};
-                Label.Text = Label.Text or "Label";
-                Label.Alignment = Label.Alignment or "Center";
-
-                table.insert(SectionContents, Label.Text);
-
-                local LF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 25),
-                    BackgroundTransparency = 1,
-                });
-
-                Library:ApplyCorner(LF, 4);
-
-                local LF_Label = Library.Create("TextLabel", {
-                    Parent = LF,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = Label.Text,
-                    TextXAlignment = (Label.Alignment and Enum.TextXAlignment[Label.Alignment]) or
-                        Enum.TextXAlignment.Center,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                Library:ApplyTextSize(LF_Label);
-
-                function Label.ChangeText(NewText)
-                    LF_Label.Text = NewText or "";
-                end
-
-                return Label;
+            function Section:Search(s)
+                if s == "" then return true end
+                local SelfContents = string.lower(table.concat(self.Contents or {}, ";"));
+                return string.find(SelfContents, string.lower(s)) ~= nil;
             end;
 
-            function Section:CreateButton(BINFO)
-                local Button = BINFO or {};
-                Button.Text = Button.Text or "Button";
-                Button.Alignment = Button.Alignment or "Center";
-                Button.Callback = Button.Callback or function(...) end;
-
-                table.insert(SectionContents, Button.Text);
-
-                local BF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 25),
-                }, { BackgroundColor3 = "Background2" });
-
-                local BF_Stroke = Library:ApplyStroke(BF, "Accent1", 1, "Round");
-                Library:ApplyCorner(BF, 4);
-
-                local BF_Label = Library.Create("TextLabel", {
-                    Parent = BF,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = Button.Text,
-                    TextXAlignment = (Button.Alignment and Enum.TextXAlignment[Button.Alignment]) or
-                        Enum.TextXAlignment.Center,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                Library:ApplyTextSize(BF_Label, 15);
-                Library.Create("UIPadding", {
-                    Parent = BF_Label,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                function Button.Fire()
-                    task.spawn(function()
-                        Button.Callback();
-                    end);
+            Section.Contents = {};
+            function Section:AddContent(Value, Index)
+                if not Value then return; end;
+                if not Index then
+                    table.insert(self.Contents, Value);
+                    return #Section.Contents;
+                else
+                    self.Contents[Index] = Value;
                 end;
-
-                function Button.ChangeText(NewText)
-                    BF_Label.Text = NewText or "";
-                end
-
-                local BF_Click = Library:ApplyClick(BF);
-
-                BF_Click.MouseEnter:Connect(function()
-                    Library:Register(BF, { BackgroundColor3 = "Background" }, true);
-                    Library:Register(BF_Stroke, { Color = "Hover" }, true);
-                end);
-
-                BF_Click.MouseLeave:Connect(function()
-                    Library:Register(BF, { BackgroundColor3 = "Background2" }, true);
-                    Library:Register(BF_Stroke, { Color = "Accent1" }, true);
-                end);
-
-                BF_Click.MouseButton1Down:Connect(function()
-                    Library:Register(BF, { BackgroundColor3 = "Background" }, true);
-                    Library:Register(BF_Stroke, { Color = "Selected" }, true);
-                end);
-
-                BF_Click.MouseButton1Up:Connect(function()
-                    Button.Fire();
-                    Library:Register(BF, { BackgroundColor3 = "Background" }, true);
-                    Library:Register(BF_Stroke, { Color = "Hover" }, true);
-                end);
-
-                return Button;
             end;
 
-            function Section:CreateToggle(TGINFO)
-                local Toggle = TGINFO or {};
-                Toggle.Text = Toggle.Text or "Toggle";
-                Toggle.Subtext = Toggle.Subtext or "";
-                Toggle.Alignment = Toggle.Alignment or "Left";
-                Toggle.Default = Toggle.Default or false;
-                Toggle.Callback = Toggle.Callback or function(...) end;
-
-                Toggle.Value = Toggle.Default or false;
-
-                table.insert(SectionContents, Toggle.Text);
-                table.insert(SectionContents, Toggle.Subtext);
-
-                local TGF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundTransparency = 1,
-                });
-
-                local TGF_Title = Library.Create("TextLabel", {
-                    Parent = TGF,
-                    Size = UDim2.new(.75, 0, (Toggle.Subtext == "" and 1) or .5, 0),
-                    BackgroundTransparency = 1,
-                    Text = Toggle.Text,
-                    TextXAlignment = (Toggle.Alignment and Enum.TextXAlignment[Toggle.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local TGF_Desc = Library.Create("TextLabel", {
-                    Parent = TGF,
-                    AnchorPoint = Vector2.new(0, 1),
-                    Size = UDim2.new(.75, 0, .5, 0),
-                    Position = UDim2.new(0, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = Toggle.Subtext,
-                    TextXAlignment = (Toggle.Alignment and Enum.TextXAlignment[Toggle.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Subtext" });
-
-                Library:ApplyTextSize(TGF_Title, 16);
-                Library.Create("UIPadding", {
-                    Parent = TGF_Title,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                Library:ApplyTextSize(TGF_Desc, 14);
-                Library.Create("UIPadding", {
-                    Parent = TGF_Desc,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local TGF_Slider = Library.Create("Frame", {
-                    Parent = TGF,
-                    AnchorPoint = Vector2.new(1, .5),
-                    Position = UDim2.new(1, 0, .5, 0),
-                    Size = UDim2.new(1, 0, .66, 0),
-                }, { BackgroundColor3 = "Background2" });
-
-                Library:ApplyRatio(TGF_Slider, 2, "Height");
-                Library:ApplyCorner(TGF_Slider, 10);
-                Library:ApplyStroke(TGF_Slider, "Accent1", 1, "Round");
-
-                local SliderCircle = Library.Create("Frame", {
-                    Parent = TGF_Slider,
-                    AnchorPoint = Vector2.new(0, .5),
-                    Position = UDim2.new(.1, 0, .5, 0),
-                    Size = UDim2.new(.4, 0, .8, 0),
-                }, { BackgroundColor3 = "Text" });
-
-                Library:ApplyCorner(SliderCircle, 10);
-
-                local function Update()
-                    if Toggle.Value then
-                        TweenService:Create(SliderCircle,
-                            TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                            { Position = UDim2.new(.55, 0, .5, 0) }):Play();
-                        Library:Register(TGF_Slider, { BackgroundColor3 = "Highlight" }, true);
-                    else
-                        TweenService:Create(SliderCircle,
-                            TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                            { Position = UDim2.new(.1, 0, .5, 0) }):Play();
-                        Library:Register(TGF_Slider, { BackgroundColor3 = "Background2" }, true);
-                    end;
-
-                    task.spawn(function()
-                        Toggle.Callback(Toggle.Value);
-                    end);
-                end;
-
-                function Toggle.Fire()
-                    Toggle.Value = not Toggle.Value;
-                    Update();
-                end;
-
-                function Toggle:SetValue(Value)
-                    Toggle.Value = Value or false;
-                    Update();
-                end;
-
-                function Toggle:Unload()
-                    self:SetValue(false);
-                end;
-
-                Update();
-
-                local TGF_Click = Library:ApplyClick(TGF);
-                TGF_Click.MouseButton1Down:Connect(Toggle.Fire);
-
-                return Toggle;
+            function Section:Visibility(Value)
+                SF.Visible = Value or false;
             end;
 
-            function Section:CreateKeybind(KINFO)
-                local Binder = KINFO or {};
-                Binder.Text = Binder.Text or "Keybind";
-                Binder.Subtext = Binder.Subtext or ""
-                Binder.Alignment = Binder.Alignment or "Left";
-                Binder.Default = Binder.Default or nil;
-                Binder.Callback = Binder.Callback or function(...) end;
-
-                Binder.Value = Binder.Default or nil;
-
-                table.insert(SectionContents, Binder.Text);
-                table.insert(SectionContents, Binder.Subtext);
-                table.insert(Library.Created.Binds, Binder);
-
-                local BF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundTransparency = 1,
-                });
-
-                local BF_Title = Library.Create("TextLabel", {
-                    Parent = BF,
-                    Size = UDim2.new(.75, 0, (Binder.Subtext == "" and 1) or .5, 0),
-                    BackgroundTransparency = 1,
-                    Text = Binder.Text,
-                    TextXAlignment = (Binder.Alignment and Enum.TextXAlignment[Binder.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local BF_Desc = Library.Create("TextLabel", {
-                    Parent = BF,
-                    AnchorPoint = Vector2.new(0, 1),
-                    Size = UDim2.new(.75, 0, .5, 0),
-                    Position = UDim2.new(0, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = Binder.Subtext,
-                    TextXAlignment = (Binder.Alignment and Enum.TextXAlignment[Binder.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Subtext" });
-
-                Library:ApplyTextSize(BF_Title, 16);
-                Library.Create("UIPadding", {
-                    Parent = BF_Title,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                Library:ApplyTextSize(BF_Desc, 14);
-                Library.Create("UIPadding", {
-                    Parent = BF_Desc,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local BF_Holder = Library.Create("Frame", {
-                    Parent = BF,
-                    AnchorPoint = Vector2.new(1, .5),
-                    Position = UDim2.new(1, 0, .5, 0),
-                    Size = UDim2.new(.1, 0, .75, 0),
-                    AutomaticSize = Enum.AutomaticSize.X,
-                }, { BackgroundColor3 = "Background2" });
-
-                Library:ApplyCorner(BF_Holder, 4);
-                Library:ApplyStroke(BF_Holder, "Accent1", 1, "Round");
-                Library:ApplyPadding(BF_Holder, 5);
-
-                local BF_Value = Library.Create("TextLabel", {
-                    Parent = BF_Holder,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    TextSize = 14,
-                    Text = Binder.Value or "",
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    RichText = true,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local Old;
-                function Binder:SetKey(Key)
-                    Binder.Value = Key;
-                    BF_Value.Text = Key or " ";
-
-                    if Old then Old:Disconnect(); end; Old = nil;
-                    if not Key then return; end;
-
-                    local function Fire()
-                        task.spawn(function()
-                            Binder.Callback();
-                        end);
-                    end;
-
-                    Old = InputService:Record(false, {
-                        Type = "KeyCode",
-                        CancelKeys = {},
-                        Inputs = { Key },
-
-                        Callback = Fire,
-                    });
-                end;
-
-                local Doing = false;
-                function Binder.Start()
-                    if Doing then return; end;
-                    Doing = true;
-                    local Found = false;
-                    local function Recieved(Key)
-                        Binder:SetKey(Key);
-                        Found = true;
-                        Doing = false;
-                    end;
-
-                    InputService:Record(false, {
-                        Type = "KeyCode",
-                        Break = true,
-
-                        Callback = Recieved,
-                    });
-
-                    task.spawn(function()
-                        while not Found do
-                            for i = 1, 3 do
-                                if Found then break; end;
-                                if i == 1 then
-                                    BF_Value.Text = ". "; task.wait(.5); continue;
-                                end;
-
-                                BF_Value.Text = BF_Value.Text .. ". ";
-
-                                task.wait(.5);
-                            end;
-                        end;
-                    end);
-                end;
-
-                function Binder:Unload()
-                    Binder:SetKey();
-                end;
-
-                local Click = Library:ApplyClick(BF);
-
-                Binder:SetKey(Binder.Default);
-                Click.MouseButton1Up:Connect(Binder.Start);
-
-                return Binder;
-            end;
-
-            function Section:CreateInput(KINFO)
-                local InputBox = KINFO or {};
-                InputBox.Text = InputBox.Text or "Input Box";
-                InputBox.Subtext = InputBox.Subtext or ""
-                InputBox.Alignment = InputBox.Alignment or "Left";
-                InputBox.Default = InputBox.Default or "";
-                InputBox.Placeholder = InputBox.Placeholder or "";
-                InputBox.Callback = InputBox.Callback or function(...) end;
-
-                InputBox.Value = InputBox.Default or "";
-
-                table.insert(SectionContents, InputBox.Text);
-                table.insert(SectionContents, InputBox.Subtext);
-
-                local IF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundTransparency = 1,
-                });
-
-                local IF_Title = Library.Create("TextLabel", {
-                    Parent = IF,
-                    Size = UDim2.new(.75, 0, (InputBox.Subtext == "" and 1) or .5, 0),
-                    BackgroundTransparency = 1,
-                    Text = InputBox.Text,
-                    TextXAlignment = (InputBox.Alignment and Enum.TextXAlignment[InputBox.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local IF_Desc = Library.Create("TextLabel", {
-                    Parent = IF,
-                    AnchorPoint = Vector2.new(0, 1),
-                    Size = UDim2.new(.75, 0, .5, 0),
-                    Position = UDim2.new(0, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = InputBox.Subtext,
-                    TextXAlignment = (InputBox.Alignment and Enum.TextXAlignment[InputBox.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Subtext" });
-
-                Library:ApplyTextSize(IF_Title, 16);
-                Library.Create("UIPadding", {
-                    Parent = IF_Title,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                Library:ApplyTextSize(IF_Desc, 14);
-                Library.Create("UIPadding", {
-                    Parent = IF_Desc,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local IF_Holder = Library.Create("Frame", {
-                    Parent = IF,
-                    AnchorPoint = Vector2.new(1, .5),
-                    Position = UDim2.new(1, 0, .5, 0),
-                    Size = UDim2.new(.25, 0, .75, 0),
-                    ClipsDescendants = true,
-                }, { BackgroundColor3 = "Background2" });
-
-                Library:ApplyCorner(IF_Holder, 4);
-                Library:ApplyStroke(IF_Holder, "Accent1", 1, "Round");
-                Library:ApplyPadding(IF_Holder, 5);
-
-                local IF_Value = Library.Create("TextBox", {
-                    Parent = IF_Holder,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    TextSize = 14,
-                    Text = InputBox.Value or "",
-                    PlaceholderText = InputBox.Placeholder,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    ClearTextOnFocus = false,
-                    RichText = true,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                Library.Create("UIPadding", {
-                    Parent = IF_Value,
-                    PaddingLeft = UDim.new(0, 2),
-                    PaddingRight = UDim.new(0, 2),
-                });
-
-                function InputBox:SetValue(Value)
-                    InputBox.Value = Value;
-                    IF_Value.Text = Value or "";
-                    task.spawn(function()
-                        InputBox.Callback(Value);
-                    end);
-                end;
-
-                IF_Value.Focused:Connect(function()
-                    local Info = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
-
-                    TweenService:Create(IF_Title, TweenInfo.new(.1), { TextTransparency = 1 }):Play();
-                    TweenService:Create(IF_Desc, TweenInfo.new(.1), { TextTransparency = 1 }):Play();
-                    TweenService:Create(IF_Holder, Info, { Size = UDim2.new(1, 0, .75, 0) }):Play();
-                end);
-
-                IF_Value.FocusLost:Connect(function()
-                    local Info = TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
-
-                    TweenService:Create(IF_Title, TweenInfo.new(.2), { TextTransparency = 0 }):Play();
-                    TweenService:Create(IF_Desc, TweenInfo.new(.2), { TextTransparency = 0 }):Play();
-                    TweenService:Create(IF_Holder, Info, { Size = UDim2.new(.25, 0, .75, 0) }):Play();
-
-                    InputBox:SetValue(IF_Value.Text);
-                end);
-
-                return InputBox;
-            end;
-
-            function Section:CreateSlider(SLINFO)
-                local Slider = SLINFO or {};
-                Slider.Text = Slider.Text or "Slider";
-                Slider.Alignment = Slider.Alignment or "Left";
-                Slider.Callback = Slider.Callback or function(...) end;
-
-                Slider.Floats = Slider.Floats or 0;
-                Slider.Default = Slider.Default or 0;
-                Slider.Limits = Slider.Limits or { 0, 100 }; -- Min / Max
-                Slider.Limits[1] = Slider.Limits[1] or 0;
-                Slider.Limits[2] = Slider.Limits[2] or 100;
-
-                Slider.Value = math.clamp(Slider.Default, unpack(Slider.Limits)) or 0;
-
-                table.insert(SectionContents, Slider.Text);
-                table.insert(SectionContents, Slider.Subtext);
-
-                local SLF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    Size = UDim2.new(1, 0, 0, 30),
-                    BackgroundTransparency = 1,
-                });
-
-                local SLF_Title = Library.Create("TextLabel", {
-                    Parent = SLF,
-                    Size = UDim2.new(.75, 0, .5, 0),
-                    BackgroundTransparency = 1,
-                    Text = Slider.Text,
-                    TextXAlignment = (Slider.Alignment and Enum.TextXAlignment[Slider.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                Library:ApplyTextSize(SLF_Title);
-                Library.Create("UIPadding", {
-                    Parent = SLF_Title,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local SLF_Box = Library.Create("Frame", {
-                    Parent = SLF,
-                    AnchorPoint = Vector2.new(1, 0),
-                    Position = UDim2.new(1, 0, 0, 0),
-                    Size = UDim2.new(.2, 0, .5, 0),
-                }, { BackgroundColor3 = "Background2" });
-
-                Library:ApplyCorner(SLF_Box, 4);
-                Library:ApplyStroke(SLF_Box, "Accent1", 1, "Round");
-
-                local SLF_Value = Library.Create("TextBox", {
-                    Parent = SLF_Box,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Text = tostring(Slider.Value),
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                Library:ApplyTextSize(SLF_Value, 14);
-
-                local Slider_Back = Library.Create("Frame", {
-                    Parent = SLF,
-                    AnchorPoint = Vector2.new(.5, 1),
-                    Position = UDim2.new(.5, 0, 1, 0),
-                    Size = UDim2.new(1, 0, .185, 0),
-
-                }, { BackgroundColor3 = "Tone" });
-
-                Library:ApplyCorner(Slider_Back, 10);
-                Library:ApplyStroke(Slider_Back, "Accent1", 1, "Round");
-
-                local Slider_Fill = Library.Create("Frame", {
-                    Parent = Slider_Back,
-                    Size = UDim2.new(0, 0, 1, 0),
-                }, { BackgroundColor3 = "Highlight" });
-
-                Library:ApplyCorner(Slider_Fill, 10);
-
-                local SliderCircle = Library.Create("Frame", {
-                    Parent = Slider_Fill,
-                    AnchorPoint = Vector2.new(1, .5),
-                    Size = UDim2.new(1, 0, 1.85, 0),
-                    Position = UDim2.new(1, 0, .5, 0),
-                }, { BackgroundColor3 = "Text" });
-
-                Library:ApplyCorner(SliderCircle, 10);
-                Library:ApplyRatio(SliderCircle, 1, "Height", true);
-
-                local SLF_Click = Library:ApplyClick(Slider_Back);
-                SLF_Click.ZIndex = 9999;
-                local isSlider = false;
-
-                local function Update()
-                    Slider.Value = math.clamp(Slider.Value, unpack(Slider.Limits));
-                    local Value = Slider.Value;
-                    local Percent = (Slider.Value / Slider.Limits[2]);
-
-                    TweenService:Create(Slider_Fill,
-                        TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                        { Size = UDim2.new(Percent, 0, 1, 0) }):Play();
-                    local Converted = string.format("%." .. tostring(Slider.Floats) .. "f", Value);
-
-                    SLF_Value.Text = (tonumber(Converted) % 1 == 0 and tostring(math.floor(Value))) or Converted;
-                    task.spawn(function()
-                        Slider.Callback(tonumber(Converted));
-                    end);
-                end;
-
-                local function Start()
-                    isSlider = true;
-
-                    while isSlider and InputService.Pressed do
-                        local absPX, absSX = Slider_Back.AbsolutePosition.X, Slider_Back.AbsoluteSize.X;
-                        local x = Mouse.X;
-
-                        local Percent = (x - absPX) / absSX;
-                        Percent = math.clamp(Percent, 0, 1);
-
-                        Slider.Value = (Slider.Limits[2] * Percent);
-                        Update();
-
-                        RunService.Heartbeat:Wait();
-                    end
-                end;
-
-                local function End()
-                    isSlider = false;
-                end;
-
-                function Slider:SetValue(Value)
-                    Slider.Value = Value or -math.huge;
-                    Update();
-                end;
-
-                Update();
-
-                SLF_Value.FocusLost:Connect(function()
-                    local BoxVal = tonumber(SLF_Value.Text);
-                    Slider:SetValue(BoxVal);
-                end);
-
-                SLF_Click.MouseButton1Down:Connect(Start);
-                InputService:Bind("MouseButton1", End, true, true);
-
-                return Slider;
-            end;
-
-            function Section:CreateLog(EINFO)
-                local EntryLog = EINFO or {};
-                EntryLog.Default = EntryLog.Default or {}; -- { "Log1", "Log2", "Log3" }
-                EntryLog.Logs = {};
-
-                local LF = Library.Create("ScrollingFrame", {
-                    Parent = SectionMain,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 60),
-                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
-                    ScrollBarThickness = 1;
-                    CanvasSize = UDim2.new(0, 0, 0, 0);
-                });
-
-                Library:ApplyStroke(LF, "Accent1", 1, "Round");
-                Library:ApplyCorner(LF, 5);
-                Library:ApplyPadding(LF, 5);
-
-                Library.Create("UIListLayout", {
-                    Parent = LF,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                });
-
-                function EntryLog:AddEntry(Contents)
-                    local EF = Library.Create("Frame", {
-                        Parent = LF,
-                        BackgroundTransparency = 1,
-                        Size = UDim2.new(1, 0, 0, 20),
-                    });
-
-                    table.insert(EntryLog.Logs, { Contents or "", EF });
-
-                    local EF_Desc = Library.Create("TextLabel", {
-                        Parent = EF,
-                        AnchorPoint = Vector2.new(1, 0),
-                        BackgroundTransparency = 1,
-                        Position = UDim2.new(1, 0, 0, 0),
-                        Size = UDim2.new(1, 0, 1, 0),
-                        Text = Contents or "",
-                    }, { FontFace = "Font", TextColor3 = "Text" });
-
-                    Library:ApplyTextSize(EF_Desc, 16);
-                    Library.Create("UIPadding", {
-                        Parent = EF_Desc,
-                        PaddingLeft = UDim.new(.1, 0),
-                        PaddingRight = UDim.new(.1, 0),
-                    });
-
-                    Library.Create("TextLabel", {
-                        Parent = EF,
-                        AnchorPoint = Vector2.new(0, 0),
-                        BackgroundTransparency = 1,
-                        Position = UDim2.new(0, 0, 0, 0),
-                        Size = UDim2.new(.1, 0, 1, 0),
-                        TextSize = 16,
-                        Text = tostring(#EntryLog.Logs) .. "." or "",
-                    }, { FontFace = "Font", TextColor3 = "Text" });
-
-                    return #EntryLog.Logs;
-                end;
-
-                function EntryLog:RemoveEntry(Entry)
-                    if typeof(Entry) == "number" then
-                        local _, Thing = unpack(EntryLog.Logs[Entry]);
-                        if Thing then
-                            Thing:Destroy();
-                        end;
-                    else
-                        for _, v in pairs(EntryLog.Logs) do
-                            local Contents, Thing = unpack(EntryLog.Logs[v]);
-
-                            if Contents == Entry then
-                                Thing:Destroy();
-                            end;
-                        end;
-                    end;
-                end;
-
-                for _, v in next, (EntryLog.Default) do
-                    EntryLog:AddEntry(v);
-                end;
-
-                return EntryLog;
-            end;
-
-            function Section:CreateDropdown(DINFO)
-                local Drop = DINFO or {};
-                Drop.Text = Drop.Text or "Dropdown";
-                Drop.Subtext = Drop.Subtext or ""
-                Drop.Alignment = Drop.Alignment or "Left";
-                Drop.Choices = Drop.Choices or {};
-                Drop.Multi = Drop.Multi or false;
-                Drop.Default = Drop.Default or nil;
-                Drop.Callback = Drop.Callback or function(...) end;
-
-                Drop.Value = Drop.Default or nil;
-
-                table.insert(SectionContents, Drop.Text);
-                table.insert(SectionContents, Drop.Subtext);
-
-                local DF = Library.Create("Frame", {
-                    Parent = SectionMain,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 30),
-                });
-
-                local DF_Title = Library.Create("TextLabel", {
-                    Parent = DF,
-                    Size = UDim2.new(.75, 0, (Drop.Subtext == "" and 1) or .5, 0),
-                    BackgroundTransparency = 1,
-                    Text = Drop.Text,
-                    TextXAlignment = (Drop.Alignment and Enum.TextXAlignment[Drop.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local DF_Desc = Library.Create("TextLabel", {
-                    Parent = DF,
-                    AnchorPoint = Vector2.new(0, 1),
-                    Size = UDim2.new(.75, 0, .5, 0),
-                    Position = UDim2.new(0, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    Text = Drop.Subtext,
-                    TextXAlignment = (Drop.Alignment and Enum.TextXAlignment[Drop.Alignment]) or
-                        Enum.TextXAlignment.Left,
-                }, { FontFace = "Font", TextColor3 = "Subtext" });
-
-                Library:ApplyTextSize(DF_Title, 16);
-                Library.Create("UIPadding", {
-                    Parent = DF_Title,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                Library:ApplyTextSize(DF_Desc, 14);
-                Library.Create("UIPadding", {
-                    Parent = DF_Desc,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local DownFrame = Library.Create("Frame", {
-                    Parent = DF,
-                    AnchorPoint = Vector2.new(1, 0),
-                    Position = UDim2.new(1, 0, 0, 0),
-                    Size = UDim2.new(.4, 0, 1, 0),
-                }, { BackgroundColor3 = "Background2" });
-
-                Library:ApplyCorner(DownFrame, 6);
-                Library:ApplyStroke(DownFrame, "Accent1", 1, "Round");
-                Library.Create("UIPadding", {
-                    Parent = DownFrame,
-                    PaddingLeft = UDim.new(0, 7),
-                    PaddingRight = UDim.new(0, 7),
-                });
-
-                local DF_Visuals = Library.Create("Frame", {
-                    Parent = DownFrame,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 30),
-                });
-
-                local DF_Circle = Library.Create("Frame", {
-                    Parent = DF_Visuals,
-                    AnchorPoint = Vector2.new(1, .5),
-                    Position = UDim2.new(1, -2, .5, 0),
-                    Size = UDim2.new(0, 5, 0, 5),
-                }, { BackgroundColor3 = "Text" });
-
-                Library:ApplyCorner(DF_Circle, 100);
-
-                local DF_Value = Library.Create("TextLabel", {
-                    Parent = DF_Visuals,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(.8, 0, 1, 0),
-                    TextSize = 11,
-                    Text = "None",
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    ClipsDescendants = true,
-                }, { FontFace = "Font", TextColor3 = "Text" });
-
-                local DF_Items = Library.Create("ScrollingFrame", {
-                    Parent = DownFrame,
-                    AnchorPoint = Vector2.new(0, 1),
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 1, 0),
-                    Size = UDim2.new(1, 0, 0, 75),
-                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                    CanvasSize = UDim2.new(0, 0, 0, 0),
-                    ScrollBarThickness = 1,
-                    Visible = false,
-                }, { ScrollBarImageColor3 = "Highlight" });
-
-                Library:ApplyPadding(DF_Items, 5);
-                Library.Create("UIListLayout", {
-                    Parent = DF_Items,
-                    Padding = UDim.new(0, 5),
-                });
-
-                local Options = {};
-                local function Update()
-                    for i, v in pairs(Options) do
-                        if (Drop.Value == i) or (typeof(Drop.Value) == "table" and table.find(Drop.Value, i)) then
-                            Library:Register(v[2], { Color = "Selected" }, true);
-                        else
-                            Library:Register(v[2], { Color = "Accent1" }, true);
-                        end;
-                    end;
-
-                    if typeof(Drop.Value) == "table" then
-                        local Concated = table.concat(Drop.Value, ", ");
-                        DF_Value.Text = (Concated ~= "" and Concated) or "None";
-                    else
-                        DF_Value.Text = Drop.Value or "None";
-                    end;
-
-                    task.spawn(function()
-                        Drop.Callback(Drop.Value);
-                    end);
-                end;
-
-                local function ToggleOption(Option)
-                    if Drop.Multi then
-                        Drop.Value = Drop.Value or {};
-
-                        local Found = table.find(Drop.Value, Option);
-                        if Found then
-                            table.remove(Drop.Value, Found);
-                        else
-                            table.insert(Drop.Value, Option);
-                        end;
-                    else
-                        if Drop.Value ~= Option then
-                            Drop.Value = Option;
-                        else
-                            Drop.Value = nil;
-                        end;
-                    end;
-
-                    Update();
-                end;
-
-                function Drop:AddOption(Option)
-                    if not Option then return; end;
-                    Option = tostring(Option);
-
-                    local OptionFrame = Library.Create("Frame", {
-                        Parent = DF_Items,
-                        Size = UDim2.new(1, 0, 0, 20),
-                        BackgroundTransparency = 1,
-                        ZIndex = 11
-                    });
-
-                    Library:ApplyCorner(OptionFrame, 4);
-                    Library:ApplyTextSize(Library.Create("TextLabel", {
-                        Parent = OptionFrame,
-                        BackgroundTransparency = 1,
-                        Size = UDim2.new(1, 0, 1, 0),
-                        Text = Option,
-                        ZIndex = 11
-                    }, { FontFace = "Font", TextColor3 = "Text" }), 10);
-
-                    Options[Option] = { OptionFrame, Library:ApplyStroke(OptionFrame, "Accent1", 1, "Round") };
-
-                    local OptionClick = Library:ApplyClick(OptionFrame);
-                    OptionClick.ZIndex = 12;
-                    OptionClick.MouseButton1Up:Connect(function()
-                        ToggleOption(Option);
-                    end);
-                end;
-
-                for _, v in pairs(Drop.Choices) do
-                    Drop:AddOption(v);
-                end;
-                Update();
-
-                function Drop:RemoveOption(Option)
-                    if Option and Options[Option] then
-                        Options[Option][1]:Destroy();
-                        Options[Option] = nil;
-                    end;
-                end;
-
-                function Drop:SetValue(Value)
-                    if Drop.Multi and typeof(Value) ~= "table" then
-                        Value = { Value };
-                    end;
-
-                    Drop.Value = Value;
-                    Update();
-                end;
-
-                local DF_Click = Library:ApplyClick(DF);
-                local FillerClick = Library:ApplyClick(DownFrame);
-
-                local Listing = false;
-                DF_Click.MouseButton1Up:Connect(function()
-                    Listing = not Listing;
-                    if Listing then
-                        DownFrame.ZIndex = 10;
-                        DF_Circle.ZIndex = 10;
-                        DF_Value.ZIndex = 10;
-                        DF_Items.ZIndex = 10;
-                        FillerClick.ZIndex = 2;
-
-                        TweenService:Create(DownFrame,
-                            TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                            { Size = UDim2.new(.4, 0, 1, 75) }):Play();
-                        DF_Items.Visible = true;
-                    else
-                        DownFrame.ZIndex = 1;
-                        DF_Circle.ZIndex = 1;
-                        DF_Value.ZIndex = 1;
-                        DF_Items.ZIndex = 1;
-                        FillerClick.ZIndex = 0;
-
-                        TweenService:Create(DownFrame,
-                            TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                            { Size = UDim2.new(.4, 0, 1, 0) }):Play();
-                        DF_Items.Visible = false;
-                    end;
-                end);
-
-                return Drop;
-            end;
+            setmetatable(Section, { __index = SubFunctions })
 
             return Section;
         end;
