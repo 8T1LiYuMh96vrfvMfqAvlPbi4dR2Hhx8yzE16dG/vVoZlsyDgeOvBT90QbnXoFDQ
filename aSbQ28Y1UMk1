@@ -1144,6 +1144,7 @@ local SubFunctions; SubFunctions = {
 
         function nself:SetValue(nv)
             nself.Value = nv;
+            nself:Fire();
             Update();
         end;
 
