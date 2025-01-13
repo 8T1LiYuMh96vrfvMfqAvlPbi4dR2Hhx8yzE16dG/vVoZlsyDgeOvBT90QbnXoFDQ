@@ -1660,6 +1660,11 @@ function Library:Notify(Message, Duration, Title)
         AutomaticSize = Enum.AutomaticSize.Y,
     });
 
+    Library.Create("UIPadding", {
+        Parent = Description;
+        PaddingBottom = UDim.new(0, 20);
+    });
+
     Library.Create("TextLabel", {
         Parent = Description,
         BackgroundTransparency = 1,
