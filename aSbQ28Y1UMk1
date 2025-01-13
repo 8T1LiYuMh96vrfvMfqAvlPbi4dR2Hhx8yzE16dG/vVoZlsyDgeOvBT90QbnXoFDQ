@@ -524,10 +524,14 @@ local SubFunctions; SubFunctions = {
                 Enum.TextXAlignment.Left;
         end;
 
-        function nself:SetValue(nv)
+        function nself:SetValue(nv, skip)
             nself.Value = nv or false;
             nself:Fire();
             Update();
+
+            if not skip then
+                Library:Save();
+            end;
         end;
 
         function nself:ChangeText(nv)
@@ -593,7 +597,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         nself.Switch = function(self) task.spawn(self.SetValue, self, not self.Value); end;
-        nself.Unload = function(self) self:SetValue(false) end;
+        nself.Unload = function(self) self:SetValue(false, true) end;
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
         Update();
@@ -699,9 +703,13 @@ local SubFunctions; SubFunctions = {
         end;
 
         local Old;
-        function nself:SetKey(Key)
+        function nself:SetKey(Key, skip)
             nself.Value = Key;
             Update();
+
+            if not skip then
+                Library:Save();
+            end;
 
             if Old then Old:Disconnect(); end; Old = nil;
             if not Key then return; end;
@@ -811,7 +819,7 @@ local SubFunctions; SubFunctions = {
             return Settings;
         end;
 
-        nself.Unload = function(self) self:SetKey() end;
+        nself.Unload = function(self) self:SetKey(nil, true) end;
         nself.Fire = function(self) task.spawn(self.Callback); end;
         nself.Load = nself.SetKey;
         nself:SetKey(nself.Default);
@@ -960,10 +968,12 @@ local SubFunctions; SubFunctions = {
 
         local function End()
             isSliding = false;
+            Library:Save();
         end;
 
         function nself:SetValue(nv)
             nself.Value = nv or -math.huge;
+            Library:Save();
             Update();
         end;
 
@@ -1144,6 +1154,8 @@ local SubFunctions; SubFunctions = {
 
         function nself:SetValue(nv)
             nself.Value = nv;
+            Library:Save();
+            nself:Fire();
             Update();
         end;
 
@@ -1346,6 +1358,7 @@ local SubFunctions; SubFunctions = {
             end;
 
             nself:Fire();
+            Library:Save();
             Update();
         end;
 
@@ -1413,6 +1426,8 @@ local SubFunctions; SubFunctions = {
             end;
 
             nself.Value = Value;
+            nself:Fire();
+            Library:Save();
             Update();
         end;
 
