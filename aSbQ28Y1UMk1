@@ -42,7 +42,9 @@ local Library = {
             ["Subtext"] = RGB(95, 95, 95),
             ["Icons"] = RGB(199, 199, 199),
 
-            ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold,
+                Enum.FontStyle.Normal)
         },
     },
 
@@ -60,7 +62,7 @@ do -- Save / Load
     function Library:Save()
         local Folder = Library.Paths["Folder"];
         FileService:CreateFolder(Folder);
-        local Path = Folder .. Library.Paths["Data"]..".json";
+        local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local SaveData = {};
         for i, v in pairs(self.Created.Flags) do
@@ -75,7 +77,7 @@ do -- Save / Load
     function Library:Load()
         local Folder = Library.Paths["Folder"];
         FileService:CreateFolder(Folder);
-        local Path = Folder .. Library.Paths["Data"]..".json";
+        local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local LoadData = FileService:Read(Path);
         if not LoadData then return; end;
@@ -1321,7 +1323,207 @@ local SubFunctions; SubFunctions = {
 
         return nself;
     end,
+
+    CreateLog = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Default = nself.Default or {}; -- { "Log1", "Log2", "Log3" }
+        nself.Logs = {};
+
+        local Background = Library.Create("ScrollingFrame", {
+            Parent = ParentUI,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, (isSetting and 30) or 60),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            ScrollBarThickness = 1,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+        });
+
+        Library:ApplyStroke(Background, "Accent1", 1, "Round");
+        Library:ApplyCorner(Background, 5);
+        Library:ApplyPadding(Background, 5);
+        Library.Create("UIListLayout", {
+            Parent = Background,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+        });
+
+        function nself:AddEntry(Contents)
+            local EF = Library.Create("Frame", {
+                Parent = Background,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, (isSetting and 10) or 20),
+            });
+
+            table.insert(nself.Logs, { Contents or "", EF });
+
+            local EF_Desc = Library.Create("TextLabel", {
+                Parent = EF,
+                AnchorPoint = Vector2.new(1, 0),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, 0, 0, 0),
+                Size = UDim2.new(1, 0, 1, 0),
+                Text = Contents or "",
+            }, { FontFace = "Font", TextColor3 = "Text" });
+
+            Library:ApplyTextSize(EF_Desc, 16);
+            Library.Create("UIPadding", {
+                Parent = EF_Desc,
+                PaddingLeft = UDim.new(.1, 0),
+                PaddingRight = UDim.new(.1, 0),
+            });
+
+            Library.Create("TextLabel", {
+                Parent = EF,
+                AnchorPoint = Vector2.new(0, 0),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.new(.1, 0, 1, 0),
+                TextSize = 16,
+                Text = tostring(#nself.Logs) .. "." or "",
+            }, { FontFace = "Font", TextColor3 = "Text" });
+
+            return #nself.Logs;
+        end;
+
+        function nself:RemoveEntry(Entry)
+            if typeof(Entry) == "number" then
+                local _, Thing = unpack(nself.Logs[Entry]);
+                if Thing then
+                    Thing:Destroy();
+                end;
+            else
+                for _, v in pairs(nself.Logs) do
+                    local Contents, Thing = unpack(nself.Logs[v]);
+                    if Contents == Entry then
+                        Thing:Destroy();
+                    end;
+                end;
+            end;
+        end;
+
+        for _, v in next, (nself.Default) do
+            nself:AddEntry(v);
+        end;
+
+        return nself;
+    end,
 };
+
+function Library:Notify(Message, Duration, Title)
+    if (not Message) or (not Library.ScreenUI) then return; end;
+
+    Duration = Duration or 7.5;
+    Title = Title or "Notificaiton!";
+
+    local NotiUI;
+    if not getgenv().NotiUI then
+        NotiUI = Library.Create("Frame", {
+            Parent = Library.ScreenUI,
+            AnchorPoint = Vector2.new(1, 0),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(0, 250, 1, 0),
+        });
+
+        Library:ApplyPadding(NotiUI, 5);
+        Library.Create("UIListLayout", {
+            Parent = NotiUI,
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            VerticalAlignment = Enum.VerticalAlignment.Bottom,
+            Padding = UDim.new(0, 5),
+        });
+    else
+        NotiUI = getgenv().NotiUI;
+    end;
+
+    local Fake = Library.Create("Frame", {
+        Parent = NotiUI,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    });
+
+    local NotiBack = Library.Create("Frame", {
+        Parent = Fake,
+        Position = UDim2.new(2, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    }, { BackgroundColor3 = "Background" });
+
+    Library:ApplyCorner(NotiBack, 5);
+    Library:ApplyPadding(NotiBack, 5);
+    Library:ApplyStroke(NotiBack, "Highlight", 1, "Round");
+
+    local Title = Library.Create("TextLabel", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(0, .75),
+        BackgroundTransparency = 1,
+        Size = UDim2.new(.5, 0, 0, 20),
+        TextSize = 20,
+        RichText = true,
+    }, { TextColor3 = "Text", FontFace = "NotiFont" });
+
+    Library:ApplyStroke(Title, "Highlight", 1, "Round");
+
+    local Description = Library.Create("Frame", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(.5, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(.5, 0, 0, 10),
+        Size = UDim2.new(.9, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    });
+
+    Library.Create("TextLabel", {
+        Parent = Description,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(.9, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        TextSize = 12,
+        RichText = true,
+        Text = tostring(Message),
+    }, { TextColor3 = "Text", FontFace = "Font" });
+
+    local Duration = Library.Create("Frame", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(.5, 1),
+        Position = UDim2.new(.5, 0, 1, -2),
+        Size = UDim2.new(.5, 0, 0, 5),
+    }, { BackgroundColor3 = "Background2" });
+
+    Library:ApplyCorner(Duration, 100);
+    Library:ApplyStroke(Duration, "Highlight", 1, "Round");
+
+    local Fill = Library.Create("Frame", {
+        Parent = Duration,
+        Size = UDim2.new(1, 0, 1, 0)
+    }, { BackgroundColor3 = "Highlight" });
+
+    Library:ApplyCorner(Fill, 100);
+
+    local Click = Library:ApplyClick(NotiBack);
+    local Tween;
+    local TweenInfo = TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+
+    task.spawn(function()
+        TweenService:Create(NotiBack, TweenInfo, { Position = UDim2.new(0, 0, 0, 0) }):Play();
+
+        Tween = TweenService:Create(Fill, TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Size = UDim2.new(0, 0, 1, 0) });
+        Tween:Play();
+        Tween.Completed:Wait();
+
+        TweenService:Create(NotiBack, TweenInfo, { Position = UDim2.new(2, 0, 0, 0) }):Play();
+    end);
+
+    Click.MouseButton1Up:Connect(function()
+        if Tween then Tween:Cancel(); end;
+    end);
+
+    getgenv().NotiUI = NotiUI;
+end;
 
 function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
