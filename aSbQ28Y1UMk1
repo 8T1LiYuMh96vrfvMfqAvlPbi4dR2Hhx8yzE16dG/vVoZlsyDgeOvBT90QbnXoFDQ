@@ -60,46 +60,36 @@ local Library = {
 
 do -- Save / Load
     function Library:Save()
-        local Folder = Library.Paths["Folder"]
-        local DataPath = Folder .. Library.Paths["Data"]
-    
-        FileService:CreateFolder(Folder)
-        FileService:CreateFolder(DataPath)
-    
-        local FilePath = DataPath .. "\\SaveData.json" 
-    
-        local SaveData = {}
+        local Folder = Library.Paths["Folder"];
+        FileService:CreateFolder(Folder);
+        local Path = Folder .. Library.Paths["Data"] .. ".json";
+
+        local SaveData = {};
         for i, v in pairs(self.Created.Flags) do
             if v.Value then
-                SaveData[i] = v.Value
-            end
-        end
-    
-        FileService:Write(FilePath, HttpService:JSONEncode(SaveData))
-    end
-    
+                SaveData[i] = v.Value;
+            end;
+        end;
+
+        FileService:Write(Path, HttpService:JSONEncode(SaveData))
+    end;
+
     function Library:Load()
-        local Folder = Library.Paths["Folder"]
-        local DataPath = Folder .. Library.Paths["Data"]
-    
-        FileService:CreateFolder(Folder)
-        FileService:CreateFolder(DataPath)
-    
-        local FilePath = DataPath .. "\\SaveData.json"
-    
-        local LoadData = FileService:Read(FilePath)
-        if not LoadData then return end
-    
-        LoadData = HttpService:JSONDecode(LoadData)
+        local Folder = Library.Paths["Folder"];
+        FileService:CreateFolder(Folder);
+        local Path = Folder .. Library.Paths["Data"] .. ".json";
+
+        local LoadData = FileService:Read(Path);
+        if not LoadData then return; end;
+
+        LoadData = HttpService:JSONDecode(LoadData);
         for i, v in pairs(LoadData) do
             if Library.Created.Flags[i] then
-                Library.Created.Flags[i]:Load(v)
-            end
-        end
-    end
-    print("Saving to path:", FilePath)
-    print("Loading from path:", FilePath)
-
+                Library.Created.Flags[i]:Load(v);
+            end;
+        end;
+    end;
+end;
 
 do -- Colorize
     function Library:Register(Obj, Properties, Tween)
