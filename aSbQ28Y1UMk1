@@ -1677,7 +1677,8 @@ function Library:Notify(Message, Duration, Title)
         RichText = true,
         Text = tostring(Message),
         TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Top
+        TextYAlignment = Enum.TextYAlignment.Top,
+        TextWrapped = true
     }, { TextColor3 = "Text", FontFace = "Font" });
 
     local DurationBar = Library.Create("Frame", {
