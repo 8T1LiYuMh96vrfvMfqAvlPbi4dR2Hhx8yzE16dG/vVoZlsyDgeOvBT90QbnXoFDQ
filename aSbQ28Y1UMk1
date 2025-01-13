@@ -1670,18 +1670,18 @@ function Library:Notify(Message, Duration, Title)
         Text = tostring(Message),
     }, { TextColor3 = "Text", FontFace = "Font" });
 
-    local Duration = Library.Create("Frame", {
+    local DurationBar = Library.Create("Frame", {
         Parent = NotiBack,
         AnchorPoint = Vector2.new(.5, 1),
         Position = UDim2.new(.5, 0, 1, -2),
         Size = UDim2.new(.9, 0, 0, 5),
     }, { BackgroundColor3 = "Background2" });
 
-    Library:ApplyCorner(Duration, 100);
-    Library:ApplyStroke(Duration, "Highlight", 1, "Round");
+    Library:ApplyCorner(DurationBar, 100);
+    Library:ApplyStroke(DurationBar, "Highlight", 1, "Round");
 
     local Fill = Library.Create("Frame", {
-        Parent = Duration,
+        Parent = DurationBar,
         Size = UDim2.new(1, 0, 1, 0)
     }, { BackgroundColor3 = "Highlight" });
 
