@@ -1,5 +1,5 @@
 -- New UI
-print("v1.5")
+print("v1.6")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -310,7 +310,7 @@ local SubFunctions; SubFunctions = {
         nself.Text = nself.Text or "Label";
         nself.Alignment = nself.Alignment or "Center";
 
-        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
 
         local Background = Library.Create("Frame", {
             Parent = ParentUI,
@@ -357,7 +357,7 @@ local SubFunctions; SubFunctions = {
         nself.Alignment = nself.Alignment or "Center";
         nself.Callback = nself.Callback or function(...) end;
 
-        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
 
         -- UI
         local Background = Library.Create("Frame", {
@@ -444,7 +444,7 @@ local SubFunctions; SubFunctions = {
         nself.Value = nself.Default or false;
         table.insert(Library.Created.Toggles, nself);
 
-        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
         if nself.Flag then
             Library.Created.Flags[nself.Flag] = nself;
         end;
@@ -764,6 +764,53 @@ local SubFunctions; SubFunctions = {
             Update();
         end;
 
+        local SettingsUI = nil;
+        function nself:CreateSettings()
+            if SettingsUI then return; end;
+            local Settings = { isSetting = true };
+
+            Settings.UI = Library.Create("ScrollingFrame", {
+                Parent = Library.ScreenUI,
+                Size = UDim2.new(0, 150, 0, 100),
+                Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                Visible = false,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ClipsDescendants = true,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 1,
+                ZIndex = 999
+            }, { BackgroundColor3 = "Background2" });
+
+            Library:ApplyCorner(Settings.UI, 4);
+            Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+            Library:ApplyPadding(Settings.UI, 7);
+            Library.Create("UIListLayout", {
+                Parent = Settings.UI,
+                Padding = UDim.new(0, 5),
+            });
+
+            SettingsUI = Settings.UI;
+            InputService:Bind("MouseButton1", function()
+                local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+            end, false, true);
+
+            SettingsUI.ChildAdded:Connect(function(child)
+                pcall(function()
+                    child.ZIndex = 999;
+                end);
+                task.wait();
+                for _, v in pairs(child:GetDescendants()) do
+                    pcall(function()
+                        v.ZIndex = 999;
+                    end);
+                end;
+            end);
+
+            setmetatable(Settings, { __index = SubFunctions })
+            return Settings;
+        end;
+
         nself.Unload = function(self) self:SetKey() end;
         nself.Fire = function(self) task.spawn(self.Callback); end;
         nself.Load = nself.SetKey;
@@ -771,6 +818,12 @@ local SubFunctions; SubFunctions = {
 
         local Click = Library:ApplyClick(Background);
         Click.MouseButton1Up:Connect(nself.Start);
+        Click.MouseButton2Up:Connect(function()
+            if SettingsUI then
+                SettingsUI.Visible = true;
+                SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
+            end;
+        end);
 
         return nself;
     end,
@@ -926,12 +979,65 @@ local SubFunctions; SubFunctions = {
         nself.Load = nself.SetValue;
         Update();
 
+        local SettingsUI = nil;
+        function nself:CreateSettings()
+            if SettingsUI then return; end;
+            local Settings = { isSetting = true };
+
+            Settings.UI = Library.Create("ScrollingFrame", {
+                Parent = Library.ScreenUI,
+                Size = UDim2.new(0, 150, 0, 100),
+                Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                Visible = false,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ClipsDescendants = true,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 1,
+                ZIndex = 999
+            }, { BackgroundColor3 = "Background2" });
+
+            Library:ApplyCorner(Settings.UI, 4);
+            Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+            Library:ApplyPadding(Settings.UI, 7);
+            Library.Create("UIListLayout", {
+                Parent = Settings.UI,
+                Padding = UDim.new(0, 5),
+            });
+
+            SettingsUI = Settings.UI;
+            InputService:Bind("MouseButton1", function()
+                local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+            end, false, true);
+
+            SettingsUI.ChildAdded:Connect(function(child)
+                pcall(function()
+                    child.ZIndex = 999;
+                end);
+                task.wait();
+                for _, v in pairs(child:GetDescendants()) do
+                    pcall(function()
+                        v.ZIndex = 999;
+                    end);
+                end;
+            end);
+
+            setmetatable(Settings, { __index = SubFunctions })
+            return Settings;
+        end;
+
         ValueBox.FocusLost:Connect(function()
             local BoxVal = tonumber(ValueBox.Text);
             nself:SetValue(BoxVal);
         end);
 
         Click.MouseButton1Down:Connect(Start);
+        Click.MouseButton2Up:Connect(function()
+            if SettingsUI then
+                SettingsUI.Visible = true;
+                SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
+            end;
+        end);
         InputService:Bind("MouseButton1", End, true, true);
 
         return nself;
@@ -951,7 +1057,7 @@ local SubFunctions; SubFunctions = {
         nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or "";
-        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
 
         if nself.Flag then
             Library.Created.Flags[nself.Flag] = nself;
@@ -1093,7 +1199,7 @@ local SubFunctions; SubFunctions = {
         nself.Flag = nself.Flag or nil;
 
         nself.Value = nself.Default or nil;
-        local i1, i2; if not self.isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text), self:AddContent(nself.Subtext); end;
 
         if nself.Flag then
             Library.Created.Flags[nself.Flag] = nself;
@@ -1210,6 +1316,13 @@ local SubFunctions; SubFunctions = {
             else
                 ValueLabel.Text = nself.Value or "None";
             end;
+
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+                .Left;
+            Description.Text = nself.Subtext;
+            Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
+                Enum.TextXAlignment.Left;
         end;
 
         local function ToggleOption(Option)
@@ -1231,6 +1344,21 @@ local SubFunctions; SubFunctions = {
             end;
 
             nself:Fire();
+            Update();
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:ChangeSubtext(nv)
+            nself.Subtext = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
             Update();
         end;
 
@@ -1289,6 +1417,53 @@ local SubFunctions; SubFunctions = {
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
 
+        local SettingsUI = nil;
+        function nself:CreateSettings()
+            if SettingsUI then return; end;
+            local Settings = { isSetting = true };
+
+            Settings.UI = Library.Create("ScrollingFrame", {
+                Parent = Library.ScreenUI,
+                Size = UDim2.new(0, 150, 0, 100),
+                Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                Visible = false,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ClipsDescendants = true,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 1,
+                ZIndex = 999
+            }, { BackgroundColor3 = "Background2" });
+
+            Library:ApplyCorner(Settings.UI, 4);
+            Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+            Library:ApplyPadding(Settings.UI, 7);
+            Library.Create("UIListLayout", {
+                Parent = Settings.UI,
+                Padding = UDim.new(0, 5),
+            });
+
+            SettingsUI = Settings.UI;
+            InputService:Bind("MouseButton1", function()
+                local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+            end, false, true);
+
+            SettingsUI.ChildAdded:Connect(function(child)
+                pcall(function()
+                    child.ZIndex = 999;
+                end);
+                task.wait();
+                for _, v in pairs(child:GetDescendants()) do
+                    pcall(function()
+                        v.ZIndex = 999;
+                    end);
+                end;
+            end);
+
+            setmetatable(Settings, { __index = SubFunctions })
+            return Settings;
+        end;
+
         local Click = Library:ApplyClick(Background);
 
         local Listing = false;
@@ -1304,6 +1479,13 @@ local SubFunctions; SubFunctions = {
                     TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                     { Size = UDim2.new(.4, 0, 1, 75) }):Play();
                 ItemHolder.Visible = true;
+            end;
+        end);
+
+        Click.MouseButton2Up:Connect(function()
+            if SettingsUI then
+                SettingsUI.Visible = true;
+                SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
             end;
         end);
 
