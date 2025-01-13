@@ -1640,17 +1640,19 @@ function Library:Notify(Message, Duration, Title)
     Library:ApplyPadding(NotiBack, 5);
     Library:ApplyStroke(NotiBack, "Highlight", 1, "Round");
 
-    local Title = Library.Create("TextLabel", {
+    local TitleLabel = Library.Create("TextLabel", {
         Parent = NotiBack,
         AnchorPoint = Vector2.new(0, .75),
         BackgroundTransparency = 1,
         Size = UDim2.new(.5, 0, 0, 20),
         TextSize = 20,
         RichText = true,
+        Text = tostring(Title), 
         TextXAlignment = Enum.TextXAlignment.Left,
     }, { TextColor3 = "Text", FontFace = "NotiFont" });
-
-    Library:ApplyStroke(Title, "Highlight", 1, "Round");
+    
+    Library:ApplyStroke(TitleLabel, "Highlight", 1, "Round");
+    
 
     local Description = Library.Create("Frame", {
         Parent = NotiBack,
