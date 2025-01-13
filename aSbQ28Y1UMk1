@@ -935,6 +935,8 @@ local SubFunctions; SubFunctions = {
             Title.Text = nself.Text;
             Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
                 .Left;
+
+            nself:Fire();
         end;
 
         local function Start()
@@ -948,10 +950,6 @@ local SubFunctions; SubFunctions = {
                 Percent = math.clamp(Percent, 0, 1);
                 local Value = (nself.Limits[2] * Percent);
                 Value = math.floor(((Value / (tonumber(nself.Increment) or 1)) * (tonumber(nself.Increment) or 1)) + .5);
-
-                if Value ~= nself.Value then
-                    nself:Fire();
-                end;
 
                 nself.Value = Value;
                 Update();
