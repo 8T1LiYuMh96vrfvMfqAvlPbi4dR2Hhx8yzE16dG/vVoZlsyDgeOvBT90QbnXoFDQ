@@ -1651,7 +1651,7 @@ function Library:Notify(Message, Duration, Title)
         TextXAlignment = Enum.TextXAlignment.Left,
     }, { TextColor3 = "Text", FontFace = "NotiFont" });
     
-    Library:ApplyStroke(TitleLabel, "Highlight", 1, "Round");
+    Library:ApplyStroke(TitleLabel, "Highlight", 0.5, "Round");
     
 
     local Description = Library.Create("Frame", {
