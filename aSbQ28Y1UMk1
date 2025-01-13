@@ -1164,6 +1164,7 @@ local SubFunctions; SubFunctions = {
 
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
+        Update();
 
         ValueBox.Focused:Connect(function()
             local Info = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
@@ -1396,7 +1397,6 @@ local SubFunctions; SubFunctions = {
         for _, v in pairs(nself.Choices) do
             nself:AddOption(v);
         end;
-        Update();
 
         function nself:RemoveOption(Option)
             if Option and Options[Option] then
@@ -1418,6 +1418,7 @@ local SubFunctions; SubFunctions = {
 
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
+        Update();
 
         local SettingsUI = nil;
         function nself:CreateSettings()
@@ -1640,19 +1641,17 @@ function Library:Notify(Message, Duration, Title)
     Library:ApplyPadding(NotiBack, 5);
     Library:ApplyStroke(NotiBack, "Highlight", 1, "Round");
 
-    local TitleLabel = Library.Create("TextLabel", {
+    local Title = Library.Create("TextLabel", {
         Parent = NotiBack,
         AnchorPoint = Vector2.new(0, .75),
         BackgroundTransparency = 1,
         Size = UDim2.new(.5, 0, 0, 20),
         TextSize = 20,
         RichText = true,
-        Text = tostring(Title), 
         TextXAlignment = Enum.TextXAlignment.Left,
     }, { TextColor3 = "Text", FontFace = "NotiFont" });
-    
-    Library:ApplyStroke(TitleLabel, "Highlight", 0.5, "Round");
-    
+
+    Library:ApplyStroke(Title, "Highlight", 1, "Round");
 
     local Description = Library.Create("Frame", {
         Parent = NotiBack,
@@ -1677,8 +1676,7 @@ function Library:Notify(Message, Duration, Title)
         RichText = true,
         Text = tostring(Message),
         TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Top,
-        TextWrapped = true
+        TextYAlignment = Enum.TextYAlignment.Top
     }, { TextColor3 = "Text", FontFace = "Font" });
 
     local DurationBar = Library.Create("Frame", {
