@@ -1,5 +1,5 @@
 -- New UI
-print("guzz")
+print("guzzian")
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -1691,17 +1691,16 @@ function Library:Notify(Message, Duration, Title)
 
     local Click = Library:ApplyClick(NotiBack);
     local Tween;
-    local TweenInfo = TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
 
     task.spawn(function()
-        TweenService:Create(NotiBack, TweenInfo, { Position = UDim2.new(0, 0, 0, 0) }):Play();
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Position = UDim2.new(0, 0, 0, 0) }):Play();
 
         Tween = TweenService:Create(Fill, TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
             { Size = UDim2.new(0, 0, 1, 0) });
         Tween:Play();
         Tween.Completed:Wait();
 
-        TweenService:Create(NotiBack, TweenInfo, { Position = UDim2.new(2, 0, 0, 0) }):Play();
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Position = UDim2.new(2, 0, 0, 0) }):Play();
     end);
 
     Click.MouseButton1Up:Connect(function()
