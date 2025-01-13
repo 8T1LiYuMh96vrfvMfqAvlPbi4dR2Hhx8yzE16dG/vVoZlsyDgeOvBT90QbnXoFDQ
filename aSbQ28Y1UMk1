@@ -1674,7 +1674,7 @@ function Library:Notify(Message, Duration, Title)
         Parent = NotiBack,
         AnchorPoint = Vector2.new(.5, 1),
         Position = UDim2.new(.5, 0, 1, -2),
-        Size = UDim2.new(.5, 0, 0, 5),
+        Size = UDim2.new(.9, 0, 0, 5),
     }, { BackgroundColor3 = "Background2" });
 
     Library:ApplyCorner(Duration, 100);
