@@ -1637,6 +1637,7 @@ function Library:Notify(Message, Duration, Title)
     }, { BackgroundColor3 = "Background" });
 
     Library:ApplyCorner(NotiBack, 5);
+    Library:ApplyPadding(NotiBack, 5);
     Library:ApplyStroke(NotiBack, "Highlight", 1, "Round");
 
     local Title = Library.Create("TextLabel", {
@@ -1646,6 +1647,7 @@ function Library:Notify(Message, Duration, Title)
         Size = UDim2.new(.5, 0, 0, 20),
         TextSize = 20,
         RichText = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
     }, { TextColor3 = "Text", FontFace = "NotiFont" });
 
     Library:ApplyStroke(Title, "Highlight", 1, "Round");
@@ -1672,6 +1674,8 @@ function Library:Notify(Message, Duration, Title)
         TextSize = 12,
         RichText = true,
         Text = tostring(Message),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top
     }, { TextColor3 = "Text", FontFace = "Font" });
 
     local DurationBar = Library.Create("Frame", {
