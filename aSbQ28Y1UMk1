@@ -52,51 +52,54 @@ local Library = {
     White = RGB(255, 255, 255),
 
     Paths = {
-        ["Folder"] = "TEMPUI",
-        ["Data"] = "Data",
-        ["Themes"] = "Themes",
-    };
+        ["Folder"] = "..\\TEMPUI",
+        ["Data"] = "\\Data",
+        ["Themes"] = "\\Themes",
+    },
+};
+
+do -- Save / Load
+    function Library:Save()
+        local Folder = Library.Paths["Folder"]
+        local DataPath = Folder .. Library.Paths["Data"]
     
-    do -- Save / Load
-        function Library:Save()
-            local Folder = Library.Paths["Folder"]
-            local DataFolder = Folder .. "\\" .. Library.Paths["Data"]
-            
-            FileService:CreateFolder(Folder)
-            FileService:CreateFolder(DataFolder)
+        FileService:CreateFolder(Folder)
+        FileService:CreateFolder(DataPath)
     
-            local Path = DataFolder .. "\\SaveData.json" 
-            
-            local SaveData = {}
-            for i, v in pairs(self.Created.Flags) do
-                if v.Value then
-                    SaveData[i] = v.Value
-                end
-            end
+        local FilePath = DataPath .. "\\SaveData.json" 
     
-            FileService:Write(Path, HttpService:JSONEncode(SaveData))
-        end
-    
-        function Library:Load()
-            local Folder = Library.Paths["Folder"]
-            local DataFolder = Folder .. "\\" .. Library.Paths["Data"]
-    
-            FileService:CreateFolder(Folder)
-            FileService:CreateFolder(DataFolder)
-    
-            local Path = DataFolder .. "\\SaveData.json" 
-    
-            local LoadData = FileService:Read(Path)
-            if not LoadData then return end
-    
-            LoadData = HttpService:JSONDecode(LoadData)
-            for i, v in pairs(LoadData) do
-                if Library.Created.Flags[i] then
-                    Library.Created.Flags[i]:Load(v)
-                end
+        local SaveData = {}
+        for i, v in pairs(self.Created.Flags) do
+            if v.Value then
+                SaveData[i] = v.Value
             end
         end
-    end    
+    
+        FileService:Write(FilePath, HttpService:JSONEncode(SaveData))
+    end
+    
+    function Library:Load()
+        local Folder = Library.Paths["Folder"]
+        local DataPath = Folder .. Library.Paths["Data"]
+    
+        FileService:CreateFolder(Folder)
+        FileService:CreateFolder(DataPath)
+    
+        local FilePath = DataPath .. "\\SaveData.json"
+    
+        local LoadData = FileService:Read(FilePath)
+        if not LoadData then return end
+    
+        LoadData = HttpService:JSONDecode(LoadData)
+        for i, v in pairs(LoadData) do
+            if Library.Created.Flags[i] then
+                Library.Created.Flags[i]:Load(v)
+            end
+        end
+    end
+    print("Saving to path:", FilePath)
+    print("Loading from path:", FilePath)
+
 
 do -- Colorize
     function Library:Register(Obj, Properties, Tween)
