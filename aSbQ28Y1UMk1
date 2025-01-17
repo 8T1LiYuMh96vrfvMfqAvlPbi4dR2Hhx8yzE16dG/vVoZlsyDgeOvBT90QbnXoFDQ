@@ -926,7 +926,7 @@ local SubFunctions; SubFunctions = {
         local function Update()
             nself.Value = math.clamp(nself.Value, unpack(nself.Limits));
             local Value = nself.Value;
-            local Percent = (nself.Value / (nself.Limits[2] - nself.Limits[1]));
+            local Percent = ((nself.Value - nself.Limits[1]) / nself.Limits[2]);
             local TweenInfo = TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
             TweenService:Create(Slider_Fill, TweenInfo, { Size = UDim2.new(Percent, 0, 1, 0) }):Play();
 
