@@ -926,7 +926,7 @@ local SubFunctions; SubFunctions = {
         local function Update()
             nself.Value = math.clamp(nself.Value, unpack(nself.Limits));
             local Value = nself.Value;
-            local Percent = (nself.Value / nself.Limits[2]);
+            local Percent = (nself.Value / (nself.Limits[2] - nself.Limits[1]));
             local TweenInfo = TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
             TweenService:Create(Slider_Fill, TweenInfo, { Size = UDim2.new(Percent, 0, 1, 0) }):Play();
 
@@ -1274,7 +1274,7 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(0, 5, 0, 5),
         }, { BackgroundColor3 = "Text" });
 
-        Library:ApplyCorner(DF_Circle, 100);
+        Library:ApplyCorner(Circle, 100);
 
         local ValueLabel = Library.Create("TextLabel", {
             Parent = Visuals,
@@ -1287,7 +1287,7 @@ local SubFunctions; SubFunctions = {
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         local ItemHolder = Library.Create("ScrollingFrame", {
-            Parent = DownFrame,
+            Parent = Subframe,
             AnchorPoint = Vector2.new(0, 1),
             BackgroundTransparency = 1,
             Position = UDim2.new(0, 0, 1, 0),
