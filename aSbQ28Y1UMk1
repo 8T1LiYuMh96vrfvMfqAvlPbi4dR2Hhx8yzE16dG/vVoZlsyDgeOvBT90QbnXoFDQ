@@ -11,6 +11,8 @@ Setup:Basics();
 local HttpService = game:GetService("HttpService");
 local Mouse = client:GetMouse();
 
+err = "Error!"
+
 local RGB = Color3.fromRGB;
 local Library = {
     Cache = {},
@@ -1975,6 +1977,16 @@ function Library:CreateWindow(WINFO)
     function Window:Visibility(Value)
         Value = (Value ~= nil and Value) or not ScreenUI.Enabled;
         ScreenUI.Enabled = Value;
+    end;
+
+    if NavClose then 
+        NavClose.MouseButton1Down:Connect(function()
+            if ScreenUI and ScreenUI.Enabled then
+                Window:Exit();
+            else
+                print(type(NavClose), err);
+            end;
+        end);
     end;
 
     if Window.Icon then
