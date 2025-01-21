@@ -1980,7 +1980,7 @@ function Library:CreateWindow(WINFO)
     end;
 
     if NavClose then 
-        NavClose.MouseButton1Down:Connect(function()
+        NavClose.MouseButton1Click:Connect(function()
             if ScreenUI and ScreenUI.Enabled then
                 Window:Exit();
             else
