@@ -264,14 +264,13 @@ end;
 local function waitForBallPossession()
     while not Football:IsDescendantOf(LP.Character) do
         moveToTarget(Football.CFrame);
-        task.wait(0.5);
+        task.wait(0.01);
     end;
 end;
 
 local function waitForBallAvailability()
     while not (workspace:FindFirstChild("Football")) do
-        addAutofarmLog("Waiting for Football or BallHitbox...");
-        task.wait();
+        task.wait(0.001);
     end;
     return workspace.Football, workspace.Football.Hitbox;
 end;
@@ -334,9 +333,6 @@ function AutoFarm:Start()
             if not isGamePlaying() then
                 AutoFarm:Stop()
                 addAutofarmLog("Game Over!")
-            else
-                randomJoinTeam();
-                AutoFarm:Start();
             end
         end)
 
@@ -624,7 +620,7 @@ local NoClip_Toggle = Section_Dashboard:CreateToggle({
 local Slider = Section_Dashboard:CreateSlider({
     Text = "Shooting Delay (ms)",  
     Alignment = "Left",
-    Default = default_config.Dashboard.AutoFarm_Config.Shoot_Delay, 
+    Default = default_config.Dashboard.AutoFarm_Config.Shoot_Delay / 1000, 
     Callback = function(Value)
         default_config.Dashboard.AutoFarm_Config.Shoot_Delay = Value / 1000;  
     end,
