@@ -128,8 +128,8 @@ succ = "Works!";
 err = "Error!";
 
 -- // Ingame
-local Football = workspace:WaitForChild("Football", math.random(.5,1));
-local BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox", math.random(.5,1));
+local Football = workspace:WaitForChild("Football", 1);
+local BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox", 1);
 local PlayerStats = cloneref(LP:WaitForChild("PlayerStats"));
 local InFlow = cloneref(PlayerStats:WaitForChild("InFlow"));
 local GameScored = cloneref(RS:WaitForChild("GameValues"):WaitForChild("Scored"));
@@ -651,7 +651,7 @@ local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
     Callback = function(Value)
         default_config.Dashboard.AutoFarm_Config.AutoJoinTeam = Value;
 
-        while default_config.Dashboard.AutoFarm_Config.AutoJoinTeam do task.wait(DELAY);
+        while default_config.Dashboard.AutoFarm_Config.AutoJoinTeam do task.wait(1);
             task.spawn(function()
                 local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
 
@@ -664,6 +664,8 @@ local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
                 end);
             end);
         end;
+
+        randomJoinTeam();
     end;
 });
 
