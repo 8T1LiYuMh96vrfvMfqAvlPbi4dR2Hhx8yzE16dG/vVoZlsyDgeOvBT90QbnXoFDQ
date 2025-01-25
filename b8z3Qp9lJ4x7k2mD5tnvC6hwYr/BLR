@@ -271,7 +271,7 @@ end;
 local function waitForBallAvailability()
     while not (workspace:FindFirstChild("Football") and workspace.Football:FindFirstChild("Hitbox")) do
         addAutofarmLog("Waiting for Football or BallHitbox...");
-        task.wait(0.5);
+        task.wait(0.1);
     end;
     return workspace.Football, workspace.Football.Hitbox;
 end;
