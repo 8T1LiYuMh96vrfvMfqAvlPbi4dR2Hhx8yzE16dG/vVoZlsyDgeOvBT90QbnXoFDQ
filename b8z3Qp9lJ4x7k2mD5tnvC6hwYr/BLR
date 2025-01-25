@@ -262,16 +262,16 @@ local function moveToTarget(targetCFrame, interval)
 end;
 
 local function waitForBallPossession()
-    while not BallHitbox:IsDescendantOf(LP.Character) do
-        moveToTarget(BallHitbox.CFrame);
-        task.wait(0.3);
+    while not Football:IsDescendantOf(LP.Character) do
+        moveToTarget(Football.CFrame);
+        task.wait(0.5);
     end;
 end;
 
 local function waitForBallAvailability()
-    while not (workspace:FindFirstChild("Football") and workspace.Football:FindFirstChild("Hitbox")) do
+    while not (workspace:FindFirstChild("Football")) do
         addAutofarmLog("Waiting for Football or BallHitbox...");
-        task.wait(0.1);
+        task.wait();
     end;
     return workspace.Football, workspace.Football.Hitbox;
 end;
@@ -285,7 +285,7 @@ local function performShooting(shootPower, targetVector)
 end;
 
 local function hasBall()
-    return Football and BallHitbox and BallHitbox:IsDescendantOf(LP.Character);
+    return Football and BallHitbox and Football:IsDescendantOf(LP.Character);
 end;
 
 local AutoFarm = {};
@@ -334,6 +334,9 @@ function AutoFarm:Start()
             if not isGamePlaying() then
                 AutoFarm:Stop()
                 addAutofarmLog("Game Over!")
+            else
+                randomJoinTeam();
+                AutoFarm:Start();
             end
         end)
 
@@ -368,7 +371,7 @@ function AutoFarm:Stop()
     default_config.Dashboard.BreakEverything = true;
     addAutofarmLog("Auto Farm stopped")
 end
-local randomJoinTeam = (function()
+ randomJoinTeam = (function()
     local player = game:GetService("Players").LocalPlayer
     local currentTeam = player.Team
     local teamChoice
@@ -665,7 +668,9 @@ local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
             end);
         end;
 
-        randomJoinTeam();
+        if Value == true then 
+            randomJoinTeam();
+        end
     end;
 });
 
