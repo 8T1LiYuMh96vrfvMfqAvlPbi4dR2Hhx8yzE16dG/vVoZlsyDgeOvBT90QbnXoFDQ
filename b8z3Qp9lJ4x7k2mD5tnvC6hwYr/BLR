@@ -1,1 +1,1420 @@
-print("W.I.P")
+-- // ENTRY
+repeat task.wait(2.5) until game:IsLoaded();
+
+-- // DEBUG 
+local Debug = {
+    Enabled = false;
+    Logs = {};
+}
+function Debug:Toggle(state)
+    self.Enabled = state
+    print("Debug Mode: " .. (state and "Enabled" or "Disabled"));
+end
+function Debug:Log(msg, level)
+    level = level or "INFO" 
+    if self.Enabled then
+        table.insert(self.Logs, "[" .. level .. "]: " .. msg)
+        print("[" .. level .. "]: " .. msg)
+    end
+end
+function Debug:Clear()
+    self.Logs = {}
+    print("Debug logs cleared.")
+end
+function Debug:SaveLogs()
+    local json = game:GetService("HttpService"):JSONEncode(self.Logs)
+    writefile("DebugLogs.json", json)
+    print("[Saved Log]")
+end
+
+-- // STATUS CHECKING
+local Status = { }
+function SetStatus(newStatus)
+    if #Status == 0 then
+        table.insert(Status, newStatus);
+    else
+        Status[1] = newStatus
+    end
+end
+function CheckTempaStatus()
+    local currentStatus = Status[1] 
+    local LP = game:GetService("Players").LocalPlayer
+    if not currentStatus then
+        warn(err);
+        return false
+    end
+    if currentStatus == "Down" then
+        LP:Kick("[SCRIPT]: Seems to be Down, Try again later and check out our Discord!");
+        return true
+    end
+
+    print("Script Paid is Working and Undetected 🟢");
+    Debug:Log("Script started successfully.");
+    return false
+end;
+SetStatus("Operational");
+if CheckTempaStatus() then
+    return 
+end;
+if Status[1] == "Operational" then
+    Debug:Log("Status is Online");
+else
+    Debug:Log("Status is Down");
+end;
+
+function GetGame(getname, getplaceid, ver)
+    local m_place = game:GetService("MarketplaceService");
+    local getinfo = m_place:GetProductInfo(game.PlaceId);
+    local getname = getinfo.Name;
+    local getplaceid = game.PlaceId;
+    local ver = game.PlaceVersion;
+
+    return getname, getplaceid, ver
+end
+
+local getname, getplaceid, ver = GetGame()
+print("Checking Game..")
+print("Game found: " ..(getname or "Game Name not found"));
+print("Place Id found: " ..(getplaceid or "Place Id not found"));
+print("Game Version Found: ".. (ver or "Version not found"));
+
+local exec = getexecutorname();
+print("Checking Executor: " ..exec)
+if getexecutorname() == "Xeno" then 
+    warn("Seems like " .. exec .. " is not compatible, consider switching exec.")
+    exec = "Xeno"
+    local lp = game:GetService("Players").LocalPlayer
+    lp:kick(exec.. " is not Supported")
+    return 
+elseif getexecutorname() == "Solara" then 
+    warn("Seems like " .. exec .. " is not compatible, consider switching exec.")
+    exec = "Solara"
+    local lp = game:GetService("Players").LocalPlayer
+    lp:kick(exec.. " is not Supported")
+    return
+end;
+
+-- // Discord Logging - Not added until needed for Whitelist purposes and Data
+local User_Logs = nil;
+
+local LP = game:GetService("Players").LocalPlayer;
+local PLRS = game:GetService("Players");
+local TS_S = game:GetService("TeleportService");
+local UIS = game:GetService("UserInputService");
+local CHAR = LP.Character or LP.CharacterAdded:Wait();
+local HRP = CHAR:WaitForChild("HumanoidRootPart");
+local TS = game:GetService("TweenService");
+local RS = game:GetService("ReplicatedStorage");
+local RUN_S = game:GetService("RunService");
+local HTTP = game:GetService("HttpService");
+DELAY = math.random(5,10);
+ENV = (getgenv and getgenv() or shared);
+TICK = tick;
+SSUB = string.sub;
+MATH_F = math.floor;
+CF = CFrame.new;
+V3 = Vector3.new;
+TS_SP = task.spawn;
+OS = os.clock;
+s_l = string.lower;
+s_u = string.upper;
+s_gsub = string.gsub;
+s_byte = string.byte; 
+s_char = string.char;
+s_rep = string.rep;
+s_find = string.find; 
+s_match = string.match;
+succ = "Works!";
+err = "Error!";
+
+-- // Ingame
+local Football = workspace:WaitForChild("Football", math.random(.5,1));
+local BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox", math.random(.5,1));
+local PlayerStats = cloneref(LP:WaitForChild("PlayerStats"));
+local InFlow = cloneref(PlayerStats:WaitForChild("InFlow"));
+local GameScored = cloneref(RS:WaitForChild("GameValues"):WaitForChild("Scored"));
+local Flow = cloneref(PlayerStats:WaitForChild("Flow"));
+local RunService = cloneref(game:GetService("RunService"));
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"));
+local Packages = cloneref(ReplicatedStorage:WaitForChild("Packages"));
+local Controllers = cloneref(ReplicatedStorage:WaitForChild("Controllers"));
+local Knit = cloneref(Packages:WaitForChild("Knit"));
+local Services = cloneref(Knit:WaitForChild("Services"));
+local StaminaService = cloneref(Services:WaitForChild("StaminaService"));
+local StaminaRE = cloneref(StaminaService:WaitForChild("RE"));
+local DecreaseStamina = cloneref(StaminaRE:WaitForChild("DecreaseStamina"));
+local AbilityController = require(Controllers:WaitForChild("AbilityController")); 
+local ballControllerModule = require(ReplicatedStorage.Controllers.BallController);
+
+local default_config = {
+    ["UI"] = {
+        ["AutoLoad"] = false;
+        ["Debug"] = false;
+        ["ToggleKey"] = nil;
+        ["Discord"] = nil;
+    };
+    ["ESP"] = {
+        ["Name_Esp"] = false;
+        ["Name_Size"] = 16;
+        ["Name_Toggle"] = "K" or nil;
+        ["Flow_Esp"] = false;
+        ["Flow_Size"] = 16;
+        ["Style_Esp"] = false;
+        ["Style_Size"] = 16;
+        ["Ball_Tracer"] = false;
+        ["Ball_Highlight"] = false;
+    };
+    ["Misc"] = {
+        ["Skill_No_Cd"] = false;
+        ["Infinite_Stam"] = false;
+        ["Anti_Rag"] = false;
+        ["Temp_Flow"] = nil;
+        ["Ball_Return"] = false;
+        ["AutoFlow"] = false;
+        ["AutoAwaken"] = false;
+    };
+    ["Dashboard"] = {
+        ["AutoFarm"] = false;
+        ["AutoFarm_Config"] = {
+            ["Stay_InGoal"] = 3;
+            ["Shoot_Delay"] = 4;
+            ["NoClip"] = false;
+            ["AutoJoinTeam"] = false;
+        };
+    };
+    ["Other"] = {
+        ["Cursor"] = {
+            ["Enabled"] = false;
+            ["Thickness"] = 2;
+            ["Radius"] = 5;
+            ["Color"] = Color3.new(1, 1, 1);
+        };
+        ["Connection"] = nil;
+        ["RagdollConnection"] = nil;
+        ["Shooting"] = false;
+        ["Revert"] = {
+            ["BreakEverything"] = false;
+        }
+    };
+    ["Cache__"] = {...}
+}
+
+-- // Functions
+local AutoLoad = (function()
+    if default_config.UI.AutoLoad == true and identifyexecutor() then 
+        pcall(function()
+            print("AutoLoad, is on REALOMGWOWOOAS")
+            queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR"))()]])
+        end)
+    else
+        print(err)
+        Debug:Log("Auto Load issue", "WARN") Debug:SaveLogs()
+    end
+end);
+local Noclip = (function(state)
+    for _, v in pairs(workspace.Goals:GetChildren()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = not state; 
+        end;
+    end;
+    for _, v in pairs(workspace.SmallSquare:GetChildren()) do
+        if v:IsA("BasePart") then
+            v.CanCollide = not state; 
+        end;
+    end;
+end)
+local Codes = {
+    "60KFOLLOWERS";
+    "30KLIKES";
+    "20KLIKESPT2";
+    "MONST3R";
+}
+local RedeemCodes = (function()
+    for _, code in ipairs(Codes) do 
+        if Codes then
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Packages.Knit.Services.CodesService.RF.Redeem:InvokeServer(code)
+                    task.wait(math.floor(1.1121212)) 
+        end)
+    else 
+        print(err)
+        Debug:Log("Redeeming Codes error", "WARN"); Debug:SaveLogs();
+    end
+    end
+end)
+-- Helper Functions
+local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
+
+local function isGamePlaying()
+    return gameStateValue.Value == "Playing";
+end;
+
+local function getGoalCFrame(team)
+    return team == "HomeTeam" and CF(-242, 11, -33) or CF(319, 11, -61);
+end;
+
+local function moveToTarget(targetCFrame, interval)
+    interval = interval or 0.2;
+    while (HRP.Position - targetCFrame.Position).Magnitude > 5 do
+        HRP.CFrame = targetCFrame;
+        task.wait(interval);
+    end;
+end;
+
+local function waitForBallPossession()
+    while not BallHitbox:IsDescendantOf(LP.Character) do
+        moveToTarget(BallHitbox.CFrame);
+        task.wait(0.1);
+    end;
+end;
+
+local function waitForBallAvailability()
+    while not (workspace:FindFirstChild("Football") and workspace.Football:FindFirstChild("Hitbox")) do
+        addAutofarmLog("Waiting for Football or BallHitbox...");
+        task.wait(0.5);
+    end;
+    return workspace.Football, workspace.Football.Hitbox;
+end;
+
+local function performShooting(shootPower, targetVector)
+    local args = {
+        [1] = shootPower,
+        [4] = targetVector
+    };
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("BallService"):WaitForChild("RE"):WaitForChild("Shoot"):FireServer(unpack(args));
+end;
+
+local function hasBall()
+    return Football and BallHitbox and BallHitbox:IsDescendantOf(LP.Character);
+end;
+
+local AutoFarm = {};
+
+function AutoFarm:Init()
+    local function monitorPlayerReset()
+        LP.CharacterAdded:Connect(function()
+            addAutofarmLog("LocalPlayer reset detected. Ensuring AutoFarm remains functional");
+        end);
+    end;
+
+    task.spawn(monitorPlayerReset);
+end;
+
+function AutoFarm:Start()
+    while default_config.Dashboard.AutoFarm do
+        if not default_config.Dashboard.AutoFarm then
+            addAutofarmLog("AutoFarm stopped as the toggle was disabled")
+            break
+        end
+
+        local teamsFolder = RS:WaitForChild("Teams")
+        local Found_Team = nil
+
+        for _, team in pairs(teamsFolder:GetChildren()) do
+            if team.Name == "HomeTeam" or team.Name == "AwayTeam" then
+                for _, obj in pairs(team:GetChildren()) do
+                    if obj:IsA("ObjectValue") and obj.Value == LP then
+                        Found_Team = team.Name
+                        addAutofarmLog("Team: " .. team.Name)
+                        break
+                    end
+                end
+                if Found_Team then break end
+            end
+        end
+
+        if not Found_Team then
+            addAutofarmLog("Team not found!")
+            print(err)
+            Debug:Log("Auto Farm issue - Team not Found", "WARN"); Debug:SaveLogs();
+            break
+        end
+
+        gameStateValue:GetPropertyChangedSignal("Value"):Connect(function()
+            if not isGamePlaying() then
+                AutoFarm:Stop()
+                addAutofarmLog("Game Over!")
+            end
+        end)
+
+        local Football, BallHitbox = waitForBallAvailability()
+        addAutofarmLog("Moving to ball")
+
+        waitForBallPossession()
+
+        if not hasBall() then
+            addAutofarmLog("Error: Ball possession check failed. Retrying...")
+        end
+
+        addAutofarmLog("Ball in possession. Heading to goal...")
+        local goalCFrame = Found_Team == "HomeTeam" and CF(-242, 11, -33) or CF(319, 11, -61)
+
+        moveToTarget(goalCFrame)
+
+        addAutofarmLog("Waiting before shooting...")
+        task.wait(default_config.Dashboard.AutoFarm_Config.Shoot_Delay)
+
+        performShooting(math.random(35, 50), goalCFrame.Position)
+
+        addAutofarmLog("Returning to normal position.")
+        task.wait(1)
+    end
+
+    addAutofarmLog("AutoFarm stopped.")
+end
+
+function AutoFarm:Stop()
+    default_config.Dashboard.AutoFarm = false;
+    default_config.Dashboard.BreakEverything = true;
+    addAutofarmLog("Auto Farm stopped")
+end
+local randomJoinTeam = (function()
+    local player = game:GetService("Players").LocalPlayer
+    local currentTeam = player.Team
+    local teamChoice
+    if currentTeam and (currentTeam.Name == "Home" or currentTeam.Name == "Away") then
+        teamChoice = currentTeam.Name == "Home" and "Away" or "Home"
+    else
+        teamChoice = math.random(1, 2) == 1 and "Home" or "Away"
+        teamChoice = teamChoice == "Home" and "Away" or "Home" 
+    end
+    local positions = {"CF", "CM", "LW", "RW", "GK"}
+    local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+    pcall(function()
+        local teamService = game:GetService("ReplicatedStorage").Packages.Knit.Services.TeamService.RE
+        if gameStateValue.Value == "Playing" then
+        for _, position in ipairs(positions) do
+            teamService.Select:FireServer(teamChoice, position) 
+            task.wait(0.2)
+            local currentPlayer = game:GetService("Players").LocalPlayer
+            local newTeam = currentPlayer.Team
+
+            if newTeam and newTeam.Name == teamChoice then
+                print("[SCRIPT] Successfully joined " .. teamChoice .. " as " .. position)
+                break
+            end
+        end
+    else 
+        print(err)
+        Debug:Log("Random Team Join issue", "WARN"); Debug:SaveLogs();
+    end
+    end)
+end)
+local teleportToFootball = (function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local ball = workspace:WaitForChild("Football")
+    if character and ball then
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+        rootPart.CFrame = CFrame.new(ball.Position)
+    else
+        print(err)
+        Debug:Log("Teleport to Football Issue - Character or Ball not found", "WARN"); Debug:SaveLogs();
+    end
+end)
+local monitorRagdoll = (function()
+    local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
+    if default_config.Other.RagdollConnection then
+        default_config.Other.RagdollConnection:Disconnect() 
+    end
+    default_config.Other.RagdollConnection = IsRagdoll:GetPropertyChangedSignal("Value"):Connect(function()
+        if ENV.AntiRagdoll and IsRagdoll.Value == true then
+            if IsRagdoll.Value == true then
+                IsRagdoll.Value = false
+            end
+        end
+    end)
+end)
+local enableInfiniteStamina = (function()
+    local stats = game.Players.LocalPlayer:WaitForChild("PlayerStats")
+
+        local staminaService = RS:FindFirstChild("StaminaService")
+        if staminaService then
+            local decreaseStamina = staminaService.RE.DecreaseStamina
+            decreaseStamina:FireServer(math.sqrt(-1)) 
+        else
+            print(err)
+            Debug:Log("Infinite Stamina Issue - Service not found", "WARN"); Debug:SaveLogs();
+        end
+        stats.Stamina.Value = 100
+end)
+local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
+local disableRagdoll = (function()
+    if IsRagdoll.Value == true then
+        IsRagdoll.Value = false
+    end
+end)
+local monitorRagdoll = (function()
+    if default_config.Other.RagdollConnection then
+        default_config.Other.RagdollConnection:Disconnect() 
+    end
+    default_config.Other.RagdollConnection = IsRagdoll:GetPropertyChangedSignal("Value"):Connect(function()
+        if ENV.AntiRagdoll and IsRagdoll.Value == true then
+            disableRagdoll()
+        end
+    end)
+end)
+local enableAntiRagdoll = (function()
+    monitorRagdoll()
+    disableRagdoll() 
+
+    LP.CharacterAdded:Connect(function(newCharacter)
+        CHAR = newCharacter
+        IsRagdoll = cloneref(newCharacter:WaitForChild("IsRagdoll"))
+        monitorRagdoll()
+        disableRagdoll()
+    end)
+end)
+local disableAntiRagdoll = (function()
+    if default_config.Other.RagdollConnection then
+        default_config.Other.RagdollConnection:Disconnect()
+        default_config.Other.RagdollConnection = nil
+    end
+end)
+local AutoSteal = (function()
+
+end)
+local AutoDribble = (function()
+    
+end)
+
+
+-- // UI
+local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
+local Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/aSbQ28Y1UMk1"))() 
+local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))() 
+Setup:Basics()
+
+Library.Paths.Folder = "..\\BETA"
+Library.Paths.Data = "\\Data"
+Library.Paths.Themes = "\\Themes"
+
+local Window = Library:CreateWindow({
+    Title = "Tempa";
+})
+
+local Dashboard_Tab = Window:CreateTab({
+    Title = "Dashboard";
+    Icon = "rbxassetid://130289250570665";
+});
+local Misc_Tab = Window:CreateTab({
+    Title = "Miscellaneous";
+    Icon = "rbxassetid://130819053773683";
+});
+local ESP_Tab = Window:CreateTab({
+    Title = "Esp";
+    Icon = "rbxassetid://138343944779037";
+});
+local Config_Tab = Window:CreateTab({
+    Title = "Config";
+    Icon = "rbxassetid://95750721918044";
+});
+
+local Section_Config = Config_Tab:CreateSection({
+    Title = "Other";
+    Side = "Left"; 
+});
+
+local Section2_Config = Config_Tab:CreateSection({
+    Title = "Cursor Settings";
+    Side = "Right"; 
+});
+
+local Section3_Info = Config_Tab:CreateSection({
+    Title = "Information";
+    Side = "Left"; 
+});
+
+local Section_Dashboard = Dashboard_Tab:CreateSection({
+    Title = "Farming";
+    Side = "Left"; 
+});
+local Section_ESP = ESP_Tab:CreateSection({
+    Title = "Player ESP";
+    Side = "Left"; 
+});
+local Section_ESP_Flow = ESP_Tab:CreateSection({
+    Title = "Flow ESP";
+    Side = "Right"; 
+});
+local Section_ESP_Style = ESP_Tab:CreateSection({
+    Title = "Style ESP";
+    Side = "Right"; 
+});
+local Section_ESP_Ball = ESP_Tab:CreateSection({
+    Title = "Ball ESP";
+    Side = "Left"; 
+});
+local Section_BallConfig = Dashboard_Tab:CreateSection({
+    Title = "Ball Control";
+    Side = "Right"; 
+});
+local Section_Flow = Misc_Tab:CreateSection({
+    Title = "Temp-Unlocks",
+    Side = "Right"
+})
+
+local Section_Other = Misc_Tab:CreateSection({
+    Title = "Utilities",
+    Side = "Left"
+})
+local Section_Auto = Misc_Tab:CreateSection({
+    Title = "Automatic",
+    Side = "Right"
+})
+local Section_Character = Misc_Tab:CreateSection({
+    Title = "Character",
+    Side = "Left"
+})
+
+local Section_Troll = Misc_Tab:CreateSection({
+    Title = "Troll",
+    Side = "Right"
+})
+
+GameScored:GetPropertyChangedSignal("Value"):Connect(function()
+    if GameScored.Value == true then
+        task.wait();
+        default_config.Other.Revert.BreakEverything = true;
+        AutoFarm:Stop()
+    elseif GameScored.Value == false then
+        task.wait();
+        default_config.Other.Revert.BreakEverything = false;
+        AutoFarm:Start();
+    end;
+end);
+
+local AutoFarm_Toggle = Section_Dashboard:CreateToggle({
+    Text = "Auto Farm",
+    Subtext = "Scores on Enemy Goal",
+    Alignment = "Left",
+    Default = default_config.Dashboard.AutoFarm,
+    Callback = function(Value)
+        default_config.Dashboard.AutoFarm = Value
+        if Value then
+            AutoFarm:Start()
+        else
+            AutoFarm:Stop()
+        end
+    end;
+})
+
+local NoClip_Toggle = Section_Dashboard:CreateToggle({
+    Text = "No Clip",
+    Subtext = "Must Enable for Autofarm!",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(val)
+        default_config.Dashboard.AutoFarm_Config.NoClip = val;
+
+        task.spawn(function()
+            while default_config.Dashboard.AutoFarm_Config.NoClip do
+                Noclip(true); 
+                task.wait(0.5);
+            end;
+
+            Noclip(false);
+        end);
+    end;
+});
+
+local Slider = Section_Dashboard:CreateSlider({
+    Text = "Shooting Delay (ms)",  
+    Alignment = "Left",
+    Default = default_config.Dashboard.AutoFarm_Config.Shoot_Delay, 
+    Callback = function(Value)
+        default_config.Dashboard.AutoFarm_Config.Shoot_Delay = Value / 1000;  
+    end,
+    Flag = "shootDelaySlider",  
+    Floats = 3,  
+    Limits = { 0, 10 },
+    Increment = 0.1,  
+});
+
+local Slider_Delay = Section_Dashboard:CreateSlider({
+    Text = "Stay in Goal",
+    Subtext = "Delays Ball Checking",
+    Alignment = "Left", 
+    Default = default_config.Dashboard.AutoFarm_Config.Stay_InGoal, 
+    Floats = 1, 
+    Limits = { 1, 5 }, 
+    Callback = function(Value)
+        default_config.Dashboard.AutoFarm_Config.Stay_InGoal = Value;
+    end;
+});
+
+local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
+    Text = "Auto Join Match",
+    Subtext = "Joins a random team",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        default_config.Dashboard.AutoFarm_Config.AutoJoinTeam = Value;
+
+        while default_config.Dashboard.AutoFarm_Config.AutoJoinTeam do task.wait(DELAY);
+            task.spawn(function()
+                local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
+
+                gameStateValue:GetPropertyChangedSignal("Value"):Connect(function()
+                    if gameStateValue.Value == "Playing" then 
+                        randomJoinTeam();
+                    else
+                        print(err, "Game is not playing or State not found");
+                    end;
+                end);
+            end);
+        end;
+    end;
+});
+
+local EntryLog = Section_Dashboard:CreateLog({
+    Default = { };
+});
+
+function addAutofarmLog(entryText)
+    EntryLog:AddEntry(entryText);
+end;
+
+
+local Button_FlingBall = Section_BallConfig:CreateButton({
+    Text = "Fling Ball";
+    Alignment = "Left"; 
+    Callback = function()
+        task.spawn(function()
+            task.wait()
+            local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+            if gameStateValue.Value == "Playing" then 
+            game:GetService("Workspace").Football.Velocity = Vector3.new(500, 200, 1000);
+            end
+        end)
+    end;
+});
+
+local Button_VoidBall = Section_BallConfig:CreateButton({
+    Text = "Void Ball";
+    Alignment = "Left"; 
+    Callback = function()
+    task.spawn(function()
+        local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+        if gameStateValue.Value == "Playing" then 
+            -- Football:Destroy()
+            Library:Notify("Removed!", 3, "Alert") 
+        else 
+            print("Not in Match")
+        end
+    end)
+    end;
+});
+
+local Button_TakeBall = Section_BallConfig:CreateButton({
+    Text = "Bring Ball";
+    Alignment = "Left"; 
+    Callback = function()
+        task.spawn(function()
+            local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+            if gameStateValue.Value == "Playing" then 
+                Football.Position = HRP.Position
+            else 
+                print("Not in Match")
+            end
+        end)
+    end;
+});
+
+local Button_TpTOBall = Section_BallConfig:CreateButton({
+    Text = "Tp to Ball";
+    Alignment = "Left"; 
+    Callback = function() 
+        task.spawn(function()
+            local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State")
+            if gameStateValue.Value == "Playing" then 
+                teleportToFootball()
+            else 
+                print("Not in Match")
+            end
+        end)
+    end;
+});
+
+local UI_ToggleKeybind = Section_Config:CreateKeybind({
+    Text = "Toggle UI";
+    Subtext = "Default [N] to Toggle";
+    Alignment = "Left"; 
+    Default = "N"; 
+    Callback = function(v) 
+        Window:Visibility()
+    end;
+});
+
+local AutoLoad_Toggle = Section_Config:CreateToggle({
+    Text = "Auto Load";
+    Subtext = "Loads script on Teleport";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(val)
+        default_config.UI.AutoLoad = val;
+
+        if default_config.UI.AutoLoad then 
+            task.spawn(function()
+                AutoLoad();
+            end)
+        end
+    end;
+});
+
+local Debug_Toggle = Section_Config:CreateToggle({
+    Text = "Debug Mode";
+    Subtext = "For Debugging Purposes";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(value) 
+        Debug:Toggle(value);
+    end;
+});
+
+local last_t = tick()
+local last_fps = 0
+
+RUN_S.RenderStepped:Connect(function()
+    local current_t = tick()
+    last_fps = math.floor(1 / (current_t - last_t))
+    last_t = current_t
+end)
+local FPS_NoCapButton = Section_Config:CreateButton({
+    Text = "Unlock Fps";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not setfpscap then print(err) return end
+
+        setfpscap(math.max(60, 9999))
+        print(succ, "FPS: " ..last_fps)
+    end;
+});
+
+local Button_Exit = Section_Config:CreateButton({
+    Text = "Exit UI";
+    Alignment = "Left"; 
+    Callback = function() 
+    Window:Exit();
+    end;
+});
+
+local Cursor
+local Connection
+local Dropdown = Section2_Config:CreateDropdown({
+    Text = "Choose Variant";
+    Subtext = "Multiple Shapes";
+    Alignment = "Left";
+    Choices = { "Circle", "Square" };  
+    Multi = false;
+    Default = nil;
+    Callback = function(Value)
+        print("Dropdown has been set: " .. tostring(Value))
+
+        if Cursor then
+            Cursor:Remove()
+            Cursor = nil
+        end
+
+        if ENV.ShowCursor then
+            Cursor = Drawing.new(Value)  
+            Cursor.Visible = true
+            Cursor.Color = default_config.Other.Cursor.Color
+            Cursor.Thickness = default_config.Other.Cursor.Thickness
+
+            if Value == "Circle" then
+                Cursor.Radius = default_config.Other.Cursor.Radius
+            elseif Value == "Square" then
+                Cursor.Size = Vector2.new(default_config.Other.Cursor.Radius, default_config.Other.Cursor.Radius)
+            end
+
+            Connection = RUN_S.RenderStepped:Connect(function()
+                local mousePosition = UIS:GetMouseLocation()
+                if Cursor then 
+                Cursor.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+                end
+            end)
+        end
+    end;
+    Flag = "cursorDrop";
+})
+
+local Cursor_Toggle = Section2_Config:CreateToggle({
+    Text = "Enable Cursor";
+    Subtext = "Shows a Custom Cursor";
+    Alignment = "Left";
+    Default = default_config.Other.Cursor.Enabled;
+    Callback = function(v)
+        ENV.ShowCursor = v
+
+        if ENV.ShowCursor then
+            Dropdown:Fire()
+
+            Connection = RUN_S.RenderStepped:Connect(function()
+                local mousePosition = UIS:GetMouseLocation()
+                if Cursor then
+                    Cursor.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+                end
+            end)
+        else
+            if Cursor then
+                Cursor:Remove()
+                Cursor = nil
+            end
+            if Connection then
+                Connection:Disconnect()
+                Connection = nil
+            end
+        end
+    end;
+})
+
+local Slider_Thick = Section2_Config:CreateSlider({
+    Text = "Thickness";
+    Subtext = "Change the Cursor Thickness";
+    Alignment = "Left";
+    Default = default_config.Other.Cursor.Thickness;
+    Floats = 1;
+    Limits = { 1, 20 };
+    Callback = function(Value)
+        if Cursor then
+            Cursor.Thickness = Value
+            default_config.Other.Cursor.Thickness = Value
+        end
+    end;
+});
+
+local Slider_Rad = Section2_Config:CreateSlider({
+    Text = "Radius";
+    Subtext = "Change the Cursor Radius";
+    Alignment = "Left";
+    Default = default_config.Other.Cursor.Radius;
+    Floats = 1;
+    Limits = { 0, 20 };
+    Callback = function(Value)
+        if Cursor then
+            if Dropdown.Value == "Circle" then
+                Cursor.Radius = Value
+            elseif Dropdown.Value == "Square" then
+                Cursor.Size = Vector2.new(Value, Value)
+            end
+            default_config.Other.Cursor.Radius = Value
+        end
+    end;
+});
+
+local EXEC = getexecutorname() or "N/A"
+local Exec_Label = Section3_Info:CreateLabel({
+    Text = "Executor: "..EXEC;
+    Alignment = "Left"; 
+})
+
+local Discord_Label = Section3_Info:CreateLabel({
+    Text = "https://discord.gg/beta";
+    Alignment = "Left"; 
+});
+
+local ESP = {}
+ESP.Enabled = false
+ESP.Cache = {}
+ESP.Settings = {
+    NameESP = false,
+    ShowFlows = false,
+    ShowStyles = false,
+    ShowSkeleton = false,
+    NameSize = 15,
+    FlowSize = 14,
+    StyleSize = 14
+}
+
+function ESP:CreateDrawing(Type, Properties)
+    local DrawingObj = Drawing.new(Type)
+    for Property, Value in pairs(Properties) do
+        DrawingObj[Property] = Value
+    end
+    return DrawingObj
+end
+
+function ESP:Toggle(State)
+    self.Enabled = State
+    if not State then
+        for _, Objects in pairs(self.Cache) do
+            for _, DrawingObj in pairs(Objects) do
+                if typeof(DrawingObj) == "table" then
+                    for _, Obj in pairs(DrawingObj) do
+                        Obj.Visible = false
+                    end
+                else
+                    DrawingObj.Visible = false
+                end
+            end
+        end
+        self.Cache = {}
+    end
+end
+
+function ESP:ClearCacheForPlayer(Player)
+    if self.Cache[Player] then
+        for _, DrawingObj in pairs(self.Cache[Player]) do
+            if typeof(DrawingObj) == "table" then
+                for _, Obj in pairs(DrawingObj) do
+                    Obj:Remove()
+                end
+            else
+                DrawingObj:Remove()
+            end
+        end
+        self.Cache[Player] = nil
+    end
+end
+
+function ESP:Update()
+    if not self.Enabled then return end
+
+    self.Settings.NameESP = default_config.ESP.Name_Esp
+    self.Settings.ShowFlows = default_config.ESP.Flow_Esp
+    self.Settings.ShowStyles = default_config.ESP.Style_Esp
+    self.Settings.NameSize = default_config.ESP.Name_Size
+    self.Settings.FlowSize = default_config.ESP.Flow_Size
+    self.Settings.StyleSize = default_config.ESP.Style_Size
+
+    for _, Player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if Player ~= game.Players.LocalPlayer and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local Character = Player.Character
+            local RootPart = Character:FindFirstChild("HumanoidRootPart")
+            local ScreenPos, OnScreen = workspace.CurrentCamera:WorldToViewportPoint(RootPart.Position)
+
+            local PlayerStats = Player:FindFirstChild("PlayerStats")
+            if not PlayerStats then continue end
+            local Style = PlayerStats:FindFirstChild("Style") and PlayerStats.Style.Value or "Unknown"
+            local Flow = PlayerStats:FindFirstChild("Flow") and PlayerStats.Flow.Value or "Unknown"
+
+            if OnScreen then
+                if not self.Cache[Player] then
+                    self.Cache[Player] = {
+                        NameTag = self:CreateDrawing("Text", {
+                            Text = Player.Name,
+                            Size = self.Settings.NameSize,
+                            Color = Color3.fromRGB(255, 255, 255),
+                            Center = true,
+                            Outline = true,
+                        }),
+                        FlowTag = self:CreateDrawing("Text", {
+                            Text = "Flow: " .. tostring(Flow),
+                            Size = self.Settings.FlowSize,
+                            Color = Color3.fromRGB(107, 100, 255),
+                            Center = true,
+                            Outline = true,
+                        }),
+                        StyleTag = self:CreateDrawing("Text", {
+                            Text = "Style: " .. tostring(Style),
+                            Size = self.Settings.StyleSize,
+                            Color = Color3.fromRGB(255, 101, 178),
+                            Center = true,
+                            Outline = true,
+                        }),
+                        Skeleton = {}, -- Not added yet
+                    }
+                end
+
+                local Cache = self.Cache[Player]
+
+                if self.Settings.NameESP and Cache.NameTag then
+                    Cache.NameTag.Size = self.Settings.NameSize
+                    Cache.NameTag.Visible = true
+                    Cache.NameTag.Position = Vector2.new(ScreenPos.X, ScreenPos.Y - 20)
+                else
+                    Cache.NameTag.Visible = false
+                end
+
+                if self.Settings.ShowFlows and Cache.FlowTag then
+                    Cache.FlowTag.Size = self.Settings.FlowSize
+                    Cache.FlowTag.Text = "Flow: " .. tostring(Flow)
+                    Cache.FlowTag.Visible = true
+                    Cache.FlowTag.Position = Vector2.new(ScreenPos.X, ScreenPos.Y)
+                else
+                    Cache.FlowTag.Visible = false
+                end
+                
+                if self.Settings.ShowStyles and Cache.StyleTag then
+                    Cache.StyleTag.Size = self.Settings.StyleSize
+                    Cache.StyleTag.Text = "Style: " .. tostring(Style)
+                    Cache.StyleTag.Visible = true
+                    Cache.StyleTag.Position = Vector2.new(ScreenPos.X, ScreenPos.Y + 20)
+                else
+                    Cache.StyleTag.Visible = false
+                end
+                
+            else
+                if self.Cache[Player] then
+                    for _, DrawingObj in pairs(self.Cache[Player]) do
+                        if typeof(DrawingObj) == "table" then
+                            for _, Obj in pairs(DrawingObj) do
+                                Obj.Visible = false
+                            end
+                        else
+                            DrawingObj.Visible = false
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+game:GetService("Players").PlayerRemoving:Connect(function(Player)
+    ESP:ClearCacheForPlayer(Player)
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    ESP:Update()
+end)
+
+local NameESP_Toggle = Section_ESP:CreateToggle({
+    Text = "Show Names",
+    Subtext = "Shows their Username",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        default_config.ESP.Name_Esp = Value
+    end,
+})
+
+local FlowESP_Toggle = Section_ESP_Flow:CreateToggle({
+    Text = "Show Flows",
+    Subtext = "Shows player's Flow",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        default_config.ESP.Flow_Esp = Value
+    end,
+})
+
+local StyleESP_Toggle = Section_ESP_Style:CreateToggle({
+    Text = "Show Styles",
+    Subtext = "Shows player's Style",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        default_config.ESP.Style_Esp = Value
+    end,
+})
+
+local NameSlider = Section_ESP:CreateSlider({
+    Text = "Name ESP Size",
+    Alignment = "Left",
+    Default = 15,
+    Callback = function(Value)
+        default_config.ESP.Name_Size = Value
+    end,
+    Flag = "nameEspSizeSlider",
+    Floats = 0,
+    Limits = { 10, 50 },
+    Increment = 1,
+})
+
+local FlowSlider = Section_ESP_Flow:CreateSlider({
+    Text = "Flow ESP Size",
+    Alignment = "Left",
+    Default = 14, 
+    Callback = function(Value)
+        default_config.ESP.Flow_Size = Value
+    end,
+    Flag = "flowEspSizeSlider",
+    Floats = 0,
+    Limits = { 10, 50 },
+    Increment = 1,
+})
+
+local StyleSlider = Section_ESP_Style:CreateSlider({
+    Text = "Style ESP Size",
+    Alignment = "Left",
+    Default = 14, 
+    Callback = function(Value)
+        default_config.ESP.Style_Size = Value
+    end,
+    Flag = "styleEspSizeSlider",
+    Floats = 0,
+    Limits = { 10, 50 },
+    Increment = 1,
+})
+
+local Keybind = Section_ESP:CreateKeybind({
+    Text = "Enable ESP",
+    Subtext = "Use a keybind to toggle ESP",
+    Alignment = "Left",
+    Default = "K",
+    Callback = function()
+        ESP:Toggle(not ESP.Enabled)
+        print("ESP is now " .. (ESP.Enabled and "Enabled" or "Disabled"))
+    end,
+})
+
+local BallHighlight = nil
+local Ball_Toggle = Section_ESP_Ball:CreateToggle({
+    Text = "Show Ball",
+    Subtext = "Highlights the ball",
+    Alignment = "Left",
+    Default = default_config.ESP.Ball_Highlight,
+    Callback = function(Value)
+        default_config.ESP.Ball_Highlight = Value
+
+        if not Football then return end
+
+        if Value then
+            if not BallHighlight then
+                BallHighlight = Instance.new("Highlight")
+                BallHighlight.Name = "BallESP"
+                BallHighlight.Adornee = Football
+                BallHighlight.FillColor = Color3.new(1, 0, 0)
+                BallHighlight.FillTransparency = 0.5
+                BallHighlight.OutlineColor = Color3.new(1, 1, 1)
+                BallHighlight.OutlineTransparency = 0.1
+            end
+            BallHighlight.Parent = Football
+        else
+            if BallHighlight then
+                BallHighlight:Destroy()
+                BallHighlight = nil
+            end
+        end
+    end,
+})
+
+local BallTracer = nil
+Tracer_Toggle = Section_ESP_Ball:CreateToggle({
+    Text = "Show Ball Tracer",
+    Subtext = "Line to ball",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        default_config.ESP.Ball_Tracer = Value
+
+        if not Football then return end
+
+        if Value then
+            if not BallTracer then
+                BallTracer = Drawing.new("Line")
+                BallTracer.Color = Color3.new(0.823529, 0.592156, 1)
+                BallTracer.Thickness = 2
+            end
+
+            game:GetService("RunService").RenderStepped:Connect(function()
+                if not default_config.ESP.Ball_Tracer or not Football or not Football.Parent then
+                    if BallTracer then BallTracer.Visible = false end
+                    return
+                end
+
+                local character = LP.Character
+                local hrp = character and character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+                if hrp then
+                    local startPos = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
+                    local endPos = workspace.CurrentCamera:WorldToViewportPoint(Football.Position)
+
+                    BallTracer.From = Vector2.new(startPos.X, startPos.Y)
+                    BallTracer.To = Vector2.new(endPos.X, endPos.Y)
+                    BallTracer.Visible = true
+                else
+                    BallTracer.Visible = false
+                end
+            end)
+        else
+            if BallTracer then BallTracer.Visible = false end
+        end
+    end,
+})
+
+local InputBox = Section_Flow:CreateInput({
+    Text = "Enter desired Flow";
+    Subtext = "Only temporary while in Server";
+    Alignment = "Left"; 
+    Default = ""; 
+    Placeholder = "";
+    Callback = function(Value)
+    default_config.Misc.Temp_Flow = Value
+
+    InFlow:GetPropertyChangedSignal("Value"):Connect(function()
+        if InFlow.Value then return end 
+        task.wait()
+        InFlow.Value = true
+    end)
+    InFlow.Value = true
+    
+    Flow:GetPropertyChangedSignal("Value"):Connect(function()
+        if Flow.Value == default_config.Misc.Temp_Flow then return end;
+        task.wait()
+        Flow.Value = default_config.Misc.Temp_Flow
+    end)
+    Flow.Value = default_config.Misc.Temp_Flow
+    end;
+});
+
+local Toggle_NoCd = Section_Other:CreateToggle({
+    Text = "Skills no Cooldown",
+    Subtext = "Disables Cooldowns",
+    Alignment = "Left", 
+    Default = false,
+    Callback = function(Value)
+        default_config.Misc.Skill_No_Cd = Value
+    end
+})
+
+RunService.Heartbeat:Connect(function(fn)
+    if not AbilityController.AbilityOne then return end
+    if default_config.Misc.Skill_No_Cd then
+        fn *= 1.5
+        AbilityController.AbilityOne -= fn
+        AbilityController.AbilityTwo -= fn
+        AbilityController.AbilityThree -= fn 
+        -- AbilityController.AbilityFour -= fn
+        -- AbilityController.AbilityFive -= fn
+    end
+end)
+
+local Toggle_InfStamina = Section_Other:CreateToggle({
+    Text = "Infinite Stamina";
+    Subtext = "No Stamina loss";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(Value)
+        default_config.Misc.Infinite_Stam = Value
+
+        task.spawn(function()
+            while default_config.Misc.Infinite_Stam do
+                task.wait()
+                enableInfiniteStamina() 
+            end
+        end)
+    end;
+});
+
+local Toggle_AntiRag = Section_Other:CreateToggle({
+    Text = "Anti Ragdoll";
+    Subtext = "Move while Ragdoll";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(Value)
+        default_config.Misc.Anti_Rag = Value 
+
+        task.spawn(function()
+            if default_config.Misc.Anti_Rag then
+                enableAntiRagdoll() 
+            else
+                disableAntiRagdoll() 
+            end
+        end)
+    end;
+})
+
+local Button_RedeemAllCodes = Section_Other:CreateButton({
+    Text = "Redeem All Codes";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not Codes then print(err) return end;
+
+        RedeemCodes();
+        print(type(Codes), string.upper(succ))
+        Debug:Log("Redeeming Codes Successful", "INFO");
+        Debug:SaveLogs()
+    end;
+})
+
+local function moveBallToPlayer()
+    local ball = workspace:WaitForChild("Football") 
+    if ball and ball:IsA("BasePart") then
+        local direction = (HRP.Position - ball.Position).Unit 
+        local speed = 110 
+        ball.AssemblyLinearVelocity = direction * speed + Vector3.new(0,2,0)
+        task.wait(0.005)
+    end
+end
+
+local Toggle_BallAlwaysReturn = Section_Troll:CreateToggle({
+    Text = "Ball Return";
+    Subtext = "Will return the Ball when in Possesion";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(Value) 
+        default_config.Misc.Ball_Return = Value
+
+        task.spawn(function()
+            while default_config.Misc.Ball_Return do
+                moveBallToPlayer()
+            end
+        end)
+    end;
+    Flag = "ballreturn";
+})
+
+local Slider_WalkSpeed = Section_Character:CreateSlider({
+    Text = "Walk Speed",
+    Alignment = "Left",
+    Default = 16, 
+    Callback = function()
+        print(string.gsub(err, "Error!", "NO SIGMA WALKSPEED YET"))
+    end,
+    Flag = "WalkSpeedSlider",
+    Floats = 0, 
+    Limits = { 0, 100 }, 
+    Increment = 1,
+})
+
+local Toggle_WalkSpeed = Section_Character:CreateToggle({
+    Text = "WalkSpeed Enabled",
+    Subtext = "Enable/Disable Walk Speed Modification",
+    Alignment = "Left",
+    Default = false,
+    Callback = function()
+        print(string.gsub(err, "Error!", "NO SIGMA WALKSPEED YET"))
+    end,
+    Flag = "WalkSpeedEnabled",
+})
+
+local Toggle_AutoFlow = Section_Auto:CreateToggle({
+    Text = "Auto Flow";
+    Subtext = "Activates flow when possible";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        default_config.Misc.AutoFlow = v 
+        local SV_F = game:GetService("ReplicatedStorage").Packages.Knit.Services.FlowService.RE.Activate
+
+        if SV_F then 
+            while default_config.Misc.AutoFlow do task.wait(DELAY)
+                pcall(function()
+                    SV_F:FireServer();
+                end)
+            end
+        else
+            print(err, type(SV_F), "Seems like Service/Remote is not Available")
+            Debug:Log("Auto Flow Error, Service or Remote not found", "WARN")
+        end
+    end;
+    Flag = "autoflow";
+})
+
+local Toggle_AutoAwaken = Section_Auto:CreateToggle({
+    Text = "Auto Awaken";
+    Subtext = "Activates Awakening when possible";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        default_config.Misc.AutoAwaken = v 
+        local SV_A = game:GetService("ReplicatedStorage").Packages.Knit.Services.AwakeningService.RE.StartAwakening;
+
+        if SV_A then 
+            while default_config.Misc.AutoAwaken do task.wait(DELAY);
+                pcall(function()
+                    SV_A:FireServer();
+                end);
+            end;
+        else
+            print(err, type(SV_A), "Seems like Service/Remote is not Available");
+            Debug:Log("Auto Awaken Error, Service or Remote not found", "WARN");
+        end;
+    end;
+    Flag = "autoawaken";
+})
+
+Debug:SaveLogs();
+Library:Notify("Whitelisted!\nScript is in early Development\nCurrent Status: " ..tostring(Status[1]), 5, "Info!") 
