@@ -145,6 +145,7 @@ local StaminaRE = cloneref(StaminaService:WaitForChild("RE"));
 local DecreaseStamina = cloneref(StaminaRE:WaitForChild("DecreaseStamina"));
 local AbilityController = require(Controllers:WaitForChild("AbilityController")); 
 local ballControllerModule = require(ReplicatedStorage.Controllers.BallController);
+local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
 
 local default_config = {
     ["UI"] = {
@@ -242,7 +243,6 @@ local RedeemCodes = (function()
     end
     end
 end)
--- Helper Functions
 local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
 
 local function isGamePlaying()
@@ -264,13 +264,13 @@ end;
 local function waitForBallPossession()
     while not Football:IsDescendantOf(LP.Character) do
         moveToTarget(Football.CFrame);
-        task.wait(0.01);
+        task.wait(0.1);
     end;
 end;
 
 local function waitForBallAvailability()
     while not (workspace:FindFirstChild("Football")) do
-        task.wait(0.001);
+        task.wait(0.1);
     end;
     return workspace.Football, workspace.Football.Hitbox;
 end;
@@ -295,7 +295,6 @@ function AutoFarm:Init()
             addAutofarmLog("LocalPlayer reset detected. Ensuring AutoFarm remains functional");
         end);
     end;
-
     task.spawn(monitorPlayerReset);
 end;
 
@@ -305,10 +304,8 @@ function AutoFarm:Start()
             addAutofarmLog("AutoFarm stopped as the toggle was disabled")
             break
         end
-
         local teamsFolder = RS:WaitForChild("Teams")
         local Found_Team = nil
-
         for _, team in pairs(teamsFolder:GetChildren()) do
             if team.Name == "HomeTeam" or team.Name == "AwayTeam" then
                 for _, obj in pairs(team:GetChildren()) do
@@ -321,38 +318,29 @@ function AutoFarm:Start()
                 if Found_Team then break end
             end
         end
-
         if not Found_Team then
             addAutofarmLog("Team not found!")
             print(err)
             Debug:Log("Auto Farm issue - Team not Found", "WARN"); Debug:SaveLogs();
             break
         end
-
         gameStateValue:GetPropertyChangedSignal("Value"):Connect(function()
             if not isGamePlaying() then
                 AutoFarm:Stop()
                 addAutofarmLog("Game Over!")
             end
         end)
-
         local Football, BallHitbox = waitForBallAvailability()
         addAutofarmLog("Moving to ball")
-
         waitForBallPossession()
-
         if not hasBall() then
             addAutofarmLog("Error: Ball possession check failed. Retrying...")
         end
-
         addAutofarmLog("Ball in possession. Heading to goal...")
         local goalCFrame = Found_Team == "HomeTeam" and CFrame.new(-242, 11, -33) or CFrame.new(319, 11, -61)
-
         moveToTarget(goalCFrame)
-
         addAutofarmLog("Waiting before shooting...")
         task.wait(default_config.Dashboard.AutoFarm_Config.Shoot_Delay)
-
         performShooting(math.random(35, 50), goalCFrame.Position)
 
         addAutofarmLog("Returning to normal position.")
@@ -437,7 +425,6 @@ local enableInfiniteStamina = (function()
         end
         stats.Stamina.Value = 100
 end)
-local IsRagdoll = cloneref(CHAR:WaitForChild("IsRagdoll")) 
 local disableRagdoll = (function()
     if IsRagdoll.Value == true then
         IsRagdoll.Value = false
@@ -650,6 +637,10 @@ local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
     Callback = function(Value)
         default_config.Dashboard.AutoFarm_Config.AutoJoinTeam = Value;
 
+        if default_config.Dashboard.AutoFarm_Config.AutoJoinTeam == true then 
+            randomJoinTeam();
+        end
+
         while default_config.Dashboard.AutoFarm_Config.AutoJoinTeam do task.wait(1);
             task.spawn(function()
                 local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
@@ -663,10 +654,6 @@ local Toggle_RandomTeam = Section_Dashboard:CreateToggle({
                 end);
             end);
         end;
-
-        if Value == true then 
-            randomJoinTeam();
-        end
     end;
 });
 
