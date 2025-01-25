@@ -250,7 +250,7 @@ local function isGamePlaying()
 end;
 
 local function getGoalCFrame(team)
-    return team == "HomeTeam" and CF(-242, 11, -33) or CF(319, 11, -61);
+    return team == "HomeTeam" and CFrame.new(-242, 11, -33) or CFrame.new(319, 11, -61);
 end;
 
 local function moveToTarget(targetCFrame, interval)
@@ -264,7 +264,7 @@ end;
 local function waitForBallPossession()
     while not BallHitbox:IsDescendantOf(LP.Character) do
         moveToTarget(BallHitbox.CFrame);
-        task.wait(0.1);
+        task.wait(0.3);
     end;
 end;
 
@@ -347,7 +347,7 @@ function AutoFarm:Start()
         end
 
         addAutofarmLog("Ball in possession. Heading to goal...")
-        local goalCFrame = Found_Team == "HomeTeam" and CF(-242, 11, -33) or CF(319, 11, -61)
+        local goalCFrame = Found_Team == "HomeTeam" and CFrame.new(-242, 11, -33) or CFrame.new(319, 11, -61)
 
         moveToTarget(goalCFrame)
 
