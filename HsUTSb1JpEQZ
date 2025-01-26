@@ -1,4 +1,5 @@
 -- Functions Remake
+print("Functions")
 
 local Setup, Called = {}, {};
 if getgenv()["[{|  |}]"] then return getgenv()["[{|  |}]"]; end;
