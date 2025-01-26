@@ -1,21 +1,45 @@
-local Setup = {};
+-- Functions Remake
 
-function Setup:ClientController()
-    local Players = game:GetService("Players");
-    local Manager = {};
-    client = Players.LocalPlayer;
+local Setup, Called = {}, {};
+if getgenv()["[{|  |}]"] then return getgenv()["[{|  |}]"]; end;
+getgenv()["[{|  |}]"] = Setup;
 
-    repeat wait(); until client.Character;
+Setup["Basics"] = function(self)
+    if Called["Basics"] then return; end;
+    Called["Basics"] = { };
 
-    char = client.Character;
-    hum = char:WaitForChild("Humanoid");
-    hrp = char:WaitForChild("HumanoidRootPart");
+    local a;
+    a = game:GetService("Players"); Players = a;
+    a = game:GetService("ReplicatedStorage"); ReplicatedStorage = a; Replicated = a;
+    a = game:GetService("TweenService"); TweenService = a; TS = a;
+    a = game:GetService("UserInputService"); UserInputService = a; UIS = a;
+    a = game:GetService("RunService"); RunService = a; RSV = a; rsv = a;
+    a = game:GetService("CoreGui"); CoreGui = a;
+    a = game:GetService("HttpService"); HttpService = a;
 
-    client.CharacterAdded:Connect(function()
-        char = client.Character;
-        hum = char:WaitForChild("Humanoid");
-        hrp = char:WaitForChild("HumanoidRootPart");
+    a = workspace.CurrentCamera; Camera = a; CC = a; cc = a;
+    a = LP:GetMouse(); Mouse = a; mouse = a;
+
+    a = Players.LocalPlayer; Client = a; client = a; LocalPlayer = a; LP = a;
+    a = LP:WaitForChild("PlayerGui"); PlayerGui = a;
+    a = LP:WaitForChild("Backpack"); Backpack = a;
+    a = LP.Character or LP.CharacterAdded:Wait(); Character = a; Char = a; char = a;
+    a = Char:WaitForChild("Humanoid"); Humanoid = a; Hum = a; hum = a;
+    a = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HumanoidRootPart = a; HRP = a; hrp = a;
+
+    LP.CharacterAdded:Connect(function()
+        a = LP.Character; Character = a; Char = a; char = a;
+        a = Char:WaitForChild("Humanoid"); Humanoid = a; Hum = a; hum = a;
+        a = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HumanoidRootPart = a; HRP = a; hrp = a;
     end);
+end;
+
+Setup["ClientController"] = function(self)
+    local Manager = { };
+    if Called["ClientController"] then return Called["ClientController"]; end;
+    Called["ClientController"] = Manager;
+
+    self:Basics();
 
     function Manager:Reset()
         if char then
@@ -32,16 +56,21 @@ function Setup:ClientController()
         end;
     end;
 
+    local Recorder = self:InputRecorder();
+    local walkspeed, jumppower;
     Manager['Movement'] = {
+        -- TP Walk
         TWX = nil,
+
         WS = function(Speed)
             walkspeed = Speed;
         end,
+
         TW = function(self, Toggle)
             if self.TWX then
                 self.TWX:Disconnect();
             end;
-    
+
             if Toggle then
                 self.TWX = rsv.RenderStepped:Connect(function()
                     if hum.MoveDirection.Magnitude > 0 then
@@ -51,43 +80,44 @@ function Setup:ClientController()
                 end);
             end;
         end,
-    
+
+        -- Jump
         IJX = nil,
         IJX2 = nil,
+        
         JP = function(Power)
             jumppower = Power;
         end,
+
         IJ = function(self, Toggle)
             if self.IJX then
                 self.IJX:Disconnect();
                 self.IJX2:Disconnect();
             end;
-    
+
             if Toggle then
                 local Pressing = false;
-    
+
                 local function jump()
                     local Power = jumppower or hum.JumpPower or 50;
                     hrp.Velocity = Vector3.new(hrp.Velocity.X, Power, hrp.Velocity.Z);
                 end;
-    
+
                 local function on()
                     Pressing = true;
-    
+
                     while Pressing do
                         jump();
                         task.wait(.1);
                     end;
                 end;
-    
+
                 local function off()
                     Pressing = false;
                 end;
-    
-                self.IJX = Recorder:Record(false,
-                    { ['Callback'] = on, ['Inputs'] = { "Space" }, ['CancelKeys'] = {}, ['Break'] = false });
-                self.IJX2 = Recorder:Record(true,
-                    { ['Callback'] = off, ['Inputs'] = { "Space" }, ['CancelKeys'] = {}, ['Break'] = false });
+
+                self.IJX = Recorder:Bind("Space", on);
+                self.IJX = Recorder:Bind("Space", off, true);
             end;
         end,
     };
@@ -95,9 +125,12 @@ function Setup:ClientController()
     return Manager;
 end;
 
-function Setup:HttpService()
-    local HttpService = game:GetService("HttpService");
+Setup["HttpService"] = function(self)
     local Manager = {};
+    if Called["HttpService"] then return Called["HttpService"]; end;
+    Called["HttpService"] = Manager;
+
+    self:Basics();
 
     function Manager:Webhook(weblink, title, fields)
         if not weblink then return; end;
@@ -121,9 +154,12 @@ function Setup:HttpService()
     return Manager;
 end;
 
-function Setup:File()
-    local Manager = {};
-    local Allowed = false;
+Setup["File"] = function(self)
+    local Manager, Allowed = {};
+    if Called["File"] then return Called["File"]; end;
+    Called["File"] = Manager;
+
+    self:Basics();
 
     if readfile and writefile and isfolder and isfile and makefolder and delfolder then
         Allowed = true;
@@ -158,7 +194,9 @@ function Setup:File()
         if not Allowed then return; end;
         if typeof(path) ~= 'string' then return; end;
 
-        makefolder(path);
+        if not isfolder(path) then
+            makefolder(path);
+        end;
     end;
 
     function Manager:DeleteFolder(path)
@@ -185,35 +223,19 @@ function Setup:File()
     return Manager;
 end;
 
-function Setup:Basics()
-    Workspace, workspace = game:GetService("Workspace");
-    UserInputService = game:GetService("UserInputService");
-    ReplicatedStorage = game:GetService("ReplicatedStorage");
-    MarketplaceService = game:GetService("MarketplaceService");
-    Players = game:GetService("Players");
-    TweenService = game:GetService("TweenService");
-    RunService = game:GetService("RunService");
-    CoreGui = game:GetService("CoreGui");
-    TextService = game:GetService('TextService');
-    Camera = workspace.CurrentCamera;
-end;
+Setup["Tween"] = function(self)
+    local Manager, Storage = {}, {};
+    if Called["Tween"] then return Called["Tween"]; end;
+    Called["Tween"] = Manager;
 
-function Setup:Tween()
-    local TweenService = game:GetService("TweenService");
-    local Manager = {};
-    local Storage = {};
-
-    local Players = game:GetService("Players");
-    local client = Players.LocalPlayer;
+    self:Basics();
 
     function Manager:Create(pos, speed, nofall, extra, delayY)
-        local char = client.Character; if not char then return; end;
-        local hum = char:WaitForChild("Humanoid");
-        local hrp = char:WaitForChild("HumanoidRootPart");
         if (typeof(pos) ~= "CFrame") or (not hrp) then
             if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end; return;
         end;
-        if (not char) and (not hrp) then return; end;
+
+        if (not char) or (not hrp) then return; end;
 
         local isClose = false;
         local cf, vec3 = pos, pos.Position;
@@ -243,9 +265,7 @@ function Setup:Tween()
         end;
 
         if typeof(extra) == "function" then
-            task.spawn(function()
-                extra(isClose);
-            end);
+            task.spawn(extra, isClose);
         end;
 
         local Time = distance / speed;
@@ -265,9 +285,10 @@ function Setup:Tween()
     return Manager;
 end;
 
-function Setup:VirtualInputManager()
-    local VirtualInputManager = game:GetService("VirtualInputManager");
-    local Manager = {};
+Setup["VirtualInputManager"] = function(self)
+    local Manager, VIM = {}, game:GetService("VirtualInputManager");
+    if Called["VirtualInputManager"] then return Called["VirtualInputManager"]; end;
+    Called["VirtualInputManager"] = Manager;
 
     function Manager:Press(Key)
         if typeof(Key) == 'string' then
@@ -277,19 +298,19 @@ function Setup:VirtualInputManager()
 
             if not EnumKey then return; end;
 
-            VirtualInputManager:SendKeyEvent(true, EnumKey, false, game);
+            VIM:SendKeyEvent(true, EnumKey, false, game);
             task.wait()
-            VirtualInputManager:SendKeyEvent(false, EnumKey, false, game);
+            VIM:SendKeyEvent(false, EnumKey, false, game);
         end;
     end;
 
     function Manager:Click(mb)
         if typeof(MB) == 'number' then
-            mb = math.floor(mb, 0, 2);
+            mb = math.clamp(mb, 0, 2);
 
-            VirtualInputManager:SendMouseButtonEvent(0, 0, mb, true, game);
+            VIM:SendMouseButtonEvent(0, 0, mb, true, game);
             task.wait();
-            VirtualInputManager:SendMouseButtonEvent(0, 0, mb, false, game);
+            VIM:SendMouseButtonEvent(0, 0, mb, false, game);
         end;
     end;
 
@@ -299,7 +320,7 @@ function Setup:VirtualInputManager()
             pcall(function() EnumKey = Enum.KeyCode[Key] end);
             if not EnumKey then return; end;
 
-            VirtualInputManager:SendKeyEvent(true, EnumKey, false, game);
+            VIM:SendKeyEvent(true, EnumKey, false, game);
         end;
     end;
 
@@ -309,24 +330,26 @@ function Setup:VirtualInputManager()
             pcall(function() EnumKey = Enum.KeyCode[Key] end);
             if not EnumKey then return; end;
 
-            VirtualInputManager:SendKeyEvent(false, EnumKey, false, game);
+            VIM:SendKeyEvent(false, EnumKey, false, game);
         end;
     end;
 
     function Manager:Move(x, y)
         if (not x) or (not y) then return; end;
-        VirtualInputManager:SendMouseMoveEvent(x, y, game)
+        VIM:SendMouseMoveEvent(x, y, game)
     end;
 
     return Manager;
 end;
 
-function Setup:InputRecorder()
+Setup["InputRecorder"] = function(self)
     local Manager = {};
+    if Called["InputRecorder"] then return Called["InputRecorder"]; end;
+    Called["InputRecorder"] = Manager;
 
-    local UserInputService = game:GetService("UserInputService");
-
-    Manager.Pressed = { };
+    self:Basics();
+    
+    Manager.Pressed = {};
     function Manager:Record(OnUP, Settings)
         if not Settings then return; end;
         local Callback = Settings['Callback'];
@@ -393,23 +416,41 @@ function Setup:InputRecorder()
         if (not Key) or (not Callback) then return; end;
 
         return Manager:Record(OnUP, {
-            Inputs = { Key };
-            CancelKeys = { };
-            IgnoreProc = IgnoreProc;
+            Inputs = { Key },
+            CancelKeys = {},
+            IgnoreProc = IgnoreProc,
 
-            Callback = Callback;
+            Callback = Callback,
         });
     end;
 
-    UserInputService.InputBegan:Connect(function(input, proc)
+    UserInputService.InputBegan:Connect(function(Input, proc)
         if not proc then
-            Manager.Pressed[input.KeyCode.Name] = true;
+            local Keycode = Input['KeyCode'];
+            local UserInputType = Input['UserInputType'];
+            if not Keycode then return; end;
+            local KeyName = Keycode.Name;
+
+            if KeyName == "Unknown" then
+                if Type == "KeyCode" then return; end;
+
+                KeyName = UserInputType.Name;
+            end;
         end;
     end);
-    
-    UserInputService.InputEnded:Connect(function(input, proc)
+
+    UserInputService.InputEnded:Connect(function(Input, proc)
         if not proc then
-            Manager.Pressed[input.KeyCode.Name] = false;
+            local Keycode = Input['KeyCode'];
+            local UserInputType = Input['UserInputType'];
+            if not Keycode then return; end;
+            local KeyName = Keycode.Name;
+
+            if KeyName == "Unknown" then
+                if Type == "KeyCode" then return; end;
+
+                KeyName = UserInputType.Name;
+            end;
         end;
     end);
 
