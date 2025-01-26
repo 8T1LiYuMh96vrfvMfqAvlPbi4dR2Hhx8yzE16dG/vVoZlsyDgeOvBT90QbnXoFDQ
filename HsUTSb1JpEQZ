@@ -1,8 +1,6 @@
 -- Functions
 
 local Setup, Called = {}, {};
-if getgenv()["[{|  |}]"] then return getgenv()["[{|  |}]"]; end;
-getgenv()["[{|  |}]"] = Setup;
 
 Setup["Basics"] = function(self)
     Players = game:GetService("Players");
