@@ -17,10 +17,10 @@ Setup["Basics"] = function(self)
     a = game:GetService("CoreGui"); CoreGui = a;
     a = game:GetService("HttpService"); HttpService = a;
 
+    a = Players.LocalPlayer; Client = a; client = a; LocalPlayer = a; LP = a;
     a = workspace.CurrentCamera; Camera = a; CC = a; cc = a;
     a = LP:GetMouse(); Mouse = a; mouse = a;
 
-    a = Players.LocalPlayer; Client = a; client = a; LocalPlayer = a; LP = a;
     a = LP:WaitForChild("PlayerGui"); PlayerGui = a;
     a = LP:WaitForChild("Backpack"); Backpack = a;
     a = LP.Character or LP.CharacterAdded:Wait(); Character = a; Char = a; char = a;
