@@ -48,6 +48,7 @@ local Library = {
 
     Paths = {
         ["Folder"] = "\\TEMPUI",
+        ["Secondary"] = nil,
         ["Data"] = "\\Data",
         ["Themes"] = "\\Themes",
     },
@@ -55,8 +56,12 @@ local Library = {
 
 do -- Save / Load
     function Library:Save()
-        local Folder = Library.Paths["Folder"];
+        local Paths = Library.Paths;
+        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
         FileService:CreateFolder(Folder);
+        if Secondary then
+            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
+        end;
         local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local SaveData = {};
@@ -70,8 +75,12 @@ do -- Save / Load
     end;
 
     function Library:Load()
-        local Folder = Library.Paths["Folder"];
+        local Paths = Library.Paths;
+        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
         FileService:CreateFolder(Folder);
+        if Secondary then
+            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
+        end;
         local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local LoadData = FileService:Read(Path);
@@ -311,8 +320,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Label = Library.Create("TextLabel", {
             Parent = Background,
@@ -363,8 +374,10 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
         }, { BackgroundColor3 = "Background2" });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Stroke = Library:ApplyStroke(Background, "Accent1", 1, "Round");
         Library:ApplyCorner(Background, 4);
@@ -513,8 +526,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -701,8 +716,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -924,8 +941,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -1143,8 +1162,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -1294,8 +1315,10 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
-                self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then
+            i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background);
+        end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
