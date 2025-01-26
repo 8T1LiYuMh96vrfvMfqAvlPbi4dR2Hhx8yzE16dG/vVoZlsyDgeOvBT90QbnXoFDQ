@@ -268,7 +268,7 @@ do -- Creation
             Parent = Obj,
             AnchorPoint = Vector2.new(.5, .5),
             Position = UDim2.new(.5, 0, .5, 0),
-            Size = UDim2.new(1, 50, 1, 50),
+            Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
             Image = "rbxassetid://6014261993",
             ZIndex = -99999999
@@ -878,6 +878,224 @@ local SubFunctions; SubFunctions = {
                 SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
             end;
         end);
+
+        return nself;
+    end,
+
+    CreateSlider = function(self, INFO)
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
+
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Slider";
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
+
+        nself.Floats = nself.Floats or 0;
+        nself.Default = nself.Default or 0;
+        nself.Limits = nself.Limits or { 0, 100 }; -- Min / Max
+        nself.Limits[1] = nself.Limits[1] or 0;
+        nself.Limits[2] = nself.Limits[2] or 100;
+        nself.Increment = nself.Increment or 1;
+
+        nself.Value = math.clamp(nself.Default, unpack(nself.Limits)) or 0;
+
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
+
+        -- UI
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
+            BackgroundTransparency = 1,
+        });
+
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
+            BackgroundTransparency = 1,
+
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(Title, (isSetting and 12) or 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+        });
+
+        local Subframe = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(.2, 0, .5, 0),
+        }, { BackgroundColor3 = "Background2" });
+
+        Library:ApplyCorner(Subframe, 4);
+        Library:ApplyStroke(Subframe, "Accent1", 1, "Round");
+
+        local ValueBox = Library.Create("TextBox", {
+            Parent = Subframe,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Text = tostring(nself.Value),
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
+        Library:ApplyTextSize(ValueBox, 14);
+
+        local Slider_Back = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(.5, 1),
+            Position = UDim2.new(.5, 0, 1, 0),
+            Size = UDim2.new(1, 0, .185, 0),
+
+        }, { BackgroundColor3 = "Tone" });
+
+        Library:ApplyCorner(Slider_Back, 10);
+        Library:ApplyStroke(Slider_Back, "Accent1", 1, "Round");
+
+        local Slider_Fill = Library.Create("Frame", {
+            Parent = Slider_Back,
+            Size = UDim2.new(0, 0, 1, 0),
+        }, { BackgroundColor3 = "Highlight" });
+
+        Library:ApplyCorner(Slider_Fill, 10);
+
+        local SliderCircle = Library.Create("Frame", {
+            Parent = Slider_Fill,
+            AnchorPoint = Vector2.new(1, .5),
+            Size = UDim2.new(1, 0, 1.85, 0),
+            Position = UDim2.new(1, 0, .5, 0),
+        }, { BackgroundColor3 = "Text" });
+
+        Library:ApplyCorner(SliderCircle, 10);
+        Library:ApplyRatio(SliderCircle, 1, "Height", true);
+
+        local Click = Library:ApplyClick(Slider_Back);
+        Click.ZIndex = 2;
+        local isSliding = false;
+
+        local function Update()
+            nself.Value = math.clamp(nself.Value, unpack(nself.Limits));
+            local Value = nself.Value;
+            local Percent = ((nself.Value - nself.Limits[1]) / (nself.Limits[2] - nself.Limits[1]));
+            local TweenInfo = TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
+            TweenService:Create(Slider_Fill, TweenInfo, { Size = UDim2.new(Percent, 0, 1, 0) }):Play();
+
+            local Converted = string.format("%." .. tostring(nself.Floats) .. "f", Value);
+            ValueBox.Text = (tonumber(Converted) % 1 == 0 and tostring(math.floor(Value))) or Converted;
+            Title.Text = nself.Text;
+            Title.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
+                .Left;
+
+            nself:Fire();
+            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+        end;
+
+        local function Start()
+            isSliding = true;
+
+            while isSliding do
+                local absPX, absSX = Slider_Back.AbsolutePosition.X, Slider_Back.AbsoluteSize.X;
+                local x = Mouse.X;
+
+                local Percent = (x - absPX) / absSX;
+                Percent = math.clamp(Percent, 0, 1);
+                local Value = ((nself.Limits[2] - nself.Limits[1]) * Percent) + nself.Limits[1];
+                Value = math.floor(((Value / (tonumber(nself.Increment) or 1)) * (tonumber(nself.Increment) or 1)) + .5);
+
+                nself.Value = Value;
+                Update();
+
+                RunService.Heartbeat:Wait();
+            end
+        end;
+
+        local function End()
+            isSliding = false;
+        end;
+
+        function nself:SetValue(nv)
+            nself.Value = nv or -math.huge;
+            Update();
+        end;
+
+        function nself:ChangeText(nv)
+            nself.Text = nv;
+            Update();
+        end;
+
+        function nself:SetAlignment(nv)
+            nself.Alignment = nv;
+            Update();
+        end;
+
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = nself.SetValue;
+        Update();
+
+        local SettingsUI = nil;
+        function nself:CreateSettings()
+            if SettingsUI then return; end;
+            local Settings = { isSetting = true };
+
+            Settings.UI = Library.Create("ScrollingFrame", {
+                Parent = Library.ScreenUI,
+                Size = UDim2.new(0, 150, 0, 100),
+                Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                Visible = false,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ClipsDescendants = true,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                ScrollBarThickness = 1,
+                ZIndex = 999
+            }, { BackgroundColor3 = "Background2" });
+
+            Library:ApplyCorner(Settings.UI, 4);
+            Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+            Library:ApplyPadding(Settings.UI, 7);
+            Library.Create("UIListLayout", {
+                Parent = Settings.UI,
+                Padding = UDim.new(0, 5),
+            });
+
+            SettingsUI = Settings.UI;
+            InputService:Bind("MouseButton1", function()
+                local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+            end, false, true);
+
+            SettingsUI.ChildAdded:Connect(function(child)
+                pcall(function()
+                    child.ZIndex = 999;
+                end);
+                task.wait();
+                for _, v in pairs(child:GetDescendants()) do
+                    pcall(function()
+                        v.ZIndex = 999;
+                    end);
+                end;
+            end);
+
+            setmetatable(Settings, { __index = SubFunctions })
+            return Settings;
+        end;
+
+        ValueBox.FocusLost:Connect(function()
+            local BoxVal = tonumber(ValueBox.Text);
+            nself:SetValue(BoxVal);
+        end);
+
+        Click.MouseButton1Down:Connect(Start);
+        Click.MouseButton2Up:Connect(function()
+            if SettingsUI then
+                SettingsUI.Visible = true;
+                SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
+            end;
+        end);
+        InputService:Bind("MouseButton1", End, true, true);
 
         return nself;
     end,
@@ -1564,7 +1782,7 @@ function Library:Notify(Message, Duration, Title)
     getgenv().NotiUI = NotiUI;
 end;
 
-local MinSize, MaxSize = UDim2.new(0, 750, 0, 110), UDim2.new(0, 750, 0, 500);
+local MinSize, MaxSize = UDim2.new(0, 750, 0, 50), UDim2.new(0, 750, 0, 500);
 function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
     Window.Title = Window.Title or "Window";
