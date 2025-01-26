@@ -4,6 +4,9 @@ local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
 local InputService = Setup:InputRecorder();
 local FileService = Setup:File();
+Setup:Basics();
+
+print(Client)
 
 local RGB = Color3.fromRGB;
 local Library = {
@@ -1642,7 +1645,7 @@ function Library:CreateWindow(WINFO)
         Size = UDim2.new(0, 1, 1, 0),
     }, { BackgroundColor3 = "Accent1" }); -- Vertical Line
 
-    Library.Create("Frame", {
+    local HoriLine = Library.Create("Frame", {
         Parent = Background,
         AnchorPoint = Vector2.new(1, 0),
         Position = UDim2.new(1, 0, .11, 0),
@@ -1810,6 +1813,7 @@ function Library:CreateWindow(WINFO)
             NavMini.Image = "rbxassetid://116599003372689"; -- Restore icon
             LeftBottom.Visible = false;
             RightBottom.Visible = false;
+            HoriLine.Visible = false;
 
             DragUI.Size = UDim2.new(1, 0, 1, 0);
             TweenService:Create(LeftTop, TweenInfo, { Size = UDim2.new(1, 0, 0, MinSize.Y.Offset) }):Play();
@@ -1818,6 +1822,7 @@ function Library:CreateWindow(WINFO)
         else
             NavMini.Image = "rbxassetid://73066567788933"; -- Mini icon
 
+            HoriLine.Visible = true;
             DragUI.Size = UDim2.new(1, 0, .11, 0);
             TweenService:Create(LeftTop, TweenInfo, { Size = UDim2.new(1, 0, 0.22, 0) }):Play();
             TweenService:Create(RightTop, TweenInfo, { Size = UDim2.new(1, 0, 0.11, 0) }):Play();
