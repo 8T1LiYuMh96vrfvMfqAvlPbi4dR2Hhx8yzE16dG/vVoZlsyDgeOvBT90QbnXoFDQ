@@ -5,9 +5,6 @@ if getgenv()["[{|  |}]"] then return getgenv()["[{|  |}]"]; end;
 getgenv()["[{|  |}]"] = Setup;
 
 Setup["Basics"] = function(self)
-    if Called["Basics"] then return; end;
-    Called["Basics"] = { };
-
     Players = game:GetService("Players");
     ReplicatedStorage = game:GetService("ReplicatedStorage"); Replicated = ReplicatedStorage;
     TweenService = game:GetService("TweenService"); TS = TweenService;
