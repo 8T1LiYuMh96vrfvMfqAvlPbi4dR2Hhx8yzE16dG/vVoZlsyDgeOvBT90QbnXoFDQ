@@ -311,7 +311,8 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Label = Library.Create("TextLabel", {
             Parent = Background,
@@ -329,7 +330,9 @@ local SubFunctions; SubFunctions = {
             Label.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
                 .Center;
 
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         function nself:ChangeText(nv)
@@ -360,7 +363,8 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
         }, { BackgroundColor3 = "Background2" });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Stroke = Library:ApplyStroke(Background, "Accent1", 1, "Round");
         Library:ApplyCorner(Background, 4);
@@ -384,7 +388,9 @@ local SubFunctions; SubFunctions = {
             Label.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or Enum.TextXAlignment
                 .Center;
 
+            if not isSetting then
                 self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         function nself:ChangeText(nv)
@@ -507,7 +513,8 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -576,7 +583,9 @@ local SubFunctions; SubFunctions = {
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
 
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         function nself:SetValue(nv)
@@ -648,7 +657,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         nself.Switch = function(self) task.spawn(self.SetValue, self, not self.Value); end;
-        nself.Unload = function(self) task.spawn(self.SetValue, self);  end;
+        nself.Unload = function(self) task.spawn(self.SetValue, self); end;
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
         nself:Fire();
@@ -692,7 +701,8 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -755,7 +765,9 @@ local SubFunctions; SubFunctions = {
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
 
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         local Old;
@@ -912,6 +924,9 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
+
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
@@ -991,7 +1006,9 @@ local SubFunctions; SubFunctions = {
                 .Left;
 
             nself:Fire();
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         local function Start()
@@ -1126,7 +1143,8 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -1197,7 +1215,9 @@ local SubFunctions; SubFunctions = {
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
 
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         function nself:SetValue(nv)
@@ -1274,7 +1294,8 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
         });
 
-        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background), self:AddContent(nself.Subtext, nil, Background); end;
+        local i1, i2; if not isSetting then i1, i2 = self:AddContent(nself.Text, nil, Background),
+                self:AddContent(nself.Subtext, nil, Background); end;
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
@@ -1388,7 +1409,9 @@ local SubFunctions; SubFunctions = {
             Description.TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Left;
 
-            self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            if not isSetting then
+                self:AddContent(nself.Text, i1, Background); self:AddContent(nself.Subtext, i2, Background);
+            end;
         end;
 
         local function ToggleOption(Option)
@@ -1713,7 +1736,7 @@ function Library:Notify(Message, Duration, Title)
         TextSize = 20,
         RichText = true,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Text = tostring(Title);
+        Text = tostring(Title),
     }, { TextColor3 = "Text", FontFace = "NotiFont" });
 
     Library:ApplyStroke(TitleLabel, "Highlight", 1, "Round");
@@ -1728,8 +1751,8 @@ function Library:Notify(Message, Duration, Title)
     });
 
     Library.Create("UIPadding", {
-        Parent = Description;
-        PaddingBottom = UDim.new(0, 20);
+        Parent = Description,
+        PaddingBottom = UDim.new(0, 20),
     });
 
     Library.Create("TextLabel", {
@@ -1765,14 +1788,16 @@ function Library:Notify(Message, Duration, Title)
     local Tween;
 
     task.spawn(function()
-        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Position = UDim2.new(0, 0, 0, 0) }):Play();
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Position = UDim2.new(0, 0, 0, 0) }):Play();
 
         Tween = TweenService:Create(Fill, TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
             { Size = UDim2.new(0, 0, 1, 0) });
         Tween:Play();
         Tween.Completed:Wait();
 
-        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Position = UDim2.new(2, 0, 0, 0) }):Play();
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Position = UDim2.new(2, 0, 0, 0) }):Play();
     end);
 
     Click.MouseButton1Up:Connect(function()
@@ -2045,7 +2070,7 @@ function Library:CreateWindow(WINFO)
             local Tween = TweenService:Create(Background, TweenInfo, { Size = MaxSize });
             Tween:Play();
             Tween.Completed:Wait();
-            
+
             LeftBottom.Visible = true;
             RightBottom.Visible = true;
         end;
@@ -2302,12 +2327,11 @@ function Library:CreateWindow(WINFO)
             });
 
             function Section:Search(s)
-                if s == "" then return true end
                 SF.Visible = false;
                 for _, v in pairs(self.Contents) do
                     local Value, Object = unpack(v);
 
-                    if string.match(string.lower(Value), string.lower(s)) then
+                    if (string.match(string.lower(Value), string.lower(s))) or (s == "") then
                         if Object then
                             Object.Visible = true;
                             SF.Visible = true;
