@@ -1625,12 +1625,13 @@ local SubFunctions; SubFunctions = {
 
         local nself = INFO or {};
         nself.Default = nself.Default or {}; -- { "Log1", "Log2", "Log3" }
+        nself.Size = nself.Size or 60;
         nself.Logs = {};
 
         local Background = Library.Create("ScrollingFrame", {
             Parent = ParentUI,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, (isSetting and 30) or 60),
+            Size = UDim2.new(1, 0, 0, (isSetting and ((nself.Size / 2) or 30)) or (nself.Size or (60))),
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             ScrollBarThickness = 1,
             CanvasSize = UDim2.new(0, 0, 0, 0),
