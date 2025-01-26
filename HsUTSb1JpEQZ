@@ -1,5 +1,4 @@
--- Functions Remake
-print("Functions")
+-- Functions
 
 local Setup, Called = {}, {};
 if getgenv()["[{|  |}]"] then return getgenv()["[{|  |}]"]; end;
@@ -9,29 +8,28 @@ Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = { };
 
-    local a;
-    a = game:GetService("Players"); Players = a;
-    a = game:GetService("ReplicatedStorage"); ReplicatedStorage = a; Replicated = a;
-    a = game:GetService("TweenService"); TweenService = a; TS = a;
-    a = game:GetService("UserInputService"); UserInputService = a; UIS = a;
-    a = game:GetService("RunService"); RunService = a; RSV = a; rsv = a;
-    a = game:GetService("CoreGui"); CoreGui = a;
-    a = game:GetService("HttpService"); HttpService = a;
+    Players = game:GetService("Players");
+    ReplicatedStorage = game:GetService("ReplicatedStorage"); Replicated = ReplicatedStorage;
+    TweenService = game:GetService("TweenService"); TS = TweenService;
+    UserInputService = game:GetService("UserInputService"); UIS = UserInputService;
+    RunService = game:GetService("RunService"); RSV = RunService; rsv = RunService;
+    CoreGui = game:GetService("CoreGui");
+    HttpService = game:GetService("HttpService");
 
-    a = Players.LocalPlayer; Client = a; client = a; LocalPlayer = a; LP = a;
-    a = workspace.CurrentCamera; Camera = a; CC = a; cc = a;
-    a = LP:GetMouse(); Mouse = a; mouse = a;
+    Client = Players.LocalPlayer; client = Client; LocalPlayer = Client; LP = Client;
+    Camera = workspace.CurrentCamera; CC = Camera; cc = Camera;
+    Mouse = LP:GetMouse(); mouse = Mouse;
 
-    a = LP:WaitForChild("PlayerGui"); PlayerGui = a;
-    a = LP:WaitForChild("Backpack"); Backpack = a;
-    a = LP.Character or LP.CharacterAdded:Wait(); Character = a; Char = a; char = a;
-    a = Char:WaitForChild("Humanoid"); Humanoid = a; Hum = a; hum = a;
-    a = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HumanoidRootPart = a; HRP = a; hrp = a;
+    PlayerGui = LP:WaitForChild("PlayerGui");
+    Backpack = LP:WaitForChild("Backpack");
+    Character = LP.Character or LP.CharacterAdded:Wait(); Char = Character; char = Character;
+    Humanoid = Char:WaitForChild("Humanoid"); Hum = Humanoid; hum = Humanoid;
+    HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp = HumanoidRootPart;
 
     LP.CharacterAdded:Connect(function()
-        a = LP.Character; Character = a; Char = a; char = a;
-        a = Char:WaitForChild("Humanoid"); Humanoid = a; Hum = a; hum = a;
-        a = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HumanoidRootPart = a; HRP = a; hrp = a;
+        Character = LP.Character; Char = Character; char = Character;
+        Humanoid = Char:WaitForChild("Humanoid"); Hum = Humanoid; hum = Humanoid;
+        HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp = HumanoidRootPart;
     end);
 end;
 
