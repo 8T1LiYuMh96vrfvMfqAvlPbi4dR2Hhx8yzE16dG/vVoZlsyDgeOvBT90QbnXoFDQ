@@ -2042,6 +2042,11 @@ function Library:CreateWindow(WINFO)
 
     Library:ApplyPadding(RightBottom, 10);
 
+    function Window:Visibility(Value)
+        Value = (Value ~= nil and Value) or not ScreenUI.Enabled;
+        ScreenUI.Enabled = Value;
+    end;
+
     local Minimized, MiniDB = false, false;
     NavClose.MouseButton1Up:Connect(BuildConnection(Window.Visibility, Window));
     NavMini.MouseButton1Up:Connect(function()
@@ -2089,11 +2094,6 @@ function Library:CreateWindow(WINFO)
                 end;
             end;
         end;
-    end;
-
-    function Window:Visibility(Value)
-        Value = (Value ~= nil and Value) or not ScreenUI.Enabled;
-        ScreenUI.Enabled = Value;
     end;
 
     if Window.Icon then
