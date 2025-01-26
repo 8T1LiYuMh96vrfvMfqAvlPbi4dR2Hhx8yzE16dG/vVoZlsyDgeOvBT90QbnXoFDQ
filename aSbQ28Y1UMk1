@@ -1,7 +1,5 @@
 -- UI Remake
 
-print("UI Remake 1");
-
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
 local InputService = Setup:InputRecorder();
@@ -1588,13 +1586,13 @@ function Library:CreateWindow(WINFO)
         Size = MaxSize,
     }, { BackgroundColor3 = "Background" });
 
-    do -- Drag
-        local DragUI = Library.Create("Frame", {
-            Parent = Background,
-            Size = UDim2.new(1, 0, .11, 0),
-            BackgroundTransparency = 1,
-        });
+    local DragUI = Library.Create("Frame", {
+        Parent = Background,
+        Size = UDim2.new(1, 0, .11, 0),
+        BackgroundTransparency = 1,
+    });
 
+    do -- Drag
         -- off roblox devforum
         local dragging;
         local dragInput;
@@ -1813,20 +1811,22 @@ function Library:CreateWindow(WINFO)
             LeftBottom.Visible = false;
             RightBottom.Visible = false;
 
+            DragUI.Size = UDim2.new(1, 0, 1, 0);
             TweenService:Create(LeftTop, TweenInfo, { Size = UDim2.new(1, 0, 0, MinSize.Y.Offset) }):Play();
             TweenService:Create(RightTop, TweenInfo, { Size = UDim2.new(1, 0, 0, MinSize.Y.Offset) }):Play();
             TweenService:Create(Background, TweenInfo, { Size = MinSize }):Play();
         else
             NavMini.Image = "rbxassetid://73066567788933"; -- Mini icon
 
+            DragUI.Size = UDim2.new(1, 0, .11, 0);
             TweenService:Create(LeftTop, TweenInfo, { Size = UDim2.new(1, 0, 0.22, 0) }):Play();
             TweenService:Create(RightTop, TweenInfo, { Size = UDim2.new(1, 0, 0.11, 0) }):Play();
-            local Tween = TweenService:Create(Background, TweenInfo, { Size = MinSize });
+            local Tween = TweenService:Create(Background, TweenInfo, { Size = MaxSize });
             Tween:Play();
             Tween.Completed:Wait();
             
-            LeftBottom.Visible = false;
-            RightBottom.Visible = false;
+            LeftBottom.Visible = true;
+            RightBottom.Visible = true;
         end;
 
         task.wait(.1);
@@ -2090,6 +2090,10 @@ function Library:CreateWindow(WINFO)
                         if Object then
                             Object.Visible = true;
                             SF.Visible = true;
+                        end;
+                    else
+                        if Object then
+                            Object.Visible = false;
                         end;
                     end;
                 end
