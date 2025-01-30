@@ -97,6 +97,8 @@ do -- Save / Load
     end;
 
     function Library:SaveExternal(File, Data)
+        if not File then return; end;
+        
         local Paths = Library.Paths;
         local Folder, Secondary = Paths["Folder"], "\\External";
         FileService:CreateFolder(Folder);
@@ -107,6 +109,8 @@ do -- Save / Load
     end;
 
     function Library:LoadExternal(File)
+        if not File then return; end;
+
         local Paths = Library.Paths;
         local Folder, Secondary = Paths["Folder"], "\\External";
         FileService:CreateFolder(Folder);
