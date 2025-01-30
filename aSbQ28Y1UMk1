@@ -62,6 +62,7 @@ do -- Save / Load
         if Secondary then
             Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
         end;
+
         local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local SaveData = {};
@@ -81,6 +82,7 @@ do -- Save / Load
         if Secondary then
             Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
         end;
+
         local Path = Folder .. Library.Paths["Data"] .. ".json";
 
         local LoadData = FileService:Read(Path);
@@ -92,6 +94,32 @@ do -- Save / Load
                 Library.Created.Flags[i]:Load(v);
             end;
         end;
+    end;
+
+    function Library:SaveExternal(File, Data)
+        local Paths = Library.Paths;
+        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
+        FileService:CreateFolder(Folder);
+        if Secondary then
+            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
+        end;
+
+        local Path = Folder .. tostring(File) .. ".json";
+        FileService:Write(Path, HttpService:JSONEncode(Data));
+    end;
+
+    function Library:LoadExternal(File)
+        local Paths = Library.Paths;
+        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
+        FileService:CreateFolder(Folder);
+        if Secondary then
+            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
+        end;
+
+        local Path = Folder .. tostring(File) .. ".json";
+        local LoadData = FileService:Read(Path);
+        if not LoadData then return; end;
+        return HttpService:JSONDecode(LoadData);
     end;
 end;
 
