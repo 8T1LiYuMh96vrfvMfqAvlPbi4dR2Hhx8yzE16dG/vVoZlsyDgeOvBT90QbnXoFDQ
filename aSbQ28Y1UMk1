@@ -98,11 +98,9 @@ do -- Save / Load
 
     function Library:SaveExternal(File, Data)
         local Paths = Library.Paths;
-        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
+        local Folder, Secondary = Paths["Folder"], "\\External";
         FileService:CreateFolder(Folder);
-        if Secondary then
-            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
-        end;
+        Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
 
         local Path = Folder .. tostring(File) .. ".json";
         FileService:Write(Path, HttpService:JSONEncode(Data));
@@ -110,11 +108,9 @@ do -- Save / Load
 
     function Library:LoadExternal(File)
         local Paths = Library.Paths;
-        local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
+        local Folder, Secondary = Paths["Folder"], "\\External";
         FileService:CreateFolder(Folder);
-        if Secondary then
-            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
-        end;
+        Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
 
         local Path = Folder .. tostring(File) .. ".json";
         local LoadData = FileService:Read(Path);
