@@ -1550,6 +1550,7 @@ local SubFunctions; SubFunctions = {
             end;
 
             nself.Value = Value;
+            nself:Fire();
             Update();
         end;
 
