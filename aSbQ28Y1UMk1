@@ -1878,7 +1878,7 @@ function Library:CreateWindow(WINFO)
 
     local Background = Library.Create("Frame", {
         Parent = ScreenUI,
-        Position = UDim2.new(.25, 0, .25, 0),
+        Position = UDim2.new(0, 0, .1, 0),
         Size = MaxSize,
     }, { BackgroundColor3 = "Background" });
 
