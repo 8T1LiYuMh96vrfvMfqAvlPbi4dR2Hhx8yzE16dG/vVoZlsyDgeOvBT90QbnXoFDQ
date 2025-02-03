@@ -1428,6 +1428,7 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             Visible = false,
+            ZIndex = 10,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         local ItemHolder = Library.Create("ScrollingFrame", {
@@ -1650,13 +1651,13 @@ local SubFunctions; SubFunctions = {
             ValueLabel.ZIndex = 1;
             ItemHolder.ZIndex = 1;
 
+            ItemHolder.Visible = false;
             SearchBox.Visible = false;
             local Tween = TweenService:Create(Subframe,
                 TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                 { Size = UDim2.new(.4, 0, 1, 0) });
             Tween:Play();
             Tween.Completed:Wait();
-            ItemHolder.Visible = false;
             ValueLabel.Visible = true;
         end;
 
