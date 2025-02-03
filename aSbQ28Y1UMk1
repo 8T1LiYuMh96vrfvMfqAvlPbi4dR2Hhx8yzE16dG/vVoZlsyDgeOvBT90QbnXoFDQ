@@ -98,7 +98,7 @@ do -- Save / Load
 
     function Library:SaveExternal(File, Data)
         if not File then return; end;
-        
+
         local Paths = Library.Paths;
         local Folder, Secondary = Paths["Folder"], "\\External";
         FileService:CreateFolder(Folder);
@@ -1418,6 +1418,18 @@ local SubFunctions; SubFunctions = {
             ClipsDescendants = true,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
+        local SearchBox = Library.Create("TextBox", {
+            Parent = Visuals,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(.8, 0, 1, 0),
+            TextSize = 11,
+            Text = "",
+            PlaceholderText = "Search: ",
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ClipsDescendants = true,
+            Visible = false;
+        }, { FontFace = "Font", TextColor3 = "Text" });
+
         local ItemHolder = Library.Create("ScrollingFrame", {
             Parent = Subframe,
             AnchorPoint = Vector2.new(0, 1),
@@ -1608,20 +1620,49 @@ local SubFunctions; SubFunctions = {
 
         local Click = Library:ApplyClick(Background);
 
+        SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+            for Contents, Objects in pairs(Options) do
+                local l1, l2 = string.lower(SearchBox.Text), string.lower(Contents);
+
+                Objects[1].Visible = string.match(l2, l1);
+            end;
+        end);
+
+        local function Show()
+            Subframe.ZIndex = 10;
+            Circle.ZIndex = 10;
+            ValueLabel.ZIndex = 10;
+            ItemHolder.ZIndex = 10;
+
+            ValueLabel.Visible = false;
+            local Tween = TweenService:Create(Subframe,
+                TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(1, 0, 1, 75) });
+            Tween:Play();
+            Tween.Completed:Wait();
+            ItemHolder.Visible = true;
+            SearchBox.Visible = true;
+        end;
+
+        local function Hide()
+            Subframe.ZIndex = 1;
+            Circle.ZIndex = 1;
+            ValueLabel.ZIndex = 1;
+            ItemHolder.ZIndex = 1;
+            
+            local Tween = TweenService:Create(Subframe,
+                TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(.4, 0, 1, 0) });
+            Tween:Play();
+            Tween.Completed:Wait();
+            ItemHolder.Visible = false;
+            ValueLabel.Visible = true;
+        end;
+
         local Listing = false;
         Click.MouseButton1Up:Connect(function()
             Listing = not Listing;
-            if Listing then
-                Subframe.ZIndex = 10;
-                Circle.ZIndex = 10;
-                ValueLabel.ZIndex = 10;
-                ItemHolder.ZIndex = 10;
-
-                TweenService:Create(Subframe,
-                    TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                    { Size = UDim2.new(.4, 0, 1, 75) }):Play();
-                ItemHolder.Visible = true;
-            end;
+            local a = (Listing and Show()) or Hide();
         end);
 
         Click.MouseButton2Up:Connect(function()
@@ -1633,15 +1674,7 @@ local SubFunctions; SubFunctions = {
 
         InputService:Bind("MouseButton1", function()
             if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
-                Subframe.ZIndex = 1;
-                Circle.ZIndex = 1;
-                ValueLabel.ZIndex = 1;
-                ItemHolder.ZIndex = 1;
-
-                TweenService:Create(Subframe,
-                    TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                    { Size = UDim2.new(.4, 0, 1, 0) }):Play();
-                ItemHolder.Visible = false;
+                Hide();
             end;
         end, true, true)
 
