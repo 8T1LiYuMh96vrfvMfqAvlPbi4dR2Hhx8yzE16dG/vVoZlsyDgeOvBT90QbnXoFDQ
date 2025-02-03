@@ -1427,7 +1427,7 @@ local SubFunctions; SubFunctions = {
             PlaceholderText = "Search: ",
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
-            Visible = false;
+            Visible = false,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         local ItemHolder = Library.Create("ScrollingFrame", {
@@ -1649,7 +1649,8 @@ local SubFunctions; SubFunctions = {
             Circle.ZIndex = 1;
             ValueLabel.ZIndex = 1;
             ItemHolder.ZIndex = 1;
-            
+
+            SearchBox.Visible = false;
             local Tween = TweenService:Create(Subframe,
                 TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                 { Size = UDim2.new(.4, 0, 1, 0) });
@@ -1662,7 +1663,11 @@ local SubFunctions; SubFunctions = {
         local Listing = false;
         Click.MouseButton1Up:Connect(function()
             Listing = not Listing;
-            local a = (Listing and Show()) or Hide();
+            if Listing then
+                Show();
+            else
+                Hide();
+            end;
         end);
 
         Click.MouseButton2Up:Connect(function()
