@@ -1431,6 +1431,12 @@ local SubFunctions; SubFunctions = {
             ZIndex = 10,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
+        Library.Create("UIPadding", {
+            Parent = SearchBox;
+            PaddingLeft = UDim.new(0, 7);
+            PaddingRight = UDim.new(0, 7);
+        });
+
         local ItemHolder = Library.Create("ScrollingFrame", {
             Parent = Subframe,
             AnchorPoint = Vector2.new(0, 1),
