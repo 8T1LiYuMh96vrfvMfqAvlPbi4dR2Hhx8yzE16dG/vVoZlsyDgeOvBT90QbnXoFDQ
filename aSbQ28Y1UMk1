@@ -42,24 +42,24 @@ local Library = {
                 Enum.FontStyle.Normal)
         },
         ["Dark"] = {
-            ["Title"] = RGB(200, 200, 200),
-
-            ["Background"] = RGB(5, 5, 8),
-            ["Background2"] = RGB(7, 7, 10),
-            ["Tone"] = RGB(15, 14, 20),
-
-            ["Accent1"] = RGB(10, 10, 15),
-            ["Highlight"] = RGB(180, 50, 255),
-            ["Hover"] = RGB(50, 50, 80),
-            ["Selected"] = RGB(100, 50, 160),
-
-            ["Text"] = RGB(220, 220, 220),
-            ["Subtext"] = RGB(120, 120, 120),
-            ["Icons"] = RGB(220, 220, 220),
-
+            ["Title"] = RGB(240, 240, 240),  
+        
+            ["Background"] = RGB(20, 20, 30), 
+            ["Background2"] = RGB(30, 30, 40),
+            ["Tone"] = RGB(40, 40, 50), 
+        
+            ["Accent1"] = RGB(40, 40, 50),
+            ["Highlight"] = RGB(150, 80, 255),
+            ["Hover"] = RGB(60, 60, 80),   
+            ["Selected"] = RGB(100, 70, 160),
+        
+            ["Text"] = RGB(230, 230, 230),    
+            ["Subtext"] = RGB(170, 170, 170),  
+            ["Icons"] = RGB(230, 230, 230),  
+        
             ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
-            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold)
-        },
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        },        
     },
 
     Black = RGB(0, 0, 0),
