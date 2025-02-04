@@ -1420,7 +1420,7 @@ local SubFunctions; SubFunctions = {
 
         local SearchBox = Library.Create("TextBox", {
             Parent = Visuals,
-            BackgroundTransparency = 0.5,
+            BackgroundTransparency = 0.9,
             Size = UDim2.new(.8, 0, 1, 0),
             TextSize = 11,
             Text = "",
@@ -1428,6 +1428,7 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             Visible = false,
+            UIStroke = 1,
             ZIndex = 10,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
