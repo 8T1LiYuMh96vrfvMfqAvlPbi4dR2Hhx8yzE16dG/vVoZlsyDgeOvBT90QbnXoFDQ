@@ -1420,7 +1420,7 @@ local SubFunctions; SubFunctions = {
 
         local SearchBox = Library.Create("TextBox", {
             Parent = Visuals,
-            BackgroundTransparency = 1,
+            BackgroundTransparency = 0.5,
             Size = UDim2.new(.8, 0, 1, 0),
             TextSize = 11,
             Text = "",
