@@ -19,7 +19,7 @@ local Library = {
         Flags = {}
     },
 
-    Theme = "Default",
+    Theme = "Dark",
     Themes = {
         ["Default"] = {
             ["Title"] = RGB(255, 255, 255),
