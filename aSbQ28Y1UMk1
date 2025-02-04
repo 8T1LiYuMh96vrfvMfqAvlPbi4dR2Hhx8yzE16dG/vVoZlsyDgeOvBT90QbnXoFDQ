@@ -1643,7 +1643,7 @@ local SubFunctions; SubFunctions = {
 
             ValueLabel.Visible = false;
             local Tween = TweenService:Create(Subframe,
-                TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                 { Size = UDim2.new(1, 0, 1, 75) });
             Tween:Play();
             Tween.Completed:Wait();
@@ -1660,7 +1660,7 @@ local SubFunctions; SubFunctions = {
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
             local Tween = TweenService:Create(Subframe,
-                TweenInfo.new(.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                 { Size = UDim2.new(.4, 0, 1, 0) });
             Tween:Play();
             Tween.Completed:Wait();
