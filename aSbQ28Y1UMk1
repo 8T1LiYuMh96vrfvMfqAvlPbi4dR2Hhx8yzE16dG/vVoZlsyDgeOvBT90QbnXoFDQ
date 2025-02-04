@@ -1420,7 +1420,7 @@ local SubFunctions; SubFunctions = {
 
         local SearchBox = Library.Create("TextBox", {
             Parent = Visuals,
-            BackgroundTransparency = 0.9,
+            BackgroundTransparency = 1,
             Size = UDim2.new(.8, 0, 1, 0),
             TextSize = 11,
             Text = "",
@@ -1428,7 +1428,6 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             Visible = false,
-            UIStroke = 1,
             ZIndex = 10,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
@@ -1642,6 +1641,7 @@ local SubFunctions; SubFunctions = {
             ValueLabel.ZIndex = 10;
             ItemHolder.ZIndex = 10;
 
+            SearchBox.Visible = true;
             ValueLabel.Visible = false;
             local Tween = TweenService:Create(Subframe,
                 TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
@@ -1649,7 +1649,6 @@ local SubFunctions; SubFunctions = {
             Tween:Play();
             Tween.Completed:Wait();
             ItemHolder.Visible = true;
-            SearchBox.Visible = true;
         end;
 
         local function Hide()
