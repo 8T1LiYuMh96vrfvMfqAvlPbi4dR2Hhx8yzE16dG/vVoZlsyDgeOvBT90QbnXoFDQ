@@ -19,7 +19,7 @@ local Library = {
         Flags = {}
     },
 
-    Theme = "Dark",
+    Theme = "Default",
     Themes = {
         ["Default"] = {
             ["Title"] = RGB(255, 255, 255),
@@ -60,7 +60,7 @@ local Library = {
             ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
             ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold)
         },
-}
+    },
 
     Black = RGB(0, 0, 0),
     White = RGB(255, 255, 255),
