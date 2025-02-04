@@ -42,15 +42,15 @@ local Library = {
                 Enum.FontStyle.Normal)
         },
         ["Dark"] = {
-            ["Title"] = RGB(240, 240, 240),  
-        
-            ["Background"] = RGB(20, 20, 30), 
-            ["Background2"] = RGB(30, 30, 40),
-            ["Tone"] = RGB(40, 40, 50), 
-        
-            ["Accent1"] = RGB(40, 40, 50),
-            ["Highlight"] = RGB(150, 80, 255),
-            ["Hover"] = RGB(60, 60, 80),   
+            ["Title"] = RGB(255, 255, 255),
+
+            ["Background"] = RGB(33, 33, 33),
+            ["Background2"] = RGB(23, 23, 23),
+            ["Tone"] = RGB(29, 29, 29),
+
+            ["Accent1"] = RGB(46, 46, 46),
+            ["Highlight"] = RGB(58, 64, 80),
+            ["Hover"] = RGB(107, 100, 255),
             ["Selected"] = RGB(100, 70, 160),
         
             ["Text"] = RGB(230, 230, 230),    
