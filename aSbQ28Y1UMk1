@@ -50,8 +50,8 @@ local Library = {
 
             ["Accent1"] = RGB(46, 46, 46),
             ["Highlight"] = RGB(58, 64, 80),
-            ["Hover"] = RGB(107, 100, 255),
-            ["Selected"] = RGB(100, 70, 160),
+            ["Hover"] = RGB(85, 87, 98),
+            ["Selected"] = RGB(101, 103, 117),
         
             ["Text"] = RGB(230, 230, 230),    
             ["Subtext"] = RGB(170, 170, 170),  
