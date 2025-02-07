@@ -153,6 +153,7 @@ if exec == "Xeno" or exec == "Luna" or exec == "Solara" then
     return;
 end;
 
+
 -- // Discord Logging - Not added until needed for Whitelist purposes and Data
 local User_Logs = nil;
 
@@ -195,8 +196,23 @@ succ = "Works!";
 err = "Error!";
 saveeeed = "Saved Config!!"
 
+local FindFootball = (function()
+    local Football = WORK:FindFirstChild("Football") or WORK:WaitForChild("Football", 1);
+
+    if not Football then
+        for _, playerModel in ipairs(WORK:GetChildren()) do
+            if playerModel:IsA("Model") and playerModel:FindFirstChild("Football") then
+                Football = playerModel:FindFirstChild("Football");
+                break;
+            end
+        end
+    end
+
+    return Football;
+end)
+
 -- // Ingame
-local Football = workspace:WaitForChild("Football", 1) or WORK:FindFirstChild("Football")
+local Football = FindFootball();
 BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox", 1);
 local PlayerStats = cloneref(LP:WaitForChild("PlayerStats"));
 local InFlow = cloneref(PlayerStats:WaitForChild("InFlow"));
@@ -313,8 +329,6 @@ local default_config = {
     };
     ["Cache__"] = {...}
 }
-
--- // Functions
 local AutoLoad = (function()
     if default_config.UI.AutoLoad == true and identifyexecutor() then 
         pcall(function()
@@ -691,6 +705,7 @@ Setup:Basics()
 Library.Paths.Folder = "..\\ "..LP.UserId .. "" .. "_Tuah"
 Library.Paths.Data = "\\ " .. LP.DisplayName .. "_Data"
 Library.Paths.Themes = "\\Themes"
+local uiAutoSave = false;
 
 local Window = Library:CreateWindow({
     Title = "Tuah";
@@ -2100,11 +2115,12 @@ local SaveConfig = Section_Config:CreateButton({
 SaveConfig:CreateSettings():CreateToggle({
     Text = "Auto Save",
     Callback = function(v)
-        default_config.UI.Save = v;
+        uiAutoSave = v; 
+
         task.spawn(function()
-            while default_config.UI.Save do
-                SaveConfig:Fire();
-                task.wait(10)
+            while uiAutoSave do
+                Library:Save();
+                task.wait(15); 
             end;
         end);
     end,
