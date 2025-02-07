@@ -1,5 +1,5 @@
 -- // ENTRY
--- // v.1.20
+-- // v.1.21
 
 repeat task.wait(math.floor(1, 2, 3)) until game:IsLoaded();
 
@@ -107,7 +107,7 @@ function Check_:CheckStatus()
         game:GetService("Players").LocalPlayer:Kick(("[SCRIPT]: %s - Check our Discord for updates!"):format(self.Options.Down));
         return true;
     elseif self.Status == "Beta" or self.Status == string.lower("BETA") or self.Status == string.upper("beta") then
-        print("Status Checked, " ..tostring(Check_.Status).. "Works but expect Bugs to happen!");
+        print("Status Checked, " ..tostring(Check_.Status).. " Works but expect Bugs to happen!");
         return false;
     end;
 
@@ -170,6 +170,7 @@ local RUN_S = game:GetService("RunService");
 local HTTP = game:GetService("HttpService");
 local HUMANOID = CHAR:WaitForChild("Humanoid");
 local VIM = game:GetService("VirtualInputManager")
+local TPSERV = game:GetService("TeleportService")
 local WORK = workspace;
 DELAY = math.random(5,10);
 ENV = (getgenv and getgenv() or shared);
@@ -195,7 +196,7 @@ err = "Error!";
 saveeeed = "Saved Config!!"
 
 -- // Ingame
-local Football = workspace:WaitForChild("Football", 1) or WORK:FindFirstChild("Football") or BallHitbox:IsDescendantOf(LP.Character, PLRS.Character)
+local Football = workspace:WaitForChild("Football", 1) or WORK:FindFirstChild("Football")
 BallHitbox = workspace:WaitForChild("Football"):WaitForChild("Hitbox", 1);
 local PlayerStats = cloneref(LP:WaitForChild("PlayerStats"));
 local InFlow = cloneref(PlayerStats:WaitForChild("InFlow"));
@@ -318,7 +319,7 @@ local AutoLoad = (function()
     if default_config.UI.AutoLoad == true and identifyexecutor() then 
         pcall(function()
             print("AutoLoad, is on REALOMGWOWOOAS")
-            queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR"))()]])
+            queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR.lua"))()]])
         end)
     else
         print(err)
@@ -628,6 +629,57 @@ local returnBall = (function()
         task.wait(0.005);
     end;
 end);
+local serv_hop = (function()
+    local TeleportService = game:GetService("TeleportService");
+    local PlaceId = game.PlaceId;
+    local ServersUrl = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100";
+
+    local succ, resp = pcall(function()
+        return HTTP:JSONDecode(game:HttpGet(ServersUrl));
+    end);
+
+    if succ and resp and resp.data then
+        for _, server in ipairs(resp.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LP);
+                return;
+            end
+        end
+    end
+
+    warn("No servers found ;/");
+end);
+local join_lowest = (function()
+    local PlaceId = game.PlaceId;
+    local ServersUrl = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100";
+
+    local succ, resp = pcall(function()
+        return HTTP:JSONDecode(game:HttpGet(ServersUrl));
+    end);
+
+    if succ and resp and resp.data then
+        local lowest_server;
+        local lowest_players = math.huge;
+
+        for _, server in ipairs(resp.data) do
+            if server.playing < lowest_players and server.id ~= game.JobId then
+                lowest_server = server.id;
+                lowest_players = server.playing;
+            end
+        end
+
+        if lowest_server then
+            TPSERV:TeleportToPlaceInstance(PlaceId, lowest_server, LP);
+            return;
+        end
+    end
+
+    warn("No available low Servers servers found ;/");
+end);
+local rejoin = (function()
+    TPSERV:TeleportToPlaceInstance(game.PlaceId, game.JobId, LP);
+end);
+
 
 -- // UI
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
@@ -748,6 +800,11 @@ local Section_Quest__ = Quest_Tab__:CreateSection({
 
 local Section_Troll = Misc_Tab:CreateSection({
     Title = "Troll",
+    Side = "Right"
+})
+
+local Server_Control = Config_Tab:CreateSection({
+    Title = "Server Control",
     Side = "Right"
 })
 
@@ -1121,6 +1178,51 @@ local FPS_NoCapButton = Section_Config:CreateButton({
 
         setfpscap(math.max(60, 9999));
         print(succ, "FPS: " ..last_fps);
+    end;
+});
+
+local Server_HopBtn = Server_Control:CreateButton({
+    Text = "Server Hop";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not serv_hop then print(err); return; end;
+
+        task.delay(5, function()
+            task.spawn(function()
+                serv_hop();
+                print(succ);
+            end)
+        end)
+    end;
+});
+
+local Server_LowestBtn = Server_Control:CreateButton({
+    Text = "Join Lowest Server";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not join_lowest() then print(err); return; end;
+
+        task.delay(5, function()
+            task.spawn(function()
+                join_lowest();
+                print(succ);
+            end)
+        end)
+    end;
+});
+
+local Server_RejoinBtn = Server_Control:CreateButton({
+    Text = "Rejoin";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not rejoin() then print(err); return; end;
+
+        task.delay(5, function()
+            task.spawn(function()
+                rejoin();
+                print(succ);
+            end)
+        end)
     end;
 });
 
