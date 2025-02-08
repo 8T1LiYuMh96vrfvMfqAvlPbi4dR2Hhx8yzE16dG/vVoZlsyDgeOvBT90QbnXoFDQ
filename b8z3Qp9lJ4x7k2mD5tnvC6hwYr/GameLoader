@@ -1,4 +1,4 @@
-if game.PlaceId == "18668065416" then -- Blue Lock: Rivals
+if game.PlaceId == 18668065416 then -- Blue Lock: Rivals
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR.lua"))()
 else
     print(string.upper("Game is not Supported, or ID is Different. (Please Screenshot and Report in Bugs!)"))
