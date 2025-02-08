@@ -962,7 +962,7 @@ local Shot_Delay_Slider = Section_Dashboard:CreateSlider({
 })
 
 local NoClip_Toggle = Section_Dashboard:CreateToggle({
-    Text = "No Clip",
+    Text = "Disable Goal Barrier",
     Subtext = "Must Enable for Autofarm!",
     Alignment = "Left",
     Default = false,
@@ -2325,6 +2325,7 @@ local FlowChoices = {
 }
 local StyleChoices = {
     "Shidou",
+    "Kunigami",
     "Aiku",
     "Yukimiya",
     "Sae",
