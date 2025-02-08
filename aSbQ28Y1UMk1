@@ -2221,7 +2221,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Position = UDim2.new(.5, 0, .5, 0),
             Size = Size or UDim2.new(.7, 0, .3, 0),
-            Image = Image or "rbxassetid://76705864592295",
+            Image = Image or "rbxassetid://90900367604661",
         }, { ImageColor3 = "Title" });
     else
         Library:ApplyStroke(Library.Create("TextLabel", {
