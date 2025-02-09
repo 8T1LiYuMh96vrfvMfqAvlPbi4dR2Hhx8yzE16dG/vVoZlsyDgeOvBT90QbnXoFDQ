@@ -1,6 +1,13 @@
 -- // ENTRY
 -- // v.1.21
 
+
+--[[
+TASK: Unlock any Style Temporary
+-- Changing Style Value;
+20:50
+]]
+
 repeat task.wait(math.floor(1, 2, 3)) until game:IsLoaded();
 
 local Debug = setmetatable({
@@ -405,8 +412,6 @@ local teleportToFootball = function()
         elseif not previousPosition then
             HRP.CFrame = CFrame.new(currentPos);
             previousPosition = currentPos;  
-        else
-            print("Football position hasn't moved significantly");
         end;
         elseif not Football then 
         local Football_Check = Football or game:GetService("Workspace"):WaitForChild("Football");
@@ -414,7 +419,6 @@ local teleportToFootball = function()
         HRP.CFrame = CFrame.new(Football.Position);
         previousPosition = Football.Position;
     else
-        print("Football not found or not in workspace or a player's model");
         Debug:Log("Teleport to Football Issue - Character or Ball not found", "WARN");
         Debug:SaveLogs();
     end;
@@ -1090,22 +1094,6 @@ local Button_FlingBall = Section_BallConfig:CreateButton({
             local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
             if gameStateValue.Value == "Playing" then 
             game:GetService("Workspace").Football.Velocity = Vector3.new(500, 200, 1000);
-            end;
-        end);
-    end;
-});
-
-local Button_VoidBall = Section_BallConfig:CreateButton({
-    Text = "Void Ball";
-    Alignment = "Left"; 
-    Callback = function()
-    task.spawn(function()
-        local gameStateValue = game:GetService("ReplicatedStorage").GameValues:WaitForChild("State");
-        if gameStateValue.Value == "Playing" then 
-            -- Football:Destroy()
-            Library:Notify("Removed!", 3, "Alert"); 
-        else 
-            print("Not in Match");
             end;
         end);
     end;
