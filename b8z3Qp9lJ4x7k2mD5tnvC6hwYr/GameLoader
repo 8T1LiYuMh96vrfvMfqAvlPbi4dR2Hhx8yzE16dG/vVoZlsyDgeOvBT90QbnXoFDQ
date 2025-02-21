@@ -1,6 +1,16 @@
-if game.PlaceId == 18668065416 or 92517437168342 then -- Blue Lock: Rivals
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR.lua"))()
+Games = {
+    ["Blue Lock: Rivals"] = {"18668065416", "92517437168342"};
+    ["Rivals"] = {"17625359962"};
+    ["Fisch"] = {"16732694052"};
+}
+Extension = ".lua"
+
+if game.PlaceId == tonumber(Games["Blue Lock: Rivals"][1]) or game.PlaceId == tonumber(Games["Blue Lock: Rivals"][2]) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR" .. Extension))()
+elseif game.PlaceId == tonumber(Games["Rivals"][1]) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/RIVALS" .. Extension))()
+elseif game.PlaceId == tonumber(Games["Fisch"][1]) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/FISCH" .. Extension))()
 else
     print(string.upper("Game is not Supported, or ID is Different. (Please Screenshot and Report in Bugs!)"))
 end
-
