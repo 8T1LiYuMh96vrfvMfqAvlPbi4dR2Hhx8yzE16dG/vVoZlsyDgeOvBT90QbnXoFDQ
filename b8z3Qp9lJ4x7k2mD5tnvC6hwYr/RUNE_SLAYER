@@ -1,0 +1,737 @@
+-- // Rune Slayer Progress // -- 
+
+rune_fun = {};
+
+rune_fun.Entry = function(check)
+    check = check or false;
+    if not game:IsLoaded() then
+        print("Waiting for the game to load..");
+        repeat task.wait(math.clamp(1,2,5)) until game:IsLoaded() or check;
+    end;
+    print("Game loaded successfully!");
+    return check;
+end;
+rune_fun.Entry(true)
+
+rune_fun.GetUser = function(userid, username, accountage)
+    if not Char then repeat task.wait(math.random()) until LclPlr.Character Char = LclPlr.Character or Char return; end;
+
+    if Char and LclPlr then 
+        userid = LclPlr.UserId;
+        username = LclPlr.Name;
+        accountage = LclPlr.AccountAge;
+        return userid, username, accountage
+    else 
+        print(type(Char), type(LclPlr))
+        print("Seems like Character is missing or not loaded yet!")
+    end;
+end;
+
+rune_fun.Entry = function(check)
+    local check = check or false;
+    if not game:IsLoaded() then
+        print("Waiting for the game to load..");
+        repeat task.wait(math.clamp(1,2,5)) until game:IsLoaded() or check;
+    end;
+    print("Game loaded successfully!");
+    return check;
+end;
+rune_fun.Entry();
+
+rune_fun.GetGame = function(get)
+    local m_service = game:GetService("MarketplaceService");
+    local succ, m_info = pcall(m_service.GetProductInfo, m_service, game.PlaceId);
+    return succ and m_info.Name or "Could not get GameValues"
+end;
+
+rune_fun.GetApples = function()
+    local apples = {};
+    for _, v in pairs(Harvestable:GetChildren()) do 
+        if v:IsA("MeshPart") and v.Name == "Apple" then 
+            table.insert(apples, v)
+        end;
+    end;
+    return apples;
+end;
+
+WalkSpeedValue = 16;
+WalkSpeedEnabled = false;
+MoveDirection = Vector3.zero;
+local WalkSpeedConnection;
+rune_fun.WalkSpeed = function(enabled)
+    WalkSpeedEnabled = enabled;
+
+    if WalkSpeedConnection then
+        WalkSpeedConnection:Disconnect();
+        WalkSpeedConnection = nil;
+    end;
+
+    if not WalkSpeedEnabled then return; end;
+
+    local function updateDirection()
+        local character = game.Players.LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return; end;
+
+        local camera = workspace.CurrentCamera
+        local moveVector = Vector3.zero
+
+        if Uis:IsKeyDown(Enum.KeyCode.W) then
+            moveVector = moveVector + camera.CFrame.LookVector
+        end
+        if Uis:IsKeyDown(Enum.KeyCode.S) then
+            moveVector = moveVector - camera.CFrame.LookVector
+        end
+        if Uis:IsKeyDown(Enum.KeyCode.A) then
+            moveVector = moveVector - camera.CFrame.RightVector
+        end
+        if Uis:IsKeyDown(Enum.KeyCode.D) then
+            moveVector = moveVector + camera.CFrame.RightVector
+        end
+
+        MoveDirection = Vector3.new(moveVector.X, 0, moveVector.Z).Unit
+    end
+
+    local function teleportWalk()
+        local character = game.Players.LocalPlayer.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") then return; end;
+
+        local hrp = character.HumanoidRootPart;
+        if MoveDirection.Magnitude > 0 then
+            hrp.CFrame = hrp.CFrame + (MoveDirection * (WalkSpeedValue / 100))
+        end;
+    end;
+
+    WalkSpeedConnection = Run.Heartbeat:Connect(function()
+        if WalkSpeedEnabled then
+            updateDirection()
+            teleportWalk()
+        end;
+    end)
+end;
+
+rune_fun.AutoLoad = function()
+    if identifyexecutor() then
+        pcall(function()
+            task.defer(function()
+                print("in queue..");
+                queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/Fisch.lua"))()]])
+            end);
+        end);
+    else
+        print("Something went wrong, AutoLoad", type(queue_on_teleport))
+    end;
+end;
+
+rune_fun.GetWeapon = function()
+    local weaponFolder = LclPlr:FindFirstChild("Backpack") and LclPlr.Backpack:FindFirstChild("Weapon");
+
+    if (not weaponFolder) then 
+        return nil; 
+    end;
+
+    for _, v in pairs(weaponFolder:GetChildren()) do
+        if v:IsA("Folder") then
+            return v;
+        end;
+    end;
+    return nil;
+end;
+
+rune_fun.GetMobs = function()
+    local mobs = {};
+    local mobFolder = workspace:FindFirstChild("Alive");
+
+    if (not mobFolder) then 
+        print("wtf?")
+        return;
+    end;
+
+    for _, v in pairs(mobFolder:GetChildren()) do
+        if v:IsA("Model") and not v:FindFirstChild("ComboCount") then 
+            table.insert(mobs, v.Name);
+        end;
+    end;
+    return mobs;
+end;
+
+rune_fun.GodMode = function(state)
+    -- ts might be patched not sure
+    local net = require(Rs.Modules.Network);
+    
+    if not getgenv().god_enabled then
+        getgenv().god_enabled = false;
+    end;
+
+    getgenv().god_enabled = state or getgenv().god_enabled;
+
+    task.spawn(function()
+        while getgenv().god_enabled do  
+            net.connect('MasterEvent', 'FireServer', LclPlr.Character, {
+                Config = "Roll"
+            })
+            task.wait(.1)
+        end;
+    end)
+end;
+
+rune_fun.GetUsedStorage_Slots = function()
+    local Storage = LclPlr.PlayerGui.BankGui.MainFrame.Slots.ScrollingFrame
+    local usedSlots = {}
+
+    for _, slot in pairs(Storage:GetChildren()) do
+        if slot:IsA("ImageLabel") and slot:FindFirstChild("ToolFrame") then 
+            table.insert(usedSlots, slot.Name);
+            print("Used slot:", slot.Name)
+        end;
+    end;
+    return usedSlots;
+end;
+
+rune_fun.GetInventory = function()
+    local Backpack = LclPlr.Backpack
+    local items = {}
+
+    for _, tool in pairs(Backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local itemName = tool.Name
+
+            if not items[itemName] then
+                items[itemName] = {
+                    Name = itemName,
+                    Quantity = 1,
+                    Tool = tool 
+                }
+            else
+                items[itemName].Quantity = items[itemName].Quantity + 1
+            end;
+        end;
+    end;
+    return items;
+end;
+
+local function Find_Emptyslot()
+    local args = {
+        [1] = {
+            ["player"] = game:GetService("Players").LocalPlayer,
+            ["Object"] = workspace:WaitForChild("Effects"):WaitForChild("NPCS"):WaitForChild("Banker"),
+            ["Action"] = "Storage"
+        }}
+    game:GetService("Players").LocalPlayer.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args))
+    task.wait(.1)
+    local usedSlots = rune_fun.GetUsedStorage_Slots()
+    for i = 1, 50 do 
+        if not table.find(usedSlots, tostring(i)) then
+            return tostring(i);
+        end;
+    end;
+    return nil;
+end;
+
+local SelectedFoods = {};
+local function GetFoodItems()
+    local inventory = rune_fun.GetInventory()
+    local foodItems = {}
+
+    for _, item in pairs(inventory) do
+        if item.Name and item.Quantity then 
+            table.insert(foodItems, item.Name) 
+        end;
+    end;
+    return foodItems;
+end;
+
+-- // Variables 
+
+LclPlr = game:GetService("Players").LocalPlayer;
+Char = LclPlr.Character or LclPlr.CharacterAdded:Wait();
+Humanoid = Char:FindFirstChildOfClass("Humanoid");
+Hrp = Char:WaitForChild("HumanoidRootPart");
+GuiService = game:GetService("GuiService");
+Vim = game:GetService("VirtualInputManager");
+Env = (getgenv and getgenv() or shared);
+Run = game:GetService("RunService");
+TweenService = game:GetService("TweenService");
+Uis = game:GetService("UserInputService");
+Rs = game:GetService("ReplicatedStorage");
+
+-- // Game Variables
+
+Harvestable = workspace.Harvestable;
+
+-- // UI
+
+local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
+local Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/aSbQ28Y1UMk1"))() 
+local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))() 
+local FileService = Setup:File();
+local VIM = Setup:VirtualInputManager();
+Setup:Basics()
+
+Library.Paths.Folder = "\\Tuah";
+userid = select(1, rune_fun.GetUser());
+Library.Paths.Secondary = "\\" .. tostring(userid);
+Library.Paths.Data = "\\" .. tostring(game.PlaceId);
+
+local Window = Library:CreateWindow({ Title = "Tuah " ..rune_fun.GetGame(); });
+local Tabs = {
+    Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://130289250570665"}),
+    Misc = Window:CreateTab({ Title = "Misc", Icon = "rbxassetid://130819053773683"}),
+    Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://95750721918044"}),
+};
+
+local Sections = {
+    Collect = Tabs.Dashboard:CreateSection({
+        Title = "Collect",
+        Side = "Left",
+    }),
+    Player = Tabs.Dashboard:CreateSection({
+        Title = "Local",
+        Side = "Left",
+    }),
+    Automatic = Tabs.Dashboard:CreateSection({
+        Title = "Automatic",
+        Side = "Right",
+    }),
+    Farm = Tabs.Dashboard:CreateSection({
+        Title = "Farm",
+        Side = "Right",
+    }),
+    Data = Tabs.Config:CreateSection({
+        Title = "Data",
+        Side = "Right",
+    }),
+    Debug = Tabs.Config:CreateSection({
+        Title = "Debug",
+        Side = "Left",
+    }),
+    Misc_Stuff = Tabs.Misc:CreateSection({
+        Title = "Misc",
+        Side = "Left",
+    }),
+};
+
+local AppleDelay = .5;
+local TweenSpeed = 5;
+local Method = "Tween";
+local Collect_ApplesDelay = Sections.Collect:CreateSlider({
+    Text = "Delay time";
+    Alignment = "Left";
+    Default = 0.5;
+    Callback = function(v) 
+        AppleDelay = v;
+    end;
+    Flag = "AppleDelay";
+    Floats = 0; 
+    Limits = {0.5, 10}; 
+    Increment = 0.5;
+})
+
+local Collect_ApplesTweenSpeed = Sections.Collect:CreateSlider({
+    Text = "Tween Speed (Low=Fast)";
+    Alignment = "Left";
+    Default = 5;
+    Callback = (function() 
+        local lastPrintedSpeed = nil;
+
+        return function(v)
+            TweenSpeed = v;
+
+            if (v > TweenSpeed and v ~= lastPrintedSpeed) or (v < TweenSpeed and v ~= lastPrintedSpeed) then
+                print("Tween Speed now at: " .. tostring(v))
+                lastPrintedSpeed = v;
+            elseif v == TweenSpeed and lastPrintedSpeed ~= TweenSpeed then 
+                print("default rn")
+                lastPrintedSpeed = 2;
+            end;
+        end;
+    end)();
+    Flag = "AppleDelay";
+    Floats = 0; 
+    Limits = {1, 10}; 
+    Increment = 1;
+})
+
+local Collect_ApplesMethod = Sections.Collect:CreateDropdown({
+    Text = "Method";
+    Subtext = "Teleport Options";
+    Alignment = "Left";
+    Choices = { "Tween", "Default" };
+    Multi = false;
+    Default = "Tween";
+    Callback = function(v)
+        Method = v;
+    end;
+    Flag = "AppleMethod";
+})
+
+local function TweenTo(target)
+    if not Hrp then return; end;
+    
+    local goal = {}
+    goal.CFrame = target.CFrame + Vector3.new(0, math.random(1, 3), 0) 
+    
+    local tweenInfo = TweenInfo.new(TweenSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(Hrp, tweenInfo, goal)
+    tween:Play()
+    
+    tween.Completed:Wait()
+end;
+
+local Collect_Apples = Sections.Collect:CreateToggle({
+    Text = "Collect Apples";
+    Subtext = "Gets all the Apples";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(a) 
+        getgenv().collectApples = a;
+
+        if a then
+            task.spawn(pcall, function()
+                if not Hrp then print("HRP not found") return; end;
+                
+                local apples = rune_fun.GetApples()
+                
+                for _, apple in pairs(apples) do 
+                    if not getgenv().collectApples then break; end;
+
+                    if Method == "Tween" then
+                        TweenTo(apple)
+                    else
+                        Hrp.CFrame = apple.CFrame + Vector3.new(0, math.random(1, 2), 0)
+                    end;
+
+                    task.wait(AppleDelay or math.random(0.5, 1.13))
+
+                    Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                    task.wait(0.1)
+                    Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end;
+            end)
+        end;
+    end;
+    Flag = "appleCollect";
+})
+
+local Debug_Apples = Sections.Debug:CreateButton({
+    Text = "Debug Apples";
+    Alignment = "Left"; 
+    Callback = function()
+         local apples = rune_fun.GetApples();
+
+         for _, v in pairs(apples) do
+            print(v.Name);
+            task.defer(function()
+                print("Total found: " ..#apples);
+                print(type(apples))
+            end)
+         end;
+    end;
+})
+
+local WalkSpeedSlider = Sections.Player:CreateSlider({
+    Text = "WalkSpeed",
+    Alignment = "Left",
+    Default = 16,
+    Callback = function(v)
+        WalkSpeedValue = v;
+    end,
+    Flag = "walkSpeedValue",
+    Floats = 0,
+    Limits = {16, 100},
+    Increment = 1,
+})
+
+local WalkSpeedToggle = Sections.Player:CreateToggle({
+    Text = "Enabled",
+    Subtext = "Toggle the WalkSpeed",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(s)
+        rune_fun.WalkSpeed(s);
+    end,
+    Flag = "walkSpeed",
+})
+
+local isEquipped = false;
+local Equip_Weapon = Sections.Automatic:CreateToggle({
+    Text = "Equip Weapon",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(s)
+        local weapon = rune_fun.GetWeapon();
+
+        if s and weapon and not isEquipped then
+            Vim:SendKeyEvent(true, Enum.KeyCode.X, false, game)
+            task.wait(.2)
+            Vim:SendKeyEvent(false, Enum.KeyCode.X, false, game)
+            isEquipped = true;        
+        elseif not s then
+            isEquipped = false;
+        end;
+    end,
+    Flag = "equipWeapon",
+})
+
+local selectedMobs = {}
+local Farm_Mobs_Drop = Sections.Farm:CreateDropdown({
+    Text = "Select Mobs",
+    Subtext = "",
+    Alignment = "Left",
+    Choices = rune_fun.GetMobs(),
+    Multi = true,
+    Default = nil,
+    Callback = function(selected)
+        selectedMobs = selected
+    end,
+    Flag = "mobsTable",
+})
+
+local Farm_Mobs = Sections.Farm:CreateToggle({
+    Text = "Auto Farm",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function()
+        -- // TODO: Make this
+    end,
+    Flag = "farmMobs",
+})
+
+local Refresh_Mobs = Sections.Farm:CreateButton({
+    Text = "Refresh Mobs",
+    Alignment = "Left",
+    Callback = function()
+        print("Refreshing mobs...")
+        selectedMobs = rune_fun.GetMobs()
+        Farm_Mobs_Drop:RemoveOption(selectedMobs)
+        task.wait(2)
+        Farm_Mobs_Drop:AddOption(selectedMobs)
+        print("Mobs refreshed:", table.concat(selectedMobs, ", "))
+    end,
+})
+
+
+local Dex = Sections.Debug:CreateButton({
+    Text = "Dex Explorer";
+    Alignment = "Left"; 
+    Callback = function()
+        task.spawn(pcall, function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))();
+        end)
+    end;
+})
+
+local Rspy = Sections.Debug:CreateButton({
+    Text = "R-Spy";
+    Alignment = "Left"; 
+    Callback = function()
+        task.spawn(pcall, function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))();
+        end)
+    end;
+})
+
+local UI_ToggleKeybind = Sections.Data:CreateKeybind({
+    Text = "Toggle UI";
+    Subtext = "Default [N] to Toggle";
+    Alignment = "Left"; 
+    Default = "N"; 
+    Callback = function() 
+        Window:Visibility();
+    end;
+});
+
+local Button_Exit = Sections.Data:CreateButton({
+    Text = "Exit UI";
+    Alignment = "Left"; 
+    Callback = function() 
+        Window:Exit();
+    end;
+});
+
+local SaveUI_Toggle = Sections.Data:CreateButton({
+    Text = "Save",
+    Callback = function()
+        Library:Save();
+    end,
+});
+
+SaveUI_Toggle:CreateSettings():CreateToggle({
+    Text = "Auto Save",
+    Callback = function(Value)
+        UI_AutoSave = Value;
+        task.spawn(function()
+            while UI_AutoSave do
+                SaveUI_Toggle:Fire();
+                task.wait(10)
+            end;
+        end);
+    end,
+    Flag = "UI_AutoSave",
+});
+
+local AutoLoad_Toggle = Sections.Data:CreateToggle({
+    Text = "Auto Load";
+    Subtext = "Loads script on Teleport";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(al)
+        if al then 
+            task.spawn(function()
+                rune_fun.AutoLoad();
+            end);
+        end;
+    end;
+    Flag = "AutoLoad"
+});
+
+local Debug_Toggle = Sections.Data:CreateToggle({
+    Text = "Debug Mode";
+    Subtext = "For Debugging Purposes";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(v) 
+        if v then
+            print("Not made yet");
+        end;
+    end;
+    Flag = "Debug"
+});
+
+local last_t = tick()
+local last_fps = 0
+Run.RenderStepped:Connect(function()
+    local current_t = tick()
+    last_fps = math.floor(1 / (current_t - last_t))
+    last_t = current_t
+end)
+
+local Fps_Toggle = Sections.Data:CreateButton({
+    Text = "Unlock Fps";
+    Alignment = "Left"; 
+    Callback = function() 
+        if not setfpscap then print("executor not supported"); return; end;
+
+        setfpscap(math.max(60, 9999));
+        print("succ", "FPS: " ..last_fps);
+    end;
+});
+
+local GodMode = Sections.Misc_Stuff:CreateToggle({
+    Text = "God Mode",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        if v then task.wait();
+            rune_fun.GodMode(true)
+        else
+            rune_fun.GodMode(false)
+            getgenv().god_enabled = false;
+        end;
+    end,
+    Flag = "godMode",
+})
+
+local AutoStoreValue = 49; 
+local AutoStore_Value = Sections.Automatic:CreateSlider({
+    Text = "Store at";
+    Alignment = "Left";
+    Default = 49;
+    Callback = function(Value)
+         AutoStoreValue = Value; 
+    end;
+    Flag = "slider1";
+    Floats = 0; 
+    Limits = { 10, 50 }; 
+    Increment = 1;
+})
+
+local AutoStoreToggle = false;
+local AutoStore = Sections.Automatic:CreateToggle({
+    Text = "Auto Store Food",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(state)
+        AutoStoreToggle = state;
+
+        while AutoStoreToggle do
+            local inventory = rune_fun.GetInventory()
+            local emptySlot = Find_Emptyslot()
+
+            if emptySlot then 
+                for _, item in pairs(inventory) do
+                    if item.Quantity >= AutoStoreValue then
+                        local args = {
+                            [1] = {
+                                ["Config"] = "FillSlot",
+                                ["tool"] = item.Tool, 
+                                ["SlotNumber"] = emptySlot 
+                            }
+                        }
+                        LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
+                        print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot);
+                    end;
+                end;
+            else
+                print("No empty slots available in the bank")
+            end;
+            task.wait(1);
+        end;
+    end,
+    Flag = "storeFood"
+})
+
+local AutoStore_SelectedOnly = Sections.Automatic:CreateDropdown({
+    Text = "Food",
+    Subtext = "Selected Only",
+    Alignment = "Left",
+    Choices = GetFoodItems(), 
+    Multi = true,
+    Default = nil,
+    Callback = function(Value) 
+        SelectedFoods = Value;
+    end,
+    Flag = "AutoStoreSelectedDrop",
+})
+
+local AutoStore_SelectedToggle = false
+local AutoStore_Selected = Sections.Automatic:CreateToggle({
+    Text = "Auto Store Selected",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(state)
+        AutoStore_SelectedToggle = state;
+
+        while AutoStore_SelectedToggle do
+            local inventory = rune_fun.GetInventory()
+            local emptySlot = Find_Emptyslot() 
+
+            if emptySlot then
+                for _, item in pairs(inventory) do
+                    if table.find(SelectedFoods, item.Name) and item.Quantity >= AutoStoreValue then
+                        local args = {
+                            [1] = {
+                                ["Config"] = "FillSlot",
+                                ["tool"] = item.Tool, 
+                                ["SlotNumber"] = emptySlot
+                            }
+                        }
+                        
+                        LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
+                        print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot)
+                    end;
+                end;
+            else
+                print("No empty slots available in the bank.")
+            end;
+            task.wait(1);
+        end;
+    end,
+    Flag = "AutoStoreSelected"
+})
+
+Library:Load();
