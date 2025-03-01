@@ -5,7 +5,7 @@ local Setup, Called = {}, {};
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
-    
+
     Players = game:GetService("Players");
     ReplicatedStorage = game:GetService("ReplicatedStorage"); Replicated = ReplicatedStorage;
     TweenService = game:GetService("TweenService"); TS = TweenService;
@@ -157,13 +157,12 @@ Setup["HttpService"] = function(self)
 end;
 
 Setup["File"] = function(self)
-    print("1")
     local Manager, Allowed = {};
     if Called["File"] then return Called["File"]; end;
     Called["File"] = Manager;
-    print("2")
+
     self:Basics();
-    print("3")
+
 
     if readfile and writefile and isfolder and isfile and makefolder and delfolder then
         Allowed = true;
