@@ -3,6 +3,9 @@
 local Setup, Called = {}, {};
 
 Setup["Basics"] = function(self)
+    if Called["Basics"] then return; end;
+    Called["Basics"] = true; 
+    
     Players = game:GetService("Players");
     ReplicatedStorage = game:GetService("ReplicatedStorage"); Replicated = ReplicatedStorage;
     TweenService = game:GetService("TweenService"); TS = TweenService;
@@ -17,19 +20,24 @@ Setup["Basics"] = function(self)
 
     PlayerGui = LP:WaitForChild("PlayerGui");
     Backpack = LP:WaitForChild("Backpack");
-    Character = LP.Character or LP.CharacterAdded:Wait(); Char = Character; char = Character;
-    Humanoid = Char:WaitForChild("Humanoid"); Hum = Humanoid; hum = Humanoid;
-    HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp = HumanoidRootPart;
 
-    LP.CharacterAdded:Connect(function()
-        Character = LP.Character; Char = Character; char = Character;
+    task.spawn(function()
+        Character = LP.Character or LP.CharacterAdded:Wait(); Char = Character; char = Character;
         Humanoid = Char:WaitForChild("Humanoid"); Hum = Humanoid; hum = Humanoid;
-        HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp = HumanoidRootPart;
+        HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp =
+            HumanoidRootPart;
+
+        LP.CharacterAdded:Connect(function()
+            Character = LP.Character; Char = Character; char = Character;
+            Humanoid = Char:WaitForChild("Humanoid"); Hum = Humanoid; hum = Humanoid;
+            HumanoidRootPart = Char:WaitForChild("HumanoidRootPart") or Char.PrimaryPart; HRP = HumanoidRootPart; hrp =
+                HumanoidRootPart;
+        end);
     end);
 end;
 
 Setup["ClientController"] = function(self)
-    local Manager = { };
+    local Manager = {};
     if Called["ClientController"] then return Called["ClientController"]; end;
     Called["ClientController"] = Manager;
 
@@ -78,7 +86,7 @@ Setup["ClientController"] = function(self)
         -- Jump
         IJX = nil,
         IJX2 = nil,
-        
+
         JP = function(Power)
             jumppower = Power;
         end,
@@ -149,11 +157,13 @@ Setup["HttpService"] = function(self)
 end;
 
 Setup["File"] = function(self)
+    print("1")
     local Manager, Allowed = {};
     if Called["File"] then return Called["File"]; end;
     Called["File"] = Manager;
-
+    print("2")
     self:Basics();
+    print("3")
 
     if readfile and writefile and isfolder and isfile and makefolder and delfolder then
         Allowed = true;
@@ -342,7 +352,7 @@ Setup["InputRecorder"] = function(self)
     Called["InputRecorder"] = Manager;
 
     self:Basics();
-    
+
     Manager.Pressed = {};
     function Manager:Record(OnUP, Settings)
         if not Settings then return; end;
