@@ -1746,7 +1746,17 @@ local SubFunctions; SubFunctions = {
                 Size = UDim2.new(1, 0, (isSetting and .2) or .3, 0),
             });
 
-            table.insert(nself.Logs, { Contents or "", EF });
+            local SettingsUI;
+            local Fake = { 
+                Destroy = function (self)
+                    EF:Destroy();
+                    if SettingsUI then
+                        SettingsUI:Destroy();
+                    end;
+                end;
+            };
+
+            table.insert(nself.Logs, { Contents or "", Fake });
             if #nself.Logs > nself.Max then self:RemoveEntry(1); end;
 
             local EF_Desc = Library.Create("TextLabel", {
@@ -1775,8 +1785,7 @@ local SubFunctions; SubFunctions = {
                 Text = tostring(#nself.Logs) .. "." or "",
             }, { FontFace = "Font", TextColor3 = "Text" });
 
-            local Click = Library:ApplyClick(Background);
-            local SettingsUI;
+            local Click = Library:ApplyClick(EF);
 
             Click.MouseButton2Up:Connect(function()
                 if SettingsUI then
