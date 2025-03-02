@@ -1743,11 +1743,11 @@ local SubFunctions; SubFunctions = {
             local EF = Library.Create("Frame", {
                 Parent = Background,
                 BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, (isSetting and 10) or 20),
+                Size = UDim2.new(1, 0, (isSetting and .2) or .3, 0),
             });
 
             table.insert(nself.Logs, { Contents or "", EF });
-            if #nself.Logs > nself.Max then table.remove(nself.Logs, 1); end;
+            if #nself.Logs > nself.Max then self:RemoveEntry(1); end;
 
             local EF_Desc = Library.Create("TextLabel", {
                 Parent = EF,
