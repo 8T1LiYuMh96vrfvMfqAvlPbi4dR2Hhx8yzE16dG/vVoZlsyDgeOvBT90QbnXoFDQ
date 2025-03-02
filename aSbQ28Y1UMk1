@@ -2474,7 +2474,6 @@ function Library:CreateWindow(WINFO)
 
             table.insert(Library.Created.Sections, Section);
 
-            print(isFull)
             local SF = Library.Create("Frame", {
                 Parent = (Section.Side and Sides[Section.Side]) or LeftTab,
                 AutomaticSize = Enum.AutomaticSize.Y,
