@@ -2478,7 +2478,7 @@ function Library:CreateWindow(WINFO)
             local SF = Library.Create("Frame", {
                 Parent = (Section.Side and Sides[Section.Side]) or LeftTab,
                 AutomaticSize = Enum.AutomaticSize.Y,
-                Size = UDim2.new((isFull and 2) or 1, (isFull and 5) or 0, 0, 0),
+                Size = UDim2.new((isFull and 2) or 1, (isFull and 10) or 0, 0, 0),
                 BackgroundTransparency = 1,
             });
 
