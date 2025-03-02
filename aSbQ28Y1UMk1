@@ -1837,14 +1837,18 @@ local SubFunctions; SubFunctions = {
         function nself:RemoveEntry(Entry)
             if typeof(Entry) == "number" then
                 local _, Thing = unpack(nself.Logs[Entry]);
+                table.remove(nself.Logs, Entry);
+
                 if Thing then
                     Thing:Destroy();
                 end;
             else
-                for _, v in pairs(nself.Logs) do
+                for i, v in pairs(nself.Logs) do
                     local Contents, Thing = unpack(nself.Logs[v]);
                     if Contents == Entry then
                         Thing:Destroy();
+                        table.remove(nself.Logs, i);
+                        break;
                     end;
                 end;
             end;
