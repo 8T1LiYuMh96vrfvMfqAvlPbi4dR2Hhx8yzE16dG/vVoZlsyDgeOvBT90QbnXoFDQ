@@ -1719,6 +1719,7 @@ local SubFunctions; SubFunctions = {
         local nself = INFO or {};
         nself.Default = nself.Default or {}; -- { "Log1", "Log2", "Log3" }
         nself.Size = nself.Size or 60;
+        nself.Max = nself.Max or 99;
         nself.Logs = {};
 
         local Background = Library.Create("ScrollingFrame", {
@@ -1746,6 +1747,7 @@ local SubFunctions; SubFunctions = {
             });
 
             table.insert(nself.Logs, { Contents or "", EF });
+            if #nself.Logs > nself.Max then table.remove(nself.Logs, 1); end;
 
             local EF_Desc = Library.Create("TextLabel", {
                 Parent = EF,
@@ -1773,7 +1775,63 @@ local SubFunctions; SubFunctions = {
                 Text = tostring(#nself.Logs) .. "." or "",
             }, { FontFace = "Font", TextColor3 = "Text" });
 
-            return #nself.Logs;
+            local Click = Library:ApplyClick(Background);
+            local SettingsUI;
+
+            Click.MouseButton2Up:Connect(function()
+                if SettingsUI then
+                    SettingsUI.Visible = true;
+                    SettingsUI.Position = UDim2.new(0, Mouse.X, 0, Mouse.Y);
+                end;
+            end);
+
+            return {
+                CreateSettings = function(self)
+                    if SettingsUI then return; end;
+                    local Settings = { isSetting = true };
+
+                    Settings.UI = Library.Create("ScrollingFrame", {
+                        Parent = Library.ScreenUI,
+                        Size = UDim2.new(0, 150, 0, 100),
+                        Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
+                        Visible = false,
+                        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                        ClipsDescendants = true,
+                        CanvasSize = UDim2.new(0, 0, 0, 0),
+                        ScrollBarThickness = 1,
+                        ZIndex = 999
+                    }, { BackgroundColor3 = "Background2" });
+
+                    Library:ApplyCorner(Settings.UI, 4);
+                    Library:ApplyStroke(Settings.UI, "Accent1", 1, "Round");
+                    Library:ApplyPadding(Settings.UI, 7);
+                    Library.Create("UIListLayout", {
+                        Parent = Settings.UI,
+                        Padding = UDim.new(0, 5),
+                    });
+
+                    SettingsUI = Settings.UI;
+                    InputService:Bind("MouseButton1", function()
+                        local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                        SettingsUI.Visible = (n and SettingsUI.Visible) or false;
+                    end, false, true);
+
+                    SettingsUI.ChildAdded:Connect(function(child)
+                        pcall(function()
+                            child.ZIndex = 999;
+                        end);
+                        task.wait();
+                        for _, v in pairs(child:GetDescendants()) do
+                            pcall(function()
+                                v.ZIndex = 999;
+                            end);
+                        end;
+                    end);
+
+                    setmetatable(Settings, { __index = SubFunctions })
+                    return Settings;
+                end,
+            };
         end;
 
         function nself:RemoveEntry(Entry)
