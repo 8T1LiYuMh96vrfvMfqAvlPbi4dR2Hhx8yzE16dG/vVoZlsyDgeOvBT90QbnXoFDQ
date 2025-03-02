@@ -2373,6 +2373,7 @@ function Library:CreateWindow(WINFO)
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 0,
+            ClipsDescendants = false;
         });
 
         Library.Create("UIListLayout", {
@@ -2391,6 +2392,7 @@ function Library:CreateWindow(WINFO)
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 0,
+            ClipsDescendants = false;
         });
 
         Library.Create("UIListLayout", {
@@ -2464,14 +2466,35 @@ function Library:CreateWindow(WINFO)
 
             local Sides = { ["Left"] = LeftTab, ["Right"] = RightTab };
 
+            local isFull;
+            if Section.Side == "Full" then
+                Section.Side = "Left";
+                isFull = true;
+            end;
+
             table.insert(Library.Created.Sections, Section);
 
+            print(isFull)
             local SF = Library.Create("Frame", {
                 Parent = (Section.Side and Sides[Section.Side]) or LeftTab,
                 AutomaticSize = Enum.AutomaticSize.Y,
-                Size = UDim2.new(1, 0, 0, 0),
+                Size = UDim2.new((isFull and 2) or 1, (isFull and 5) or 0, 0, 0),
                 BackgroundTransparency = 1,
             });
+
+            if isFull then
+                task.spawn(function()
+                    local filler = Library.Create("Frame", {
+                        Parent = RightTab,
+                        Size = UDim2.new((isFull and 2) or 1, (isFull and 5) or 0, 0, 0),
+                        BackgroundTransparency = 1,
+                    });
+    
+                    while filler and task.wait() do
+                        filler.Size = UDim2.new(filler.Size.X.Scale, filler.Size.X.Offset, 0, SF.AbsoluteSize.Y)
+                    end;
+                end);
+            end;
 
             Library:ApplyTextSize(Library.Create("TextLabel", {
                 Parent = SF,
