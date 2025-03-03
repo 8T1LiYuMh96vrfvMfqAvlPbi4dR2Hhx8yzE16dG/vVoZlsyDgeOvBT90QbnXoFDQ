@@ -1088,7 +1088,7 @@ local SubFunctions; SubFunctions = {
                 local Percent = (x - absPX) / absSX;
                 Percent = math.clamp(Percent, 0, 1);
                 local Value = ((nself.Limits[2] - nself.Limits[1]) * Percent) + nself.Limits[1];
-                
+
                 local increment = tonumber(nself.Increment) or 1
                 Value = math.floor((Value / increment) + 0.5) * increment
 
@@ -1889,8 +1889,8 @@ local SubFunctions; SubFunctions = {
         end;
 
         function nself:Clear()
-            for i, _ in pairs(nself.Logs) do
-                nself:RemoveEntry(i);
+            for _, v in pairs(nself.Logs) do
+                nself:RemoveEntry(v);
             end;
         end;
 
