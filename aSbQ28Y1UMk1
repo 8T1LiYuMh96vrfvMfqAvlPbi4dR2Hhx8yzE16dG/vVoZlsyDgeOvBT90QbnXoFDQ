@@ -468,13 +468,13 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local SettingsUI = nil;
-        function nself:CreateSettings()
+        function nself:CreateSettings(Size)
             if SettingsUI then return; end;
             local Settings = { isSetting = true };
 
             Settings.UI = Library.Create("ScrollingFrame", {
                 Parent = Library.ScreenUI,
-                Size = UDim2.new(0, 150, 0, 100),
+                Size = Size or UDim2.new(0, 150, 0, 100),
                 Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                 Visible = false,
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -493,7 +493,7 @@ local SubFunctions; SubFunctions = {
             });
 
             SettingsUI = Settings.UI;
-            InputService:Bind("MouseButton1", function()
+            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 SettingsUI.Visible = (n and SettingsUI.Visible) or false;
             end, false, true);
@@ -673,13 +673,13 @@ local SubFunctions; SubFunctions = {
         end;
 
         local SettingsUI = nil;
-        function nself:CreateSettings()
+        function nself:CreateSettings(Size)
             if SettingsUI then return; end;
             local Settings = { isSetting = true };
 
             Settings.UI = Library.Create("ScrollingFrame", {
                 Parent = Library.ScreenUI,
-                Size = UDim2.new(0, 150, 0, 100),
+                Size = Size or UDim2.new(0, 150, 0, 100),
                 Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                 Visible = false,
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -698,7 +698,7 @@ local SubFunctions; SubFunctions = {
             });
 
             SettingsUI = Settings.UI;
-            InputService:Bind("MouseButton1", function()
+            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 SettingsUI.Visible = (n and SettingsUI.Visible) or false;
             end, false, true);
@@ -896,13 +896,13 @@ local SubFunctions; SubFunctions = {
         end;
 
         local SettingsUI = nil;
-        function nself:CreateSettings()
+        function nself:CreateSettings(Size)
             if SettingsUI then return; end;
             local Settings = { isSetting = true };
 
             Settings.UI = Library.Create("ScrollingFrame", {
                 Parent = Library.ScreenUI,
-                Size = UDim2.new(0, 150, 0, 100),
+                Size = Size or UDim2.new(0, 150, 0, 100),
                 Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                 Visible = false,
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -921,7 +921,7 @@ local SubFunctions; SubFunctions = {
             });
 
             SettingsUI = Settings.UI;
-            InputService:Bind("MouseButton1", function()
+            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 SettingsUI.Visible = (n and SettingsUI.Visible) or false;
             end, false, true);
@@ -1121,13 +1121,13 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local SettingsUI = nil;
-        function nself:CreateSettings()
+        function nself:CreateSettings(Size)
             if SettingsUI then return; end;
             local Settings = { isSetting = true };
 
             Settings.UI = Library.Create("ScrollingFrame", {
                 Parent = Library.ScreenUI,
-                Size = UDim2.new(0, 150, 0, 100),
+                Size = Size or UDim2.new(0, 150, 0, 100),
                 Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                 Visible = false,
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -1146,7 +1146,7 @@ local SubFunctions; SubFunctions = {
             });
 
             SettingsUI = Settings.UI;
-            InputService:Bind("MouseButton1", function()
+            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 SettingsUI.Visible = (n and SettingsUI.Visible) or false;
             end, false, true);
@@ -1614,13 +1614,13 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local SettingsUI = nil;
-        function nself:CreateSettings()
+        function nself:CreateSettings(Size)
             if SettingsUI then return; end;
             local Settings = { isSetting = true };
 
             Settings.UI = Library.Create("ScrollingFrame", {
                 Parent = Library.ScreenUI,
-                Size = UDim2.new(0, 150, 0, 100),
+                Size = Size or UDim2.new(0, 150, 0, 100),
                 Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                 Visible = false,
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -1639,7 +1639,7 @@ local SubFunctions; SubFunctions = {
             });
 
             SettingsUI = Settings.UI;
-            InputService:Bind("MouseButton1", function()
+            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 SettingsUI.Visible = (n and SettingsUI.Visible) or false;
             end, false, true);
@@ -1818,13 +1818,13 @@ local SubFunctions; SubFunctions = {
             end);
 
             return {
-                CreateSettings = function(self)
+                CreateSettings = function(self, Size)
                     if SettingsUI then return; end;
                     local Settings = { isSetting = true };
 
                     Settings.UI = Library.Create("ScrollingFrame", {
                         Parent = Library.ScreenUI,
-                        Size = UDim2.new(0, 150, 0, 100),
+                        Size = Size or UDim2.new(0, 150, 0, 100),
                         Position = UDim2.new(0, Mouse.X, 0, Mouse.Y),
                         Visible = false,
                         AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -1843,7 +1843,7 @@ local SubFunctions; SubFunctions = {
                     });
 
                     SettingsUI = Settings.UI;
-                    InputService:Bind("MouseButton1", function()
+                    InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                         local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                         SettingsUI.Visible = (n and SettingsUI.Visible) or false;
                     end, false, true);
