@@ -1088,7 +1088,9 @@ local SubFunctions; SubFunctions = {
                 local Percent = (x - absPX) / absSX;
                 Percent = math.clamp(Percent, 0, 1);
                 local Value = ((nself.Limits[2] - nself.Limits[1]) * Percent) + nself.Limits[1];
-                Value = math.floor(((Value / (tonumber(nself.Increment) or 1)) * (tonumber(nself.Increment) or 1)) + .5);
+                
+                local increment = tonumber(nself.Increment) or 1
+                Value = math.floor((Value / increment) + 0.5) * increment
 
                 nself.Value = Value;
                 Update();
