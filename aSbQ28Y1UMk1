@@ -1878,7 +1878,7 @@ local SubFunctions; SubFunctions = {
                 end;
             else
                 for i, v in pairs(nself.Logs) do
-                    local Contents, Thing = unpack(nself.Logs[v]);
+                    local Contents, Thing = unpack(v);
                     if Contents == Entry then
                         Thing:Destroy();
                         table.remove(nself.Logs, i);
