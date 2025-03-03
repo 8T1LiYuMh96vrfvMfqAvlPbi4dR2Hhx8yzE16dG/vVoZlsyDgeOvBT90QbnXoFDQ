@@ -419,7 +419,7 @@ Setup["InputRecorder"] = function(self)
         if (not Key) or (not Callback) then return; end;
 
         return Manager:Record(OnUP, {
-            Inputs = { Key },
+            Inputs = (typeof(Key) == "table" and Key) or { Key },
             CancelKeys = {},
             IgnoreProc = IgnoreProc,
 
