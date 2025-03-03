@@ -52,14 +52,15 @@ local Library = {
             ["Highlight"] = RGB(58, 64, 80),
             ["Hover"] = RGB(85, 87, 98),
             ["Selected"] = RGB(101, 103, 117),
-        
-            ["Text"] = RGB(230, 230, 230),    
-            ["Subtext"] = RGB(170, 170, 170),  
-            ["Icons"] = RGB(230, 230, 230),  
-        
+
+            ["Text"] = RGB(230, 230, 230),
+            ["Subtext"] = RGB(170, 170, 170),
+            ["Icons"] = RGB(230, 230, 230),
+
             ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
-            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-        },        
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold,
+                Enum.FontStyle.Normal)
+        },
     },
 
     Black = RGB(0, 0, 0),
@@ -1451,9 +1452,9 @@ local SubFunctions; SubFunctions = {
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library.Create("UIPadding", {
-            Parent = SearchBox;
-            PaddingLeft = UDim.new(0, 7);
-            PaddingRight = UDim.new(0, 7);
+            Parent = SearchBox,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
         });
 
         local ItemHolder = Library.Create("ScrollingFrame", {
@@ -1540,6 +1541,20 @@ local SubFunctions; SubFunctions = {
             Update();
         end;
 
+        function nself:SetOptions(New)
+            for idx, _ in pairs(Options) do
+                nself:RemoveOption(idx);
+            end;
+
+            for _, nv in ipairs(New) do
+                nself:AddOption(nv);
+            end;
+
+            nself:SetValue();
+            nself:Fire();
+            Update();
+        end;
+
         function nself:AddOption(Option)
             if not Option then return; end;
             Option = tostring(Option);
@@ -1569,15 +1584,15 @@ local SubFunctions; SubFunctions = {
             end);
         end;
 
-        for _, v in pairs(nself.Choices) do
-            nself:AddOption(v);
-        end;
-
         function nself:RemoveOption(Option)
             if Option and Options[Option] then
                 Options[Option][1]:Destroy();
                 Options[Option] = nil;
             end;
+        end;
+
+        for _, v in pairs(nself.Choices) do
+            nself:AddOption(v);
         end;
 
         function nself:SetValue(Value)
@@ -1591,18 +1606,6 @@ local SubFunctions; SubFunctions = {
             nself:Fire();
             Update();
         end;
-
-        function nself:ClearDropdown()
-            for _, obj in pairs(Options) do
-                obj[1]:Destroy();
-            end;
-            Options = {};
-            nself.Value = nil;
-            ValueLabel.Text = "None";
-        
-            nself:Fire();
-        end;
-        
 
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
@@ -1755,7 +1758,7 @@ local SubFunctions; SubFunctions = {
             Parent = Background,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, (isSetting and .2) or .3, 0),
-            LayoutOrder = 999999;
+            LayoutOrder = 999999,
         });
 
         function nself:AddEntry(Contents)
@@ -1766,13 +1769,13 @@ local SubFunctions; SubFunctions = {
             });
 
             local SettingsUI;
-            local Fake = { 
-                Destroy = function (self)
+            local Fake = {
+                Destroy = function(self)
                     EF:Destroy();
                     if SettingsUI then
                         SettingsUI:Destroy();
                     end;
-                end;
+                end,
             };
 
             table.insert(nself.Logs, { Contents or "", Fake });
@@ -2383,6 +2386,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
+            ClipsDescendants = true;
         });
 
         local LeftTab = Library.Create("ScrollingFrame", {
@@ -2392,7 +2396,7 @@ function Library:CreateWindow(WINFO)
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 0,
-            ClipsDescendants = false;
+            ClipsDescendants = false,
         });
 
         Library.Create("UIListLayout", {
@@ -2411,7 +2415,7 @@ function Library:CreateWindow(WINFO)
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 0,
-            ClipsDescendants = false;
+            ClipsDescendants = false,
         });
 
         Library.Create("UIListLayout", {
@@ -2507,7 +2511,7 @@ function Library:CreateWindow(WINFO)
                         Size = UDim2.new((isFull and 2) or 1, (isFull and 5) or 0, 0, 0),
                         BackgroundTransparency = 1,
                     });
-    
+
                     while filler and task.wait() do
                         filler.Size = UDim2.new(filler.Size.X.Scale, filler.Size.X.Offset, 0, SF.AbsoluteSize.Y)
                     end;
