@@ -1592,6 +1592,18 @@ local SubFunctions; SubFunctions = {
             Update();
         end;
 
+        function nself:ClearDropdown()
+            for _, obj in pairs(Options) do
+                obj[1]:Destroy();
+            end;
+            Options = {};
+            nself.Value = nil;
+            ValueLabel.Text = "None";
+        
+            nself:Fire();
+        end;
+        
+
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
         nself:Fire();
