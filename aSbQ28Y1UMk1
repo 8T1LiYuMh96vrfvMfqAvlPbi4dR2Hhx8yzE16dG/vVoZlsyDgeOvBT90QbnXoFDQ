@@ -1886,6 +1886,12 @@ local SubFunctions; SubFunctions = {
             end;
         end;
 
+        function nself:Clear()
+            for i, _ in pairs(nself.Logs) do
+                nself:RemoveEntry(i);
+            end;
+        end;
+
         for _, v in next, (nself.Default) do
             nself:AddEntry(v);
         end;
@@ -2387,7 +2393,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
-            ClipsDescendants = true;
+            ClipsDescendants = true,
         });
 
         local LeftTab = Library.Create("ScrollingFrame", {
