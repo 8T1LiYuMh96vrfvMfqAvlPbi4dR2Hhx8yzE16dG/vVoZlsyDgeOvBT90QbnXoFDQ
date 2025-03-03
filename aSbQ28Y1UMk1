@@ -1607,6 +1607,7 @@ local SubFunctions; SubFunctions = {
             Update();
         end;
 
+        nself.ClearDropdown = nself.SetOptions;
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = nself.SetValue;
         nself:Fire();
