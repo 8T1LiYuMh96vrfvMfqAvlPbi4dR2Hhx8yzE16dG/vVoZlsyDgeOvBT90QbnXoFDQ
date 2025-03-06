@@ -1,6 +1,72 @@
 -- // Rune Slayer Progress // -- 
 
+-- // TODO: Use Bed anywhere
+
 rune_fun = {};
+rune_config = {};
+
+local defaultConfig = {
+    chopTrees = false,
+    collectApples = false,
+    collectEggs = false
+}
+
+local configMT = {
+    __index = function(table, key)
+        return defaultConfig[key] or nil;
+    end,
+    
+    __newindex = function(table, key, value)
+        if key == "chopTrees"
+         or key == "collectApples"
+         or key == "collectEggs" then
+            if type(value) == "boolean" then
+                rawset(table, key, value);
+            else
+                warn("Invalid value for " .. key .. ", Expected boolean");
+            end;
+        else
+            rawset(table, key, value);
+        end;
+    end;
+}
+setmetatable(rune_config, configMT);
+
+-- // Error Handling - Debug Purposes
+
+err_codes = {
+    [100] = "Variable Issue";
+    [101] = "Game Variable Changed";
+    [102] = "Function Issue";
+    [103] = "Detection AntiCheat";
+};
+
+function format_error(err)
+    if type(err) == "table" then
+        local msg = err_codes[err.code] or "Unknown Error";
+        return string.format("Error Code: %d | Message: %s", err.code, msg);
+    end;
+    return "Runtime Error: " .. tostring(err);
+end;
+
+function safe_execute(func, ...)
+    local status, result = xpcall(func, format_error, ...);
+    if (not status) then
+        print("Error: " .. result);
+    end;
+    return status, result;
+end;
+
+function foo()
+    local unexpected_condition = true;
+    if unexpected_condition then
+        error({code = 100});
+    end;
+    local a = nil;
+    print(a[1]); 
+end;
+
+safe_execute(foo);
 
 rune_fun.Entry = function(check)
     check = check or false;
@@ -23,25 +89,13 @@ rune_fun.GetUser = function(userid, username, accountage)
         return userid, username, accountage
     else 
         print(type(Char), type(LclPlr))
-        print("Seems like Character is missing or not loaded yet!")
     end;
 end;
 
-rune_fun.Entry = function(check)
-    local check = check or false;
-    if not game:IsLoaded() then
-        print("Waiting for the game to load..");
-        repeat task.wait(math.clamp(1,2,5)) until game:IsLoaded() or check;
-    end;
-    print("Game loaded successfully!");
-    return check;
-end;
-rune_fun.Entry();
-
-rune_fun.GetGame = function(get)
+rune_fun.GetGame = function()
     local m_service = game:GetService("MarketplaceService");
     local succ, m_info = pcall(m_service.GetProductInfo, m_service, game.PlaceId);
-    return succ and m_info.Name or "Could not get GameValues"
+    return succ and m_info.Name or "Couldnt get GameValues"
 end;
 
 rune_fun.GetApples = function()
@@ -54,10 +108,31 @@ rune_fun.GetApples = function()
     return apples;
 end;
 
-WalkSpeedValue = 16;
-WalkSpeedEnabled = false;
-MoveDirection = Vector3.zero;
-local WalkSpeedConnection;
+rune_fun.GetEggs = function()
+    local eggs = {};
+    for _, v in pairs(Effects:GetChildren()) do 
+        if v.Name == "Egg" and v:FindFirstChild("Handle") then 
+            table.insert(eggs, v)
+        end;
+    end;
+    return eggs;
+end;
+
+rune_fun.GetTrees = function()
+    local trees = {}
+    for _, v in pairs(Harvestable:GetChildren()) do 
+        if v:IsA("Model") and (v.Name == "Small Oak" or v.Name == "Oak") then
+            if v:FindFirstChildOfClass("MeshPart") then table.insert(trees, v)
+            end;
+        end;
+    end;
+    print("Found trees:", #trees);
+    return trees;
+end;
+
+-- // WalkSpeed Variables cba
+WalkSpeedValue = 16; WalkSpeedEnabled = false; MoveDirection = Vector3.zero; local WalkSpeedConnection;
+
 rune_fun.WalkSpeed = function(enabled)
     WalkSpeedEnabled = enabled;
 
@@ -69,30 +144,29 @@ rune_fun.WalkSpeed = function(enabled)
     if not WalkSpeedEnabled then return; end;
 
     local function updateDirection()
-        local character = game.Players.LocalPlayer.Character
+        local character = LclPlr.Character;
         if not character or not character:FindFirstChild("HumanoidRootPart") then return; end;
 
-        local camera = workspace.CurrentCamera
-        local moveVector = Vector3.zero
+        local camera = workspace.CurrentCamera;
+        local moveVector = Vector3.zero;
 
         if Uis:IsKeyDown(Enum.KeyCode.W) then
-            moveVector = moveVector + camera.CFrame.LookVector
-        end
+            moveVector = moveVector + camera.CFrame.LookVector;
+        end;
         if Uis:IsKeyDown(Enum.KeyCode.S) then
-            moveVector = moveVector - camera.CFrame.LookVector
-        end
+            moveVector = moveVector - camera.CFrame.LookVector;
+        end;
         if Uis:IsKeyDown(Enum.KeyCode.A) then
-            moveVector = moveVector - camera.CFrame.RightVector
-        end
+            moveVector = moveVector - camera.CFrame.RightVector;
+        end;
         if Uis:IsKeyDown(Enum.KeyCode.D) then
-            moveVector = moveVector + camera.CFrame.RightVector
-        end
-
-        MoveDirection = Vector3.new(moveVector.X, 0, moveVector.Z).Unit
-    end
+            moveVector = moveVector + camera.CFrame.RightVector;
+        end;
+        MoveDirection = Vector3.new(moveVector.X, 0, moveVector.Z).Unit;
+    end;
 
     local function teleportWalk()
-        local character = game.Players.LocalPlayer.Character
+        local character = LclPlr.Character;
         if not character or not character:FindFirstChild("HumanoidRootPart") then return; end;
 
         local hrp = character.HumanoidRootPart;
@@ -110,15 +184,16 @@ rune_fun.WalkSpeed = function(enabled)
 end;
 
 rune_fun.AutoLoad = function()
-    if identifyexecutor() then
+    if (not queue_on_teleport) then return; end;
+    if queue_on_teleport and identifyexecutor() then
         pcall(function()
             task.defer(function()
                 print("in queue..");
-                queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/Fisch.lua"))()]])
+                queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/RUNE_SLAYER.lua"))()]])
             end);
         end);
     else
-        print("Something went wrong, AutoLoad", type(queue_on_teleport))
+        print("Something went wrong, AutoLoad Issue", type(queue_on_teleport))
     end;
 end;
 
@@ -140,43 +215,38 @@ end;
 rune_fun.GetMobs = function()
     local mobs = {};
     local mobFolder = workspace:FindFirstChild("Alive");
+    local dist, mob = math.huge;
 
-    if (not mobFolder) then 
-        print("wtf?")
+    if not mobFolder then 
+        print("wtf?");
         return;
     end;
 
     for _, v in pairs(mobFolder:GetChildren()) do
-        if v:IsA("Model") and not v:FindFirstChild("ComboCount") then 
-            table.insert(mobs, v.Name);
+        if v:IsA("Model") and (not v:FindFirstChild("ComboCount")) then
+            local rootPart = v:FindFirstChild("HumanoidRootPart") or v.PrimaryPart or v:FindFirstChild("Torso") or v:FindFirstChild("UpperTorso") or v:FindFirstChildWhichIsA("BasePart") 
+
+            if rootPart then
+                table.insert(mobs, v)
+                local mag = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).magnitude;
+                if mag < dist then 
+                    dist = mag;
+                    mob = v;
+                end;
+            end;
         end;
     end;
-    return mobs;
+    return mobs, mob
 end;
 
-rune_fun.GodMode = function(state)
-    -- ts might be patched not sure
-    local net = require(Rs.Modules.Network);
-    
-    if not getgenv().god_enabled then
-        getgenv().god_enabled = false;
-    end;
-
-    getgenv().god_enabled = state or getgenv().god_enabled;
-
-    task.spawn(function()
-        while getgenv().god_enabled do  
-            net.connect('MasterEvent', 'FireServer', LclPlr.Character, {
-                Config = "Roll"
-            })
-            task.wait(.1)
-        end;
-    end)
+rune_fun.GodMode = function()
+    -- // Reverted due to Patch
+    print(string.rep("Patched", 2))
 end;
 
 rune_fun.GetUsedStorage_Slots = function()
-    local Storage = LclPlr.PlayerGui.BankGui.MainFrame.Slots.ScrollingFrame
-    local usedSlots = {}
+    local Storage = PlayerGui.BankGui.MainFrame.Slots.ScrollingFrame
+    local usedSlots = {};
 
     for _, slot in pairs(Storage:GetChildren()) do
         if slot:IsA("ImageLabel") and slot:FindFirstChild("ToolFrame") then 
@@ -189,7 +259,7 @@ end;
 
 rune_fun.GetInventory = function()
     local Backpack = LclPlr.Backpack
-    local items = {}
+    local items = {};
 
     for _, tool in pairs(Backpack:GetChildren()) do
         if tool:IsA("Tool") then
@@ -209,35 +279,171 @@ rune_fun.GetInventory = function()
     return items;
 end;
 
-local function Find_Emptyslot()
-    local args = {
+rune_fun.FindEmptySlot = function()
+    local StorageUI = {
         [1] = {
-            ["player"] = game:GetService("Players").LocalPlayer,
+            ["player"] = LclPlr,
             ["Object"] = workspace:WaitForChild("Effects"):WaitForChild("NPCS"):WaitForChild("Banker"),
             ["Action"] = "Storage"
         }}
-    game:GetService("Players").LocalPlayer.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args))
-    task.wait(.1)
-    local usedSlots = rune_fun.GetUsedStorage_Slots()
-    for i = 1, 50 do 
-        if not table.find(usedSlots, tostring(i)) then
-            return tostring(i);
+        game:GetService("Players").LocalPlayer.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(StorageUI))
+        task.wait(.1);
+
+        local usedSlots = rune_fun.GetUsedStorage_Slots();
+
+        for i = 1, 50 do
+            if not table.find(usedSlots, tostring(i)) then
+                return tostring(i);
+            end;
         end;
-    end;
     return nil;
 end;
 
-local SelectedFoods = {};
-local function GetFoodItems()
-    local inventory = rune_fun.GetInventory()
-    local foodItems = {}
+local SelectedFoods = {}; -- // nil cuz none selected
+rune_fun.GetFood_Items = function()
+    local inv = rune_fun.GetInventory();
+    local foodItems = {};
 
-    for _, item in pairs(inventory) do
-        if item.Name and item.Quantity then 
-            table.insert(foodItems, item.Name) 
+    for _, i in pairs(inv) do 
+        if i.Name and i.Quantity then 
+            table.insert(foodItems, i.Name)
         end;
     end;
     return foodItems;
+end;
+
+rune_fun.Tween = function(targetCFrame, speed)
+    if (not Hrp) then print("Hrp not found", type(Hrp)) return; end;
+
+    if typeof(targetCFrame) ~= "CFrame" then 
+        print("Invalid target CFrame:", targetCFrame);
+        return;
+    end;
+
+    if Hrp:FindFirstChild("BodyVelocity") then 
+        Hrp.BodyVelocity:Destroy();
+    end;
+
+    local antifall = Instance.new("BodyVelocity");
+    antifall.Parent = Hrp;
+    antifall.Velocity = Vector3.new(0, 0, 0);
+    antifall.MaxForce = Vector3.new(4000, 4000, 4000);
+
+    local function disableCollisions()
+        for _, part in ipairs(Hrp.Parent:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false;
+            end;
+        end;
+    end;
+
+    local noclipConnection = game:GetService("RunService").Stepped:Connect(disableCollisions)
+
+    local info = TweenInfo.new(
+        (Hrp.Position - targetCFrame.Position).Magnitude / speed, 
+        Enum.EasingStyle.Linear
+    )
+
+    local tween = TweenService:Create(Hrp, info, {CFrame = targetCFrame})
+    tween:Play()
+    tween.Completed:Connect(function()
+        if noclipConnection then noclipConnection:Disconnect() end;
+        if antifall then antifall:Destroy() end;
+    end)
+end;
+
+-- // Anti fall by #Bored
+local old; 
+rune_fun.NoFall = function(Check)
+    Check = Check or false;
+    local Remote = LclPlr.Character.CharacterHandler.Input.Events.MasterEvent;
+    if Check then
+        if not old then
+            old = hookmetamethod(game, "__namecall", function(self, ...)
+                local args = { ... }
+                local method = getnamecallmethod()
+
+                if not checkcaller() and self == Remote and method == "FireServer" then
+                    if typeof(args[1]) == "table" and args[1]["Config"] == "FallDamage" then
+                        return;
+                    end;
+                end;
+                return old(self, ...)
+            end)
+        end;
+    else
+        if old then
+            hookmetamethod(game, "__namecall", old)
+            old = nil;
+        end;
+    end;
+end;
+
+local noFogConnection;
+rune_fun.NoFog = function(Check)
+    Check = Check or false;
+    local Lighting = game:GetService("Lighting");
+
+    if (not Check) then
+        if noFogConnection then
+            noFogConnection:Disconnect();
+            noFogConnection = nil;
+        end;
+
+        Lighting.FogEnd = 10000;
+        local atmosphere = Lighting:FindFirstChild("Atmosphere")
+        if atmosphere then
+            atmosphere.Density = 0.3
+        end;
+        return;
+    end;
+
+    Lighting.FogEnd = 1000000;
+    local atmosphere = Lighting:FindFirstChild("Atmosphere")
+    if atmosphere then
+        atmosphere.Density = 0;
+    end;
+
+    noFogConnection = Run.RenderStepped:Connect(function()
+        Lighting.FogEnd = 1000000;
+        local atmosphere = Lighting:FindFirstChild("Atmosphere");
+        if atmosphere then
+            atmosphere.Density = 0;
+        end;
+    end)
+end;
+
+rune_fun.ChangeTime = function(day, night)
+    local timeValue = Rs.GlobalSettings.Time;
+    if day then
+        timeValue.Value = "Day";
+    elseif night then
+        timeValue.Value = "Night";
+    end;
+end;
+
+rune_fun.NoRollCooldown = function()
+    -- // Not made yet idk its unnecessary
+end;
+
+rune_fun.InstaKill = function(check)
+    check = check or false;
+    local Username = LclPlr.Name;
+    while check and getgenv().InstaKill do task.wait();
+        for _, v in pairs(Alive:GetChildren()) do
+            local HC = v:FindFirstChild("HitCredit");
+            if v.PrimaryPart and HC and v:IsA("Model") and isnetworkowner(v.PrimaryPart) then
+                local Credit = HC:FindFirstChild(Username)
+                if Credit and Credit.Value >= getgenv().InstaKillVal then
+                    v.Humanoid.Health = 0
+                end;
+            elseif (not isnetworkowner) or (not HC) then 
+                print("")
+            else
+                print("something went wrong")
+            end;
+        end;
+    end;
 end;
 
 -- // Variables 
@@ -248,15 +454,23 @@ Humanoid = Char:FindFirstChildOfClass("Humanoid");
 Hrp = Char:WaitForChild("HumanoidRootPart");
 GuiService = game:GetService("GuiService");
 Vim = game:GetService("VirtualInputManager");
-Env = (getgenv and getgenv() or shared);
 Run = game:GetService("RunService");
 TweenService = game:GetService("TweenService");
 Uis = game:GetService("UserInputService");
 Rs = game:GetService("ReplicatedStorage");
+PlayerGui = LclPlr:WaitForChild("PlayerGui") or LclPlr:FindFirstChild("PlayerGui");
+
+local function assignHrp(newCh)
+    Char = newCh;
+    Hrp = Char:WaitForChild("HumanoidRootPart");
+end;
+LclPlr.CharacterAdded:Connect(assignHrp);
 
 -- // Game Variables
 
 Harvestable = workspace.Harvestable;
+Effects = workspace.Effects;
+Alive = workspace.Alive;
 
 -- // UI
 
@@ -273,50 +487,35 @@ Library.Paths.Secondary = "\\" .. tostring(userid);
 Library.Paths.Data = "\\" .. tostring(game.PlaceId);
 
 local Window = Library:CreateWindow({ Title = "Tuah " ..rune_fun.GetGame(); });
+
 local Tabs = {
     Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://130289250570665"}),
     Misc = Window:CreateTab({ Title = "Misc", Icon = "rbxassetid://130819053773683"}),
+    Esp = Window:CreateTab({ Title = "Esp", Icon = "rbxassetid://138343944779037"}),
     Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://95750721918044"}),
 };
 
 local Sections = {
-    Collect = Tabs.Dashboard:CreateSection({
-        Title = "Collect",
-        Side = "Left",
-    }),
-    Player = Tabs.Dashboard:CreateSection({
-        Title = "Local",
-        Side = "Left",
-    }),
-    Automatic = Tabs.Dashboard:CreateSection({
-        Title = "Automatic",
-        Side = "Right",
-    }),
-    Farm = Tabs.Dashboard:CreateSection({
-        Title = "Farm",
-        Side = "Right",
-    }),
-    Data = Tabs.Config:CreateSection({
-        Title = "Data",
-        Side = "Right",
-    }),
-    Debug = Tabs.Config:CreateSection({
-        Title = "Debug",
-        Side = "Left",
-    }),
-    Misc_Stuff = Tabs.Misc:CreateSection({
-        Title = "Misc",
-        Side = "Left",
-    }),
+    Collect = Tabs.Dashboard:CreateSection({ Title = "Collect", Side = "Left",}),
+    Player = Tabs.Dashboard:CreateSection({ Title = "Local", Side = "Left",}),
+    Automatic = Tabs.Dashboard:CreateSection({ Title = "Automatic", Side = "Right",}),
+    Farm = Tabs.Dashboard:CreateSection({ Title = "Farm", Side = "Right",}),
+    Data = Tabs.Config:CreateSection({ Title = "Data", Side = "Right",}),
+    Debug = Tabs.Config:CreateSection({ Title = "Debug", Side = "Left",}),
+    Misc_Stuff = Tabs.Misc:CreateSection({ Title = "Misc", Side = "Left",}),
+    Insta_Kill = Tabs.Misc:CreateSection({ Title = "Helper", Side = "Right",}),
+    Misc_Class = Tabs.Misc:CreateSection({ Title = "Classes", Side = "Right",}),
+    Esp_Settings = Tabs.Esp:CreateSection({ Title = "Esp", Side = "Left",}),
+    GameInfo = Tabs.Config:CreateSection({ Title = "Information", Side = "Left",}),
 };
 
-local AppleDelay = .5;
-local TweenSpeed = 5;
+local AppleDelay = math.random(.4,.5);
+local TweenSpeed = 90;
 local Method = "Tween";
 local Collect_ApplesDelay = Sections.Collect:CreateSlider({
     Text = "Delay time";
     Alignment = "Left";
-    Default = 0.5;
+    Default = AppleDelay;
     Callback = function(v) 
         AppleDelay = v;
     end;
@@ -327,9 +526,9 @@ local Collect_ApplesDelay = Sections.Collect:CreateSlider({
 })
 
 local Collect_ApplesTweenSpeed = Sections.Collect:CreateSlider({
-    Text = "Tween Speed (Low=Fast)";
+    Text = "Tween Speed";
     Alignment = "Left";
-    Default = 5;
+    Default = TweenSpeed;
     Callback = (function() 
         local lastPrintedSpeed = nil;
 
@@ -340,14 +539,13 @@ local Collect_ApplesTweenSpeed = Sections.Collect:CreateSlider({
                 print("Tween Speed now at: " .. tostring(v))
                 lastPrintedSpeed = v;
             elseif v == TweenSpeed and lastPrintedSpeed ~= TweenSpeed then 
-                print("default rn")
                 lastPrintedSpeed = 2;
             end;
         end;
     end)();
     Flag = "AppleDelay";
     Floats = 0; 
-    Limits = {1, 10}; 
+    Limits = {5, 100}; 
     Increment = 1;
 })
 
@@ -364,17 +562,19 @@ local Collect_ApplesMethod = Sections.Collect:CreateDropdown({
     Flag = "AppleMethod";
 })
 
-local function TweenTo(target)
-    if not Hrp then return; end;
-    
-    local goal = {}
-    goal.CFrame = target.CFrame + Vector3.new(0, math.random(1, 3), 0) 
-    
-    local tweenInfo = TweenInfo.new(TweenSpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(Hrp, tweenInfo, goal)
-    tween:Play()
-    
-    tween.Completed:Wait()
+local function getNearestApple()
+    local apples = rune_fun.GetApples()
+    local nearestApple = nil
+    local shortestDistance = math.huge
+
+    for _, apple in pairs(apples) do
+        local distance = (Hrp.Position - apple.Position).Magnitude
+        if distance < shortestDistance then
+            shortestDistance = distance
+            nearestApple = apple
+        end;
+    end;
+    return nearestApple;
 end;
 
 local Collect_Apples = Sections.Collect:CreateToggle({
@@ -383,33 +583,249 @@ local Collect_Apples = Sections.Collect:CreateToggle({
     Alignment = "Left";
     Default = false;
     Callback = function(a) 
-        getgenv().collectApples = a;
+        defaultConfig.collectApples = a;
 
-        if a then
+        print(typeof(defaultConfig.collectApples))
+        if a and (not defaultConfig.chopTrees) then
             task.spawn(pcall, function()
                 if not Hrp then print("HRP not found") return; end;
                 
-                local apples = rune_fun.GetApples()
-                
-                for _, apple in pairs(apples) do 
-                    if not getgenv().collectApples then break; end;
+                while defaultConfig.collectApples do
+                    local apple = getNearestApple()
+                    if not apple then print("No apples found!") break end
 
                     if Method == "Tween" then
-                        TweenTo(apple)
+                        rune_fun.Tween(apple.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
                     else
-                        Hrp.CFrame = apple.CFrame + Vector3.new(0, math.random(1, 2), 0)
+                        Hrp.CFrame = apple.CFrame + Vector3.new(0, math.random(1, 2), 0);
+                    end; task.wait(1);
+
+                    Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game) task.wait(0.2) Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game);
+                end;
+            end);
+        end;
+    end;
+    Flag = "appleCollect";
+})
+
+local function getNearestEgg()
+    local eggs = rune_fun.GetEggs()
+    local nearestEgg = nil
+    local shortestDistance = math.huge
+
+    for _, egg in pairs(eggs) do
+        local handle = egg:FindFirstChild("Handle") 
+        if handle then
+            local distance = (Hrp.Position - handle.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestEgg = handle 
+            end;
+        end;
+    end;
+    return nearestEgg;
+end;
+
+local Collect_Eggs = Sections.Collect:CreateToggle({
+    Text = "Collect Eggs";
+    Subtext = "Gets all the Eggs";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(a) 
+        defaultConfig.collectEggs = a;
+
+        print(typeof(defaultConfig.collectEggs))
+        if a and (not defaultConfig.chopTrees) or (not defaultConfig.collectApples) then
+            task.spawn(pcall, function()
+                if not Hrp then print("HRP not found") return; end;
+                
+                while defaultConfig.collectEggs do
+                    local egg = getNearestEgg()
+                    if not egg then print("No eggs found!") break end
+
+                    if Method == "Tween" then
+                        rune_fun.Tween(egg.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
+                    else
+                        Hrp.CFrame = egg.CFrame + Vector3.new(0, math.random(1, 2), 0);
+                    end; task.wait(1);
+
+                    Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game) task.wait(0.2) Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game);
+                end;
+            end);
+        end;
+    end;
+    Flag = "eggCollect";
+})
+
+-- // AUTO QUEST 
+local Quests = {
+    ["Jane"] = {
+        ["Position"] = 931.006531, 125.154938, 389.696198,
+        ["Speak"] = {
+            [1] = {
+                ["player"] = LclPlr,
+                ["Object"] = workspace:WaitForChild("Effects"):WaitForChild("NPCS"):WaitForChild("Jane"),
+                ["Action"] = "NPC"
+            };
+        };
+        ["Skip"] = {
+             [1] = "Sure." 
+        }
+    };
+};
+
+local JaneQuest = Sections.Collect:CreateToggle({
+    Text = "Auto Jane Quest";
+    Subtext = "Not fully done yet";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        defaultConfig.autoQuest_Jane = v;
+
+        if v then
+            task.spawn(function()
+                if (not Hrp) then print("HRP not found") return; end;
+
+                while defaultConfig.autoQuest_Jane do
+                    local janePosition = Vector3.new(931.006531, 125.154938, 389.696198)
+                    rune_fun.Tween(CFrame.new(janePosition), TweenSpeed)
+                    task.wait(1);
+
+                    local args = {
+                        [1] = {
+                            ["player"] = game.Players.LocalPlayer,
+                            ["Object"] = workspace:WaitForChild("Effects"):WaitForChild("NPCS"):WaitForChild("Jane"),
+                            ["Action"] = "NPC"
+                        }
+                    }
+                    game.Players.LocalPlayer.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args))
+                    task.wait(1);
+
+                    for i = 1, 3 do
+                        local args = { [1] = "Sure." }
+                        LclPlr.Character.CharacterHandler.Input.Events.DialogueEvent:FireServer(unpack(args))
+                        task.wait(0.5);
                     end;
 
-                    task.wait(AppleDelay or math.random(0.5, 1.13))
+                    local appleCount = 0;
+                    while appleCount < 3 and defaultConfig.autoQuest_Jane do
+                        local apple = getNearestApple()
+                        if apple then
+                            rune_fun.Tween(apple.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
+                            task.wait(1);
+                            Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game);
+                            task.wait(0.2);
+                            Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game);
+                            appleCount = appleCount + 1;
+                        else
+                            print("No apples found");
+                            break;
+                        end;
+                    end;
 
-                    Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                    task.wait(0.1)
-                    Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                    local eggCount = 0;
+                    while eggCount < 2 and defaultConfig.autoQuest_Jane do
+                        local egg = getNearestEgg();
+                        if egg then
+                            rune_fun.Tween(egg.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
+                            task.wait(1);
+                            Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game);
+                            task.wait(0.2);
+                            Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game);
+                            eggCount = eggCount + 1;
+                        else
+                            print("No eggs found");
+                            break;
+                        end;
+                    end;
+
+                    rune_fun.Tween(CFrame.new(janePosition), TweenSpeed);
+                    task.wait(1);
+
+                    local args = {
+                        [1] = {
+                            ["player"] = game.Players.LocalPlayer,
+                            ["Object"] = workspace:WaitForChild("Effects"):WaitForChild("NPCS"):WaitForChild("Jane"),
+                            ["Action"] = "NPC"
+                        }}
+                    LclPlr.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args));
+                    task.wait(1);
+                    if not defaultConfig.autoQuest_Jane then break; end;
                 end;
             end)
         end;
     end;
-    Flag = "appleCollect";
+    Flag = "autoQuest_Jane";
+})
+
+local function getNearestTree()
+    local trees = rune_fun.GetTrees();
+    local nearestTree = nil;
+    local shortestDistance = math.huge;
+
+    for _, tree in pairs(trees) do
+        local health = tree:FindFirstChild("Health");
+        local leaves = tree:FindFirstChild("leaves");
+
+        if not leaves or not leaves.Parent then continue; end;
+
+        local treePart = tree:FindFirstChildOfClass("MeshPart")
+        if treePart then
+            local distance = (Hrp.Position - treePart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestTree = tree
+            end;
+        end;
+    end;
+    return nearestTree;
+end;
+
+local Collect_Trees = Sections.Collect:CreateToggle({
+    Text = "Collect Trees";
+    Subtext = "Gets all the Trees";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(a) 
+        defaultConfig.chopTrees = a
+
+        print(typeof(defaultConfig.chopTrees))
+        if a and (not defaultConfig.collectApples) then
+            task.spawn(pcall, function()
+                local Hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not Hrp then print("HRP not found") return end
+
+                while defaultConfig.chopTrees do
+                    local tree = getNearestTree()
+                    local treePart = tree:FindFirstChildOfClass("MeshPart")
+                    if treePart then
+                        if Method == "Tween" then
+                            rune_fun.Tween(treePart.CFrame * CFrame.new(0, -3, -3), TweenSpeed)
+                        elseif not defaultConfig.chopTrees then 
+                            break;
+                        else
+                            local targetPos = treePart.Position + Vector3.new(0, 0, -3)
+                            Hrp.CFrame = CFrame.new(targetPos, treePart.Position)
+                        end;
+                    end;
+                    task.wait(1)
+                    local args = {
+                        [1] = {["player"] = game:GetService("Players").LocalPlayer,["Object"] = tree,["Action"] = "Chop"}}
+                        LclPlr.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args))
+
+                    local health = tree:FindFirstChild("Health") local leaves = tree:FindFirstChild("leaves")
+                    repeat
+                        task.wait(0.1)
+                        if (health and health.Value == 0) or not tree.Parent or not tree:FindFirstChild("Health") or (leaves and not leaves.Parent) then
+                            break;
+                        end;
+                    until not tree.Parent or (health and health.Value == 0) or (leaves and not leaves.Parent)
+                    task.wait(0.3);
+                end;
+            end);
+        end;
+    end;
+    Flag = "treeCollect";
 })
 
 local Debug_Apples = Sections.Debug:CreateButton({
@@ -419,11 +835,35 @@ local Debug_Apples = Sections.Debug:CreateButton({
          local apples = rune_fun.GetApples();
 
          for _, v in pairs(apples) do
+            if apples then
             print(v.Name);
             task.defer(function()
                 print("Total found: " ..#apples);
-                print(type(apples))
+                print(type(apples));
             end)
+        else 
+            print("None found")
+            end;
+         end;
+    end;
+})
+
+local Debug_Eggs = Sections.Debug:CreateButton({
+    Text = "Debug Eggs";
+    Alignment = "Left"; 
+    Callback = function()
+         local eggs = rune_fun.GetEggs();
+
+         for _, v in pairs(eggs) do
+            if eggs then
+            print(v.Name);
+            task.defer(function()
+                print("Total found: " ..#eggs);
+                print(type(eggs));
+            end)
+        else 
+            print("None found");
+            end;
          end;
     end;
 })
@@ -443,7 +883,7 @@ local WalkSpeedSlider = Sections.Player:CreateSlider({
 
 local WalkSpeedToggle = Sections.Player:CreateToggle({
     Text = "Enabled",
-    Subtext = "Toggle the WalkSpeed",
+    Subtext = "",
     Alignment = "Left",
     Default = false,
     Callback = function(s)
@@ -461,56 +901,17 @@ local Equip_Weapon = Sections.Automatic:CreateToggle({
     Callback = function(s)
         local weapon = rune_fun.GetWeapon();
 
-        if s and weapon and not isEquipped then
+        if s and weapon and (not isEquipped) then
             Vim:SendKeyEvent(true, Enum.KeyCode.X, false, game)
             task.wait(.2)
             Vim:SendKeyEvent(false, Enum.KeyCode.X, false, game)
             isEquipped = true;        
-        elseif not s then
+        elseif (not s) then
             isEquipped = false;
         end;
     end,
     Flag = "equipWeapon",
 })
-
-local selectedMobs = {}
-local Farm_Mobs_Drop = Sections.Farm:CreateDropdown({
-    Text = "Select Mobs",
-    Subtext = "",
-    Alignment = "Left",
-    Choices = rune_fun.GetMobs(),
-    Multi = true,
-    Default = nil,
-    Callback = function(selected)
-        selectedMobs = selected
-    end,
-    Flag = "mobsTable",
-})
-
-local Farm_Mobs = Sections.Farm:CreateToggle({
-    Text = "Auto Farm",
-    Subtext = "",
-    Alignment = "Left",
-    Default = false,
-    Callback = function()
-        -- // TODO: Make this
-    end,
-    Flag = "farmMobs",
-})
-
-local Refresh_Mobs = Sections.Farm:CreateButton({
-    Text = "Refresh Mobs",
-    Alignment = "Left",
-    Callback = function()
-        print("Refreshing mobs...")
-        selectedMobs = rune_fun.GetMobs()
-        Farm_Mobs_Drop:RemoveOption(selectedMobs)
-        task.wait(2)
-        Farm_Mobs_Drop:AddOption(selectedMobs)
-        print("Mobs refreshed:", table.concat(selectedMobs, ", "))
-    end,
-})
-
 
 local Dex = Sections.Debug:CreateButton({
     Text = "Dex Explorer";
@@ -532,11 +933,12 @@ local Rspy = Sections.Debug:CreateButton({
     end;
 })
 
+local KeyBind__ = "N";
 local UI_ToggleKeybind = Sections.Data:CreateKeybind({
     Text = "Toggle UI";
-    Subtext = "Default [N] to Toggle";
+    Subtext = "Default [" .. tostring(KeyBind__) .. "] to Toggle";
     Alignment = "Left"; 
-    Default = "N"; 
+    Default = KeyBind__; 
     Callback = function() 
         Window:Visibility();
     end;
@@ -599,39 +1001,91 @@ local Debug_Toggle = Sections.Data:CreateToggle({
     Flag = "Debug"
 });
 
-local last_t = tick()
-local last_fps = 0
+local last_t = tick();
+local last_fps = 0;
 Run.RenderStepped:Connect(function()
-    local current_t = tick()
-    last_fps = math.floor(1 / (current_t - last_t))
-    last_t = current_t
+    local current_t = tick();
+    last_fps = math.floor(1 / (current_t - last_t));
+    last_t = current_t;
 end)
 
 local Fps_Toggle = Sections.Data:CreateButton({
     Text = "Unlock Fps";
     Alignment = "Left"; 
     Callback = function() 
-        if not setfpscap then print("executor not supported"); return; end;
+        if (not setfpscap) then print("Executor not supported"); return; end;
 
         setfpscap(math.max(60, 9999));
-        print("succ", "FPS: " ..last_fps);
+        print("FPS: " ..tostring(last_fps));
     end;
 });
 
+--[[
 local GodMode = Sections.Misc_Stuff:CreateToggle({
     Text = "God Mode",
+    Subtext = "[Patched]",
+    Alignment = "Left",
+    Default = false,
+    Callback = function()
+        -- Patched
+    end,
+    Flag = "godMode",
+})]]
+
+local NoFall = Sections.Misc_Stuff:CreateToggle({
+    Text = "No Fall Dmg",
     Subtext = "",
     Alignment = "Left",
     Default = false,
     Callback = function(v)
-        if v then task.wait();
-            rune_fun.GodMode(true)
-        else
-            rune_fun.GodMode(false)
-            getgenv().god_enabled = false;
-        end;
+        task.spawn(function()
+            if v then 
+                rune_fun.NoFall(true);
+            else
+                rune_fun.NoFall(false);
+            end;
+        end)
     end,
-    Flag = "godMode",
+    Flag = "noFall",
+})
+
+local NoFog = Sections.Misc_Stuff:CreateToggle({
+    Text = "No Fog",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        task.spawn(function()
+            if v then 
+                rune_fun.NoFog(true);
+            else
+                rune_fun.NoFog(false);
+            end;
+        end)
+    end,
+    Flag = "noFog",
+})
+
+local DayTime = Sections.Misc_Stuff:CreateButton({
+    Text = "Day Time";
+    Alignment = "Left"; 
+    Callback = function()
+        local timeCheck = Rs.GlobalSettings.Time.Value;
+        local solve = timeCheck.Value;
+
+        rune_fun.ChangeTime("Day", nil);
+    end;
+})
+
+local NightTime = Sections.Misc_Stuff:CreateButton({
+    Text = "Night Time";
+    Alignment = "Left"; 
+    Callback = function()
+        local timeCheck = Rs.GlobalSettings.Time.Value;
+        local solve2 = timeCheck.Value;
+
+        rune_fun.ChangeTime(nil, "Night");
+    end;
 })
 
 local AutoStoreValue = 49; 
@@ -642,7 +1096,7 @@ local AutoStore_Value = Sections.Automatic:CreateSlider({
     Callback = function(Value)
          AutoStoreValue = Value; 
     end;
-    Flag = "slider1";
+    Flag = "autoStoreval";
     Floats = 0; 
     Limits = { 10, 50 }; 
     Increment = 1;
@@ -651,44 +1105,46 @@ local AutoStore_Value = Sections.Automatic:CreateSlider({
 local AutoStoreToggle = false;
 local AutoStore = Sections.Automatic:CreateToggle({
     Text = "Auto Store Food",
-    Subtext = "",
+    Subtext = "Will store Inventory Only",
     Alignment = "Left",
     Default = false,
     Callback = function(state)
         AutoStoreToggle = state;
 
-        while AutoStoreToggle do
-            local inventory = rune_fun.GetInventory()
-            local emptySlot = Find_Emptyslot()
-
-            if emptySlot then 
-                for _, item in pairs(inventory) do
-                    if item.Quantity >= AutoStoreValue then
-                        local args = {
-                            [1] = {
-                                ["Config"] = "FillSlot",
-                                ["tool"] = item.Tool, 
-                                ["SlotNumber"] = emptySlot 
+        task.spawn(function()
+            while AutoStoreToggle do
+                local inventory = rune_fun.GetInventory()
+                local emptySlot = rune_fun.FindEmptySlot()
+    
+                if emptySlot then 
+                    for _, item in pairs(inventory) do
+                        if item.Quantity >= AutoStoreValue then
+                            local args = {
+                                [1] = {
+                                    ["Config"] = "FillSlot",
+                                    ["tool"] = item.Tool, 
+                                    ["SlotNumber"] = emptySlot 
+                                }
                             }
-                        }
-                        LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
-                        print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot);
+                            LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
+                            print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot);
+                        end;
                     end;
+                else
+                    print("No empty slots available in the bank")
                 end;
-            else
-                print("No empty slots available in the bank")
+                task.wait(1);
             end;
-            task.wait(1);
-        end;
+        end)
     end,
     Flag = "storeFood"
 })
 
 local AutoStore_SelectedOnly = Sections.Automatic:CreateDropdown({
     Text = "Food",
-    Subtext = "Selected Only",
+    Subtext = "Choose to Store",
     Alignment = "Left",
-    Choices = GetFoodItems(), 
+    Choices = rune_fun.GetFood_Items(), 
     Multi = true,
     Default = nil,
     Callback = function(Value) 
@@ -706,32 +1162,463 @@ local AutoStore_Selected = Sections.Automatic:CreateToggle({
     Callback = function(state)
         AutoStore_SelectedToggle = state;
 
-        while AutoStore_SelectedToggle do
-            local inventory = rune_fun.GetInventory()
-            local emptySlot = Find_Emptyslot() 
-
-            if emptySlot then
-                for _, item in pairs(inventory) do
-                    if table.find(SelectedFoods, item.Name) and item.Quantity >= AutoStoreValue then
-                        local args = {
-                            [1] = {
-                                ["Config"] = "FillSlot",
-                                ["tool"] = item.Tool, 
-                                ["SlotNumber"] = emptySlot
+        task.spawn(function()
+            while AutoStore_SelectedToggle do
+                local inventory = rune_fun.GetInventory()
+                local emptySlot = rune_fun.FindEmptySlot() 
+    
+                if emptySlot then
+                    for _, item in pairs(inventory) do
+                        if table.find(SelectedFoods, item.Name) and item.Quantity >= AutoStoreValue then
+                            local args = {
+                                [1] = {
+                                    ["Config"] = "FillSlot",
+                                    ["tool"] = item.Tool, 
+                                    ["SlotNumber"] = emptySlot
+                                }
                             }
-                        }
-                        
-                        LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
-                        print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot)
+                            
+                            LclPlr.Character.CharacterHandler.Input.Events.BankEvent:FireServer(unpack(args))
+                            print("Stored:", item.Name, "Quantity:", item.Quantity, "into Slot:", emptySlot)
+                        end;
                     end;
+                else
+                    print("No empty slots available in the bank.")
                 end;
-            else
-                print("No empty slots available in the bank.")
+                task.wait(1);
             end;
-            task.wait(1);
-        end;
+        end)
     end,
     Flag = "AutoStoreSelected"
+})
+
+local selectedMob;
+local offset = 5;
+local farmMobs = false;
+local positionType = "Behind"
+local MobsDropdown = Sections.Farm:CreateDropdown({
+    Text = "Select Mobs";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = rune_fun.GetMobs();
+    Multi = false;
+    Default = nil;
+    Callback = function(v)
+        local mobs = rune_fun.GetMobs();
+        for _, mob in ipairs(mobs) do
+            if mob.Name == v then
+                selectedMob = mob
+                break;
+                end;
+            end;
+        end;
+    Flag = "selectedMobs";
+})
+
+local MobsPosition = Sections.Farm:CreateDropdown({
+    Text = "Position";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = { "Behind", "Above", "Below", "SpinRadius" };
+    Multi = false;
+    Default = positionType;
+    Callback = function(v) 
+        positionType = v;
+    end;
+    Flag = "positionMobsFarm";
+})
+
+local MobsOffset = Sections.Farm:CreateSlider({
+    Text = "Offset";
+    Alignment = "Left";
+    Default = offset;
+    Callback = function(v) 
+        offset = v;
+     end;
+    Flag = "offsetMobs";
+    Floats = 0; 
+    Limits = { 1, 20 }; 
+    Increment = 1;
+})
+
+local MobsToggle = Sections.Farm:CreateToggle({
+    Text = "Auto Farm";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        farmMobs = v;
+       
+        if (not selectedMob) then 
+            print("No mob selected");
+            return;
+        end;
+
+        local selectedMobType = selectedMob.Name:match("^(%a+)");
+
+        task.spawn(function()
+            while farmMobs do
+                local mobs = rune_fun.GetMobs();
+                
+                local closestMob, closestDist = nil, math.huge;
+                for _, mob in ipairs(mobs) do
+                    local mobType = mob.Name:match("^(%a+)");
+                    local rootPart = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart;
+                    local humanoid = mob:FindFirstChildOfClass("Humanoid");
+
+                    if mobType == selectedMobType and humanoid and humanoid.Health > 0 and rootPart then
+                        local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                        if distance < closestDist then
+                            closestDist = distance;
+                            closestMob = mob;
+                        end;
+                    end;
+                end;
+
+                if closestMob then
+                    local rootPart = closestMob:FindFirstChild("HumanoidRootPart") or closestMob.PrimaryPart;
+                    local humanoid = closestMob:FindFirstChildOfClass("Humanoid");
+
+                    while humanoid and humanoid.Health > 0 and farmMobs do
+                        if rootPart then
+                            local targetCFrame
+                    
+                            if positionType == "Behind" then
+                                targetCFrame = rootPart.CFrame * CFrame.new(0, 0, offset)
+                    
+                            elseif positionType == "Above" then
+                                targetCFrame = CFrame.new(rootPart.Position + Vector3.new(0, offset, 0), rootPart.Position) 
+                    
+                            elseif positionType == "Below" then
+                                targetCFrame = CFrame.new(rootPart.Position + Vector3.new(0, -offset, 0), rootPart.Position) 
+                    
+                            elseif positionType == "SpinRadius" then
+                                local angle = tick() * 2 % (2 * math.pi)
+                                local xOffset = math.cos(angle) * offset
+                                local zOffset = math.sin(angle) * offset
+                                targetCFrame = CFrame.new(rootPart.Position + Vector3.new(xOffset, 0, zOffset), rootPart.Position)
+                            end
+                    
+                            rune_fun.Tween(targetCFrame, TweenSpeed or 100);
+                        end;
+
+                        -- // might make this optional since its m1 but whatever
+                        Vim:SendMouseButtonEvent(0, 0, 0, true, game, 0);
+                        task.wait();
+                        Vim:SendMouseButtonEvent(0, 0, 0, false, game, 0);
+                    end;
+                end;
+                task.wait();
+            end;
+        end)    
+    end;
+    Flag = "farmMobs";
+})
+
+local MobsRefresh = Sections.Farm:CreateButton({
+    Text = "Refresh Mobs";
+    Alignment = "Left";
+    Callback = function() 
+        local mobs = {};
+
+        task.spawn(function()
+            for _, mob in pairs(rune_fun.GetMobs()) do
+                table.insert(mobs, mob.Name);
+            end;
+        end)
+        task.wait(math.random(1,2));
+        
+        MobsDropdown:SetOptions(mobs);
+    end;
+})
+
+local selectedClass;
+local rankUp = false;
+local Classes_SelectRankup = Sections.Misc_Class:CreateDropdown({
+    Text = "Class";
+    Subtext = "Select your Class";
+    Alignment = "Left";
+    Choices = { "Thief", "Archer", "Warrior", "Magician", "Priest", "Striker" };
+    Multi = false;
+    Default = nil;
+    Callback = function(v) 
+        selectedClass = v;
+    end;
+    Flag = "classSelection";
+})
+
+local Classes_RankUpToggle = Sections.Misc_Class:CreateToggle({
+    Text = "Auto Rankup";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        rankUp = v;
+
+        task.spawn(function()
+            while rankUp do
+                task.wait()
+
+                if (not selectedClass) then
+                    print("No Class selected ", type(selectedClass));
+                    task.wait(1);
+                    continue;
+                end;
+
+                local args = {
+                    [1] = {
+                        ["FinalSelections"] = { ["Class"] = tostring(selectedClass) },
+                        ["Config"] = "VerifyClassResults"
+                    }
+                }
+                LclPlr.ClientNetwork.ClassRemote:FireServer(unpack(args));
+
+                task.wait(math.exp(2));
+            end;
+        end)
+    end;
+    Flag = "classRankup";
+})
+
+
+getgenv().Respawn = false;
+local Respawn_Shit = Sections.Misc_Stuff:CreateToggle({
+    Text = "Auto Respawn";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().Respawn = v;
+
+        task.spawn(function()
+            while getgenv().Respawn do task.wait(math.sqrt(4) * .1);
+
+                local overlay = PlayerGui.InfoOverlays:FindFirstChild("ConfirmButton", true);
+                if (not overlay) then continue; end;  
+
+                for _, confirm in pairs(PlayerGui.InfoOverlays:GetChildren()) do
+                    if confirm:IsA("ImageLabel") and confirm.Name == "ConfirmFrame" then
+                        local mainFrame = confirm:FindFirstChild("MainFrame");
+                        if mainFrame then
+                            local textLabel = mainFrame:FindFirstChild("TextLabel");
+                            local tGetTxt = textLabel.Text;
+                            if textLabel and (textLabel.Text:match("Would you like to respawn?")) then --or string.find(tGetTxt, "respawn")) then -- Fallback if Text is Translated i guess, (didnt test ts)
+                                local buttonFrame = mainFrame:FindFirstChild("ButtonFrame");
+                                if buttonFrame then
+                                    local respawnButton = buttonFrame:FindFirstChild("ConfirmButton");
+                                    if respawnButton and respawnButton:FindFirstChild("TextLabel") then
+                                        local respawnLabel = respawnButton.TextLabel;
+                                        if respawnLabel.Text == "Confirm" then
+                                            if game:GetService("GuiService").SelectedObject ~= respawnButton then
+                                                game:GetService("GuiService").SelectedObject = respawnButton;
+                                            end;
+                                            Vim:SendKeyEvent(true, Enum.KeyCode.Return, false, game);
+                                            Vim:SendKeyEvent(false, Enum.KeyCode.Return, false, game);
+                                            task.wait(.5);
+                                            game:GetService("GuiService").SelectedObject = nil;
+                                        end;
+                                    end;
+                                end;
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+        end);
+    end;
+    Flag = "respawnShit";
+})
+
+getgenv().instaKill = false;
+getgenv().instaKillVal = 300;
+
+local instaKillVal = Sections.Insta_Kill:CreateSlider({
+    Text = "Hp";
+    Alignment = "Left";
+    Default = 300;
+    Callback = function(v) 
+        getgenv().InstaKillVal = v
+     end;
+    Flag = "";
+    Floats = 0; 
+    Limits = { 50, 500 }; 
+    Increment = 5;
+})
+
+local InstaKill = Sections.Insta_Kill:CreateToggle({
+    Text = "Insta Kill";
+    Subtext = "One shot mobs";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().InstaKill = v;
+
+        task.spawn(function()
+            if getgenv().InstaKill then task.wait();
+                rune_fun.InstaKill(true)
+            elseif not getgenv().InstaKill then 
+                rune_fun.InstaKill(false)
+            end;
+        end)
+    end;
+    Flag = "instaKill";
+})
+
+local KillYourself = Sections.Misc_Stuff:CreateButton({
+    Text = "Kill yourself";
+    Alignment = "Left";
+    Callback = function() 
+        Char.Humanoid.Health = 0;
+    end;
+})
+
+local ESP = {};
+ESP.Enabled = false;
+ESP.Cache = {};
+ESP.Settings = {
+    Player_Names = false;
+    Player_Names_Size = 15;
+}
+
+function ESP:CreateDrawing(Type, Properties)
+    local DrawingObj = Drawing.new(Type)
+    for Property, Value in pairs(Properties) do
+        DrawingObj[Property] = Value;
+    end
+    return DrawingObj;
+end
+
+function ESP:Toggle(State)
+    self.Enabled = State;
+    if not State then
+        for _, Objects in pairs(self.Cache) do
+            for _, DrawingObj in pairs(Objects) do
+                if typeof(DrawingObj) == "table" then
+                    for _, Obj in pairs(DrawingObj) do
+                        Obj.Visible = false;
+                    end;
+                else
+                    DrawingObj.Visible = false;
+                end;
+            end;
+        end;
+        self.Cache = {};
+    end;
+end;
+
+function ESP:ClearCacheForPlayer(Player)
+    if self.Cache[Player] then
+        for _, DrawingObj in pairs(self.Cache[Player]) do
+            if typeof(DrawingObj) == "table" then
+                for _, Obj in pairs(DrawingObj) do
+                    Obj:Remove();
+                end;
+            else
+                DrawingObj:Remove();
+            end;
+        end;
+        self.Cache[Player] = nil;
+    end;
+end;
+
+function ESP:Update()
+    if not self.Enabled then return end
+
+    self.Settings.Player_Names = ESP.Settings.Player_Names;
+    self.Settings.Player_Names_Size = ESP.Settings.Player_Names_Size;
+    local camera = workspace.CurrentCamera;
+
+    for _, Player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if Player ~= LclPlr and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local Character = Char or Player.Character;
+            local RootPart = Hrp or Character:FindFirstChild("HumanoidRootPart");
+            local ScreenPos, OnScreen = camera:WorldToViewportPoint(RootPart.Position);
+
+            if (LclPlr.Character and LclPlr.Character:FindFirstChild("HumanoidRootPart")) then
+                local distance = (LclPlr.Character.HumanoidRootPart.Position - RootPart.Position).Magnitude;
+                if distance > 1000 then 
+                    if self.Cache[Player] then
+                        self:ClearCacheForPlayer(Player)
+                    end;
+                    continue;
+                end;
+            end;
+
+            if OnScreen then
+                if not self.Cache[Player] then
+                    self.Cache[Player] = {
+                        NameTag = self:CreateDrawing("Text", {
+                            Text = Player.Name,
+                            Size = self.Settings.Player_Names_Size,
+                            Color = Color3.fromRGB(255, 255, 255),
+                            Center = true,
+                            Outline = true,
+                            Visible = false
+                        })
+                    }
+                end;
+
+                local Cache = self.Cache[Player];
+
+                if self.Settings.Player_Names and Cache.NameTag then
+                    if not Cache.NameTag.Visible then
+                        Cache.NameTag.Visible = true;
+                    end;
+                    Cache.NameTag.Size = self.Settings.Player_Names_Size;
+                    Cache.NameTag.Position = Vector2.new(ScreenPos.X, ScreenPos.Y - 20);
+                else
+                    Cache.NameTag.Visible = false;
+                end;
+            else
+                if self.Cache[Player] then
+                    if self.Cache[Player].NameTag then
+                        self.Cache[Player].NameTag.Visible = false;
+                    end;
+                end;
+            end;
+        end;
+    end;
+end;
+
+game:GetService("Players").PlayerRemoving:Connect(function(Player)
+    ESP:ClearCacheForPlayer(Player);
+end);
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    ESP:Update();
+end);
+
+local NameESP_Toggle_Esp = Sections.Esp_Settings:CreateToggle({
+    Text = "Show Names",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        ESP.Settings.Player_Names = v
+    end,
+})
+
+local NameSlider_Esp = Sections.Esp_Settings:CreateSlider({
+    Text = "Name ESP Size",
+    Alignment = "Left",
+    Default = 15,
+    Callback = function(v)
+        ESP.Settings.Player_Names_Size = v
+    end,
+    Flag = "nameEspSizeSlider",
+    Floats = 0,
+    Limits = { 10, 50 },
+    Increment = 1,
+})
+
+local Keybind_Esp = Sections.Esp_Settings:CreateKeybind({
+    Text = "Enable ESP",
+    Subtext = "Use a keybind to toggle Esp",
+    Alignment = "Left",
+    Default = "K",
+    Callback = function()
+        ESP:Toggle(not ESP.Enabled);
+    end,
 })
 
 Library:Load();
