@@ -614,7 +614,6 @@ rune_fun.FairyFarm = function()
             if autoHop then
                 print("Server hopping in " .. hopDelay .. " seconds")
                 task.wait(hopDelay)
-                queue_on_teleport("rune_fun.FairyFarm()")
                 game:GetService("TeleportService"):Teleport(game.PlaceId, LclPlr)
             end
         end
