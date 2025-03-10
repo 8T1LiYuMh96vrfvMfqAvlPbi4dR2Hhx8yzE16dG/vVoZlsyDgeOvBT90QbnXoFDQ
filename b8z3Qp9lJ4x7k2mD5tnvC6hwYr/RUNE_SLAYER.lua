@@ -1203,7 +1203,7 @@ LclPlr.CharacterAdded:Connect(function()
     end
 end)
 
-local Dex = Sections.Debug:CreateButton({
+--[[local Dex = Sections.Debug:CreateButton({
     Text = "Dex Explorer";
     Alignment = "Left"; 
     Callback = function()
@@ -1211,9 +1211,9 @@ local Dex = Sections.Debug:CreateButton({
             loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))();
         end)
     end;
-})
+})]]
 
-local Rspy = Sections.Debug:CreateButton({
+--[[local Rspy = Sections.Debug:CreateButton({
     Text = "R-Spy";
     Alignment = "Left"; 
     Callback = function()
@@ -1221,7 +1221,7 @@ local Rspy = Sections.Debug:CreateButton({
             loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua"))();
         end)
     end;
-})
+})]]
 
 local KeyBind__ = "N";
 local UI_ToggleKeybind = Sections.Data:CreateKeybind({
