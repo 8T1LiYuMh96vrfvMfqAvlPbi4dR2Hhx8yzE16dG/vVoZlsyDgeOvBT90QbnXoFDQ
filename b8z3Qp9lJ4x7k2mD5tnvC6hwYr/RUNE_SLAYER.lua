@@ -714,6 +714,21 @@ rune_fun.ModDetection = function(check)
 end;
 end;
 
+rune_fun.NoHeat = function(check)
+    check = check or false;
+
+    if check then 
+        task.spawn(function()
+             local args = {
+                [1] = Rs:WaitForChild("WorldModel"):WaitForChild("Areas"):WaitForChild("Wilderness"),
+                [2] = "Cloudy"
+            }
+            
+            LclPlr:WaitForChild("AreaChangeEvent"):FireServer(unpack(args))
+        end)
+    end;
+end;
+
 -- // Variables 
 
 LclPlr = game:GetService("Players").LocalPlayer;
@@ -1372,6 +1387,22 @@ local NoRollCooldown = Sections.Misc_Stuff:CreateToggle({
         rune_fun.NoRollCd(v); 
     end,
     Flag = "noRollCd",
+})
+
+getgenv().noHeat = false;
+local NoHeat = Sections.Misc_Stuff:CreateToggle({
+    Text = "No Heat",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        getgenv().noHeat = v;
+
+        if getgenv().noHeat then 
+            rune_fun.NoHeat(true)
+        end;
+    end,
+    Flag = "noHeat",
 })
 
 getgenv().Respawn = false;
