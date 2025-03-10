@@ -760,7 +760,7 @@ local Window = Library:CreateWindow({ Title = "Tuah " ..rune_fun.GetGame(); });
 local Tabs = {
     Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://130289250570665"}),
     Misc = Window:CreateTab({ Title = "Misc", Icon = "rbxassetid://130819053773683"}),
-    Parry = Window:CreateTab({ Title = "Parry Config", Icon = "rbxassetid://106479339281996"}),
+    Parry = Window:CreateTab({ Title = "Parry", Icon = "rbxassetid://106479339281996"}),
     Esp = Window:CreateTab({ Title = "Esp", Icon = "rbxassetid://138343944779037"}),
     Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://95750721918044"}),
 };
