@@ -4,10 +4,10 @@ rune_config = {};
 
 -- // Error Handling - Debug Purposes
 err_codes = {
-    [100] = "Variable Issue";
-    [101] = "Game Variable Changed";
-    [102] = "Function Issue";
-    [103] = "Detection AntiCheat";
+    [100] = "Variable Issue",
+    [101] = "Game Variable Changed",
+    [102] = "Function Issue",
+    [103] = "Detection AntiCheat",
 };
 
 function format_error(err)
@@ -265,22 +265,30 @@ rune_fun.GetFood_Items = function()
     return foodItems;
 end;
 
+rune_fun.currentTween = nil
 rune_fun.Tween = function(targetCFrame, speed)
-    if (not Hrp) then print("Hrp not found", type(Hrp)) return; end;
+    if not Hrp then 
+        print("Hrp not found", type(Hrp));
+        return;
+    end;
 
     if typeof(targetCFrame) ~= "CFrame" then 
         print("Invalid target CFrame:", targetCFrame);
         return;
     end;
 
+    if rune_fun.currentTween and rune_fun.currentTween.PlaybackState == Enum.PlaybackState.Playing then
+        rune_fun.currentTween:Cancel();
+    end;
+
     if Hrp:FindFirstChild("BodyVelocity") then 
         Hrp.BodyVelocity:Destroy();
     end;
 
-    local antifall = Instance.new("BodyVelocity");
-    antifall.Parent = Hrp;
-    antifall.Velocity = Vector3.new(0, 0, 0);
-    antifall.MaxForce = Vector3.new(4000, 4000, 4000);
+    local antifall = Instance.new("BodyVelocity")
+    antifall.Parent = Hrp
+    antifall.Velocity = Vector3.new(0, 0, 0)
+    antifall.MaxForce = Vector3.new(4000, 4000, 4000)
 
     local function disableCollisions()
         for _, part in ipairs(Hrp.Parent:GetDescendants()) do
@@ -292,45 +300,26 @@ rune_fun.Tween = function(targetCFrame, speed)
 
     local noclipConnection = game:GetService("RunService").Stepped:Connect(disableCollisions)
 
+    local distance = (Hrp.Position - targetCFrame.Position).Magnitude
     local info = TweenInfo.new(
-        (Hrp.Position - targetCFrame.Position).Magnitude / speed, 
+        distance / speed, 
         Enum.EasingStyle.Linear
     )
 
     local tween = TweenService:Create(Hrp, info, {CFrame = targetCFrame})
+    rune_fun.currentTween = tween
+
     tween:Play()
     tween.Completed:Connect(function()
-        if noclipConnection then noclipConnection:Disconnect() end;
-        if antifall then antifall:Destroy() end;
+        if noclipConnection then 
+            noclipConnection:Disconnect() 
+        end
+        if antifall then 
+            antifall:Destroy();
+        end;
+        rune_fun.currentTween = nil;
     end)
 end;
-
--- // Anti fall by #Bored
-local old; 
-rune_fun.NoFall = newcclosure(function(Check)
-    Check = Check or false;
-    local Remote = LclPlr.Character.CharacterHandler.Input.Events.MasterEvent;
-    if Check then
-        if not old then
-            old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-                local args = { ... }
-                local method = getnamecallmethod()
-
-                if not checkcaller() and self == Remote and method == "FireServer" then
-                    if typeof(args[1]) == "table" and args[1]["Config"] == "FallDamage" then
-                        return;
-                    end;
-                end;
-                return old(self, ...)
-            end))
-        end;
-    else
-        if old then
-            hookmetamethod(game, "__namecall", old)
-            old = nil;
-        end;
-    end;
-end);
 
 local noFogConnection;
 rune_fun.NoFog = function(Check)
@@ -351,6 +340,7 @@ rune_fun.NoFog = function(Check)
         return;
     end;
 
+    if Check and getgenv().noFog == true then
     Lighting.FogEnd = 1000000;
     local atmosphere = Lighting:FindFirstChild("Atmosphere")
     if atmosphere then
@@ -364,6 +354,9 @@ rune_fun.NoFog = function(Check)
             atmosphere.Density = 0;
         end;
     end)
+else 
+    getgenv().noFog = false;
+end
 end;
 
 rune_fun.ChangeTime = function(day, night)
@@ -387,7 +380,7 @@ rune_fun.InstaKill = function(check)
                 if Credit and Credit.Value >= getgenv().InstaKillVal then
                     v.Humanoid.Health = 0
                 end;
-            elseif (not isnetworkowner) or (not HC) then 
+            elseif (not isnetworkowner) then 
                 print("#100")
             else
                 print("something went wrong")
@@ -421,31 +414,15 @@ rune_fun.InfiniteJump = function(check)
     end;
 end;
 
-rune_fun.InfCoins = function(cCheck)
-    cCheck = cCheck or false;
-    local net = require(Rs.Modules.Network);
-
-    if cCheck == true then 
-    local tradeData = {
-    Config = "SetTradeItem",
-    SetCoins = true,
-    Coins = -math.huge
-    }
- 
-    net.connect("MasterEvent", "FireServer", LclPlr.Character, tradeData)
-    end;
-end;
-
 rune_fun.NoRollCd = newcclosure(function(cCheck)
     cCheck = cCheck or false;
     local net = require(Rs.Modules.Network);
-    local char = Char or LclPlr.Character;
     getgenv().noRollCdActive = cCheck;
 
     local function remove_cd()
         while getgenv().noRollCdActive do
-            if char:FindFirstChild("RollCD") then
-                char.RollCD:Destroy();
+            if Char:FindFirstChild("RollCD") then
+                Char.RollCD:Destroy();
             end;
             task.wait(0.1);
         end;
@@ -454,7 +431,7 @@ rune_fun.NoRollCd = newcclosure(function(cCheck)
     if cCheck then
         task.spawn(remove_cd);
         local rollData = { Config = "Roll" }
-        net.connect("MasterEvent", "FireServer", char, rollData)
+        net.connect("MasterEvent", "FireServer", Char, rollData)
     else
         getgenv().noRollCdActive = false;
     end;
@@ -479,6 +456,7 @@ rune_fun.Invisible = newcclosure(function(check)
     end
 end);
 
+-- No fall by #Bored
 local old; 
 rune_fun.NoFall = newcclosure(function(Check)
     Check = Check or false;
@@ -508,7 +486,7 @@ end);
 local oldSt
 rune_fun.NoStun = newcclosure(function(check)
     check = check or false
-    local StunHandler = require(game:GetService("ReplicatedStorage").Modules.StunHandler);
+    local StunHandler = require(Rs.Modules.StunHandler);
     local mt = getrawmetatable(game)
     setreadonly(mt, false)
 
@@ -556,7 +534,7 @@ rune_fun.UseBedAnywhere = function()
 end;
 
 rune_fun.TpBypass = function(Location)
-    Location = Location or CFrame.new(0, 100, 0);
+    Location = Location or CFrame.new(0,0,0);
 
     if Hrp then
         local args = {
@@ -569,7 +547,7 @@ rune_fun.TpBypass = function(Location)
 
         LclPlr.Character.CharacterHandler.Input.Events.Interact:FireServer(unpack(args))
 
-        task.wait(.3);
+        task.wait(.1);
         Hrp.CFrame = Location;
     else
         warn("Hrp not found", type(Hrp));
@@ -577,27 +555,26 @@ rune_fun.TpBypass = function(Location)
 end;
 
 rune_fun.FairyFarm = function()
-    local fairyFound = false
-    local hopDelay = getgenv().hopDelay or 4 
-    local autoHop = getgenv().serverHop or false
+    fairyFound = false;
+    local hopDelay = getgenv().hopDelay or 4;
+    local autoHop = getgenv().serverHop or false;
     
     local function findFairy()
         if Alive then
             for _, v in pairs(Alive:GetChildren()) do
                 if v:IsA("Model") and string.find(v.Name, "Fairy") then
                     return v:FindFirstChildWhichIsA("MeshPart") 
-                end
-            end
-        end
+                end;
+            end;
+        end;
         
         for _, v in pairs(game.Workspace:GetDescendants()) do
             if v:IsA("Model") and string.find(v.Name, "Fairy") then
                 return v:FindFirstChildWhichIsA("MeshPart")
-            end
-        end
-
-        return nil
-    end
+            end;
+        end;
+        return nil;
+    end;
 
     while getgenv().fairyFarm do
         local fairy = findFairy()
@@ -615,11 +592,127 @@ rune_fun.FairyFarm = function()
                 print("Server hopping in " .. hopDelay .. " seconds")
                 task.wait(hopDelay)
                 game:GetService("TeleportService"):Teleport(game.PlaceId, LclPlr)
-            end
-        end
-        task.wait(1) 
-    end
-end
+            end;
+        end;
+        task.wait(1);
+    end;
+end;
+
+rune_fun.CookFood = function(checked)
+    checked = checked or false;
+
+    if not LclPlr.Backpack then 
+        return;
+    end;
+
+    if checked == nil then 
+        safe_execute(rune_fun.CookFood());
+        print("forgot to boolean");
+    end;
+
+    if checked == true then
+    task.spawn(function()
+        while getgenv().cookFood do task.wait() 
+                if LclPlr.Backpack:FindFirstChild("Raw Deer Meat") then
+                    local arguments1 = {
+                        [1] = {
+                            ["AmountToCraft"] = getgenv().cookAmount,
+                            ["SelectedItem"] = {
+                                ["Materials"] = {
+                                    [1] = {
+                                        ["Name"] = "Raw Deer Meat",
+                                        ["Amount"] = 1
+                                    }
+                                },
+                                ["ToolTip"] = "",
+                                ["Station"] = "Cooker",
+                                ["Name"] = "Cooked Deer Meat"
+                            }
+                        }
+                    }
+                    PlayerGui.CraftingGui.LocalScript.RemoteEvent:FireServer(unpack(arguments1))
+                elseif LclPlr.Backpack:FindFirstChild("Raw Prime Meat") then
+                    local arguments2 = {
+                        [1] = {
+                            ["AmountToCraft"] = getgenv().cookAmount,
+                            ["SelectedItem"] = {
+                                ["Materials"] = {
+                                    [1] = {
+                                        ["Name"] = "Raw Prime Meat",
+                                        ["Amount"] = 1
+                                    }
+                                },
+                                ["ToolTip"] = "",
+                                ["Station"] = "Cooker",
+                                ["Name"] = "Cooked Prime Meat"
+                            }
+                        }
+                    }
+                    PlayerGui.CraftingGui.LocalScript.RemoteEvent:FireServer(unpack(arguments2))
+                elseif LclPlr.Backpack:FindFirstChild("Raw Crocodile Meat") then
+                    local arguments3 = {
+                        [1] = {
+                            ["AmountToCraft"] = getgenv().cookAmount,
+                            ["SelectedItem"] = {
+                                ["Materials"] = {
+                                    [1] = {
+                                        ["Name"] = "Raw Crocodile Meat",
+                                        ["Amount"] = 1
+                                    }
+                                },
+                                ["ToolTip"] = "",
+                                ["Station"] = "Cooker",
+                                ["Name"] = "Cooked Crocodile Meat"
+                            }
+                        }
+                    }
+                    PlayerGui.CraftingGui.LocalScript.RemoteEvent:FireServer(unpack(arguments3))
+                elseif LclPlr.Backpack:FindFirstChild("Raw Serpent Meat") then
+                    local arguments4 = {
+                        [1] = {
+                            ["AmountToCraft"] = getgenv().cookAmount,
+                            ["SelectedItem"] = {
+                                ["Materials"] = {
+                                    [1] = {
+                                        ["Name"] = "Raw Serpent Meat",
+                                        ["Amount"] = 1
+                                    }
+                                },
+                                ["ToolTip"] = "",
+                                ["Station"] = "Cooker",
+                                ["Name"] = "Cooked Serpent Meat"
+                            }
+                        }
+                    }
+                PlayerGui.CraftingGui.LocalScript.RemoteEvent:FireServer(unpack(arguments4))
+            end;
+        end;
+    end)
+end;
+end;
+
+rune_fun.ModDetection = function(check)
+    check = check or false;
+
+    if check then 
+        task.wait()
+        Players.PlayerAdded:Connect(function(Plr)
+            if Plr:IsInGroup(15431531) then
+                LclPlr:Kick("Spotted a Mod (" .. Plr.Name .. "), " .. tostring(err_codes[100]))
+            end;
+
+        task.spawn(function()
+            pcall(function()
+                for _, Plr in Players:GetPlayers() do
+                    if Plr:IsInGroup(15431531) then
+                        LclPlr:Kick("Spotted a Mod (" .. Plr.Name .. "), " .. tostring(err_codes[100]))
+                    end;
+                end;
+            end)
+        end)
+    end)
+end;
+end;
 
 -- // Variables 
 
@@ -691,15 +784,16 @@ local Sections = {
 getgenv().chopTrees = false;
 getgenv().collectApples = false;
 getgenv().collectEggs = false;
-local AppleDelay = math.random(.4,.5);
-local TweenSpeed = 150;
+getgenv().AppleDelay = math.random(.4,.5);
+getgenv().TweenSpeed = 160;
+
 local Method = "Tween";
 local Collect_ApplesDelay = Sections.Collect:CreateSlider({
     Text = "Delay time";
     Alignment = "Left";
-    Default = AppleDelay;
+    Default = getgenv().AppleDelay;
     Callback = function(v) 
-        AppleDelay = v;
+        getgenv().AppleDelay = v;
     end;
     Flag = "AppleDelay";
     Floats = 0; 
@@ -710,22 +804,22 @@ local Collect_ApplesDelay = Sections.Collect:CreateSlider({
 local Collect_ApplesTweenSpeed = Sections.Collect:CreateSlider({
     Text = "Tween Speed";
     Alignment = "Left";
-    Default = TweenSpeed;
+    Default = getgenv().TweenSpeed;
     Callback = (function() 
         local lastPrintedSpeed = nil;
 
         return function(v)
-            TweenSpeed = v;
+            getgenv().TweenSpeed = v;
 
-            if (v > TweenSpeed and v ~= lastPrintedSpeed) or (v < TweenSpeed and v ~= lastPrintedSpeed) then
+            if (v > getgenv().TweenSpeed and v ~= lastPrintedSpeed) or (v < getgenv().TweenSpeed and v ~= lastPrintedSpeed) then
                 print("Tween Speed now at: " .. tostring(v))
                 lastPrintedSpeed = v;
-            elseif v == TweenSpeed and lastPrintedSpeed ~= TweenSpeed then 
+            elseif v == getgenv().TweenSpeed and lastPrintedSpeed ~= getgenv().TweenSpeed then 
                 lastPrintedSpeed = 2;
             end;
         end;
     end)();
-    Flag = "AppleDelay";
+    Flag = "TweenSpeed";
     Floats = 0; 
     Limits = {5, 200}; 
     Increment = 1;
@@ -777,7 +871,7 @@ local Collect_Apples = Sections.Collect:CreateToggle({
                     if not apple then print("No apples found!") break end
 
                     if Method == "Tween" then
-                        rune_fun.Tween(apple.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
+                        rune_fun.Tween(apple.CFrame * CFrame.new(0, math.random(1, 2), 0), getgenv().TweenSpeed);
                     else
                         Hrp.CFrame = apple.CFrame + Vector3.new(0, math.random(1, 2), 0);
                     end; task.wait(1);
@@ -826,7 +920,7 @@ local Collect_Eggs = Sections.Collect:CreateToggle({
                     if not egg then print("No eggs found!") break end
 
                     if Method == "Tween" then
-                        rune_fun.Tween(egg.CFrame * CFrame.new(0, math.random(1, 2), 0), TweenSpeed);
+                        rune_fun.Tween(egg.CFrame * CFrame.new(0, math.random(1, 2), 0), getgenv().TweenSpeed);
                     else
                         Hrp.CFrame = egg.CFrame + Vector3.new(0, math.random(1, 2), 0);
                     end; task.wait(1);
@@ -848,7 +942,7 @@ local function getNearestTree()
         local health = tree:FindFirstChild("Health");
         local leaves = tree:FindFirstChild("leaves");
 
-        if not leaves or not leaves.Parent then continue; end;
+        if not leaves or not leaves.Parent then return end;
 
         local treePart = tree:FindFirstChildOfClass("MeshPart")
         if treePart then
@@ -881,7 +975,7 @@ local Collect_Trees = Sections.Collect:CreateToggle({
                     local treePart = tree:FindFirstChildOfClass("MeshPart")
                     if treePart then
                         if Method == "Tween" then
-                            rune_fun.Tween(treePart.CFrame * CFrame.new(0, -3, -3), TweenSpeed)
+                            rune_fun.Tween(treePart.CFrame * CFrame.new(0, -3, -3), getgenv().TweenSpeed)
                         elseif not getgenv().chopTrees then 
                             break;
                         else
@@ -926,7 +1020,7 @@ local Quests = {
     };
 };
 
-local JaneQuest = Sections.Collect:CreateToggle({
+--[[local JaneQuest = Sections.Collect:CreateToggle({
     Text = "Auto Jane Quest";
     Subtext = "Not fully done yet";
     Alignment = "Left";
@@ -1008,7 +1102,7 @@ local JaneQuest = Sections.Collect:CreateToggle({
         end;
     end;
     Flag = "autoQuest_Jane";
-})
+})]]
 
 local Debug_Apples = Sections.Debug:CreateButton({
     Text = "Debug Apples";
@@ -1152,6 +1246,11 @@ local SaveUI_Toggle = Sections.Data:CreateButton({
     Text = "Save",
     Callback = function()
         Library:Save();
+
+        task.delay(1, function()
+            Library:Notify("Saved Config for \n" .. LclPlr.Name .. ":" ..tostring(LclPlr.UserId) .. "", 4, "Tuah")
+        end
+        )
     end,
 });
 
@@ -1177,7 +1276,7 @@ local AutoLoad_Toggle = Sections.Data:CreateToggle({
     Callback = function(al)
         if al then 
             task.spawn(function()
-                safe_execute(rune_fun.AutoLoad());
+                rune_fun.AutoLoad()
             end);
         end;
     end;
@@ -1288,7 +1387,7 @@ local Respawn_Shit = Sections.Misc_Stuff:CreateToggle({
             while getgenv().Respawn do task.wait(math.sqrt(4) * .1);
 
                 local overlay = PlayerGui.InfoOverlays:FindFirstChild("ConfirmButton", true);
-                if (not overlay) then continue; end;  
+                if (not overlay) then return end;  
 
                 for _, confirm in pairs(PlayerGui.InfoOverlays:GetChildren()) do
                     if confirm:IsA("ImageLabel") and confirm.Name == "ConfirmFrame" then
@@ -1355,6 +1454,21 @@ local Invisible = Sections.Misc_Stuff:CreateToggle({
         end
     end;
     Flag = "infiniteJump";
+})
+
+local ModDetection = Sections.Misc_Stuff:CreateToggle({
+    Text = "Mod Detection";
+    Subtext = "Kick if in a Server with Mod";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        if v then
+            rune_fun.ModDetection(true)
+        else
+            rune_fun.ModDetection(false)
+        end
+    end;
+    Flag = "modDetection";
 })
 
 local DayTime = Sections.Misc_Stuff:CreateButton({
@@ -1491,8 +1605,39 @@ local AutoStore_Selected = Sections.Automatic:CreateToggle({
     Flag = "AutoStoreSelected"
 })
 
+getgenv().cookFood = false;
+getgenv().cookAmount = 1;
+
+local CookAmount = Sections.Automatic:CreateSlider({
+    Text = "Cook Amount";
+    Alignment = "Left";
+    Default = getgenv().cookAmount;
+    Callback = function(v) 
+        getgenv().cookAmount = v
+     end;
+    Flag = "cookAmount";
+    Floats = 1; 
+    Limits = { 0, 10 }; 
+    Increment = 1;
+})
+
+local AutoCook = Sections.Automatic:CreateToggle({
+    Text = "Auto Cook Food",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        if v then 
+            rune_fun.CookFood(true);
+        else
+            rune_fun.CookFood(false);
+        end
+    end,
+    Flag = "cookFood"
+})
+
 local offset = 5;
-local farmMobs = false;
+getgenv().farmMobs = false;
 local positionType = "Behind"
 local selectedMobs = {};
 
@@ -1551,73 +1696,50 @@ local MobsOffset = Sections.Farm:CreateSlider({
     Increment = 1;
 })
 
-local lastPosition = nil
-local stuckTime = 0
-local STUCK_THRESHOLD = 2 
-
-function isPlayerStuck()
-    local playerRoot = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    
-    if not playerRoot then return false end
-    
-    local currentPosition = playerRoot.Position
-    
-    if lastPosition and (currentPosition - lastPosition).Magnitude < 0.5 then
-        stuckTime = stuckTime + task.wait()
-    else
-        stuckTime = 0
-    end
-
-    lastPosition = currentPosition
-    return stuckTime >= STUCK_THRESHOLD
-end
-
 MobsToggle = Sections.Farm:CreateToggle({
     Text = "Auto Farm";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v) 
-        farmMobs = v;
+        getgenv().farmMobs = v;
        
         if (not selectedMobs or #selectedMobs == 0) then 
             return;
         end;
         
         task.spawn(function()
-            while farmMobs do
+            while getgenv().farmMobs do
                 local mobs = Alive:GetChildren();
                 local closestMob, closestDist = nil, math.huge;
         
                 for _, mob in ipairs(mobs) do
-                    local mobType = mob.Name:match("^(%a+)");
-                    local rootPart = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart;
-                    local humanoid = mob:FindFirstChildOfClass("Humanoid");
-        
-                    for _, selectedMobType in ipairs(selectedMobs) do
-                        if selectedMobType:match("^(%a+)") == mobType and humanoid and humanoid.Health > 0 and rootPart then
-                            local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude;
-                            if distance < closestDist then
-                                closestDist = distance;
-                                closestMob = mob;
+                    if typeof(mob) == "Instance" and mob.Name then
+                        local mobType = mob.Name:match("^(.-)%.%d+$") or mob.Name;
+                        
+                        local rootPart = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart;
+                        local humanoid = mob:FindFirstChildOfClass("Humanoid");
+                
+                        for _, selectedMobType in ipairs(selectedMobs) do
+                            if selectedMobType:match("^(%a+)") == mobType and humanoid and humanoid.Health > 0 and rootPart then
+                                local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude;
+                                if distance < closestDist then
+                                    closestDist = distance;
+                                    closestMob = mob;
+                                end;
                             end;
                         end;
+                    else
+                        warn("Seems like something Happened here") 
                     end;
                 end;
+                
 
-                                    
-                if isPlayerStuck() and (not positionType == "Below") then
-                    print(LclPlr.Name .. "Stuck")
-                    MobsToggle:SetValue(false)
-                    task.wait(2) 
-                    MobsToggle:SetValue(true) 
-                end;
-        
                 if closestMob then
                     local rootPart = closestMob:FindFirstChild("HumanoidRootPart") or closestMob.PrimaryPart;
                     local humanoid = closestMob:FindFirstChildOfClass("Humanoid");
         
-                    while humanoid and humanoid.Health > 0 and farmMobs do
+                    while humanoid and humanoid.Health > 0 and getgenv().farmMobs do
                         if rootPart then
                             local targetCFrame;
         
@@ -1637,7 +1759,7 @@ MobsToggle = Sections.Farm:CreateToggle({
                                 targetCFrame = CFrame.new(rootPart.Position + Vector3.new(xOffset, 0, zOffset), rootPart.Position);
                             end;
         
-                            rune_fun.Tween(targetCFrame, TweenSpeed or 100);
+                            rune_fun.Tween(targetCFrame, getgenv().TweenSpeed or 160);
                         end;
         
                         Vim:SendMouseButtonEvent(0, 0, 0, true, game, 0);
@@ -1696,7 +1818,7 @@ local Classes_RankUpToggle = Sections.Misc_Class:CreateToggle({
                 if (not selectedClass) then
                     print("No Class selected ", type(selectedClass));
                     task.wait(1);
-                    continue;
+                    return
                 end;
 
                 local args = {
@@ -1769,7 +1891,7 @@ local detectedKid = {
     banned = true,
     exploiter = true,
     exploit = true,
-    admin = true
+    admin = false
 }
 
 getgenv().killReporters = false
@@ -1810,7 +1932,7 @@ end)
 
 local KillReporters = Sections.RageBait:CreateToggle({
     Text = "Hunt Reporters",
-    Subtext = "Will rage quit them",
+    Subtext = "Uses Filtered Chat words",
     Alignment = "Left",
     Default = false,
     Callback = function(r)
@@ -1857,7 +1979,7 @@ local FairyFarm = Sections.Fairy_Farm:CreateToggle({
         if r then
             rune_fun.FairyFarm()
         else
-            print("Fairy farming stopped");
+            getgenv().fairyFarm = false;
         end;
     end,
     Flag = "fairyFarm"
@@ -1872,6 +1994,7 @@ local LazyLabel = Sections.Esp_Settings:CreateLabel({
 })
 
 -- // Auto Parry by Bored
+
 
 local InfoParry = Sections.ParrySection:CreateLabel({
     Text = "Get near entity to get Animation Helper [Right-Click to Config]";
@@ -1892,21 +2015,23 @@ Sections.ParrySection:CreateSlider({
 });
 
 local function GetAliveInRad(Rad)
-    local rv = {};
+    local rv = {}
 
     for _, v in pairs(workspace.Alive:GetChildren()) do
-        if v == Char then continue; end;
-
-        local pHRP = v:FindFirstChild("HumanoidRootPart");
-        if not pHRP then continue; end;
-
-        local Distance = (Hrp.Position - pHRP.Position).Magnitude;
+        if v == Char then continue end 
+        
+        local pHRP = v:FindFirstChild("HumanoidRootPart")
+        if not pHRP then continue end 
+        
+        local Distance = (Hrp.Position - pHRP.Position).Magnitude
         if Distance <= Rad then
-            table.insert(rv, v);
-        end;
-    end;
-    return rv;
-end;
+            table.insert(rv, v)
+        end
+    end
+
+    return rv 
+end
+
 
 local IgnoreAnims = {
     "http://www.roblox.com/asset/?id=180435571",
@@ -1927,10 +2052,10 @@ while not getgenv().EStop do
         local Species = (not isPlayer and v.Name:gsub("[^%a]", "")) or v.Name;
 
         local pHUM = v:FindFirstChildOfClass("Humanoid");
-        if not pHUM then continue; end;
+        if not pHUM then continue end;
 
         local Animator = pHUM:FindFirstChildOfClass("Animator");
-        if not Animator then continue; end;
+        if not Animator then continue end;
 
         task.spawn(function()
             if not Cloned[Species] then
@@ -1950,7 +2075,7 @@ while not getgenv().EStop do
             for _, track in Playing do
                 local Animation = track.Animation
                 local id = Animation and Animation.AnimationId;
-                if (not id) or (table.find(IgnoreAnims, tostring(id))) then continue; end;
+                if (not id) or (table.find(IgnoreAnims, tostring(id))) then continue end;
 
                 local timeIn, maxTime = track.TimePosition, track.Length;
                 local percent = timeIn / maxTime;
