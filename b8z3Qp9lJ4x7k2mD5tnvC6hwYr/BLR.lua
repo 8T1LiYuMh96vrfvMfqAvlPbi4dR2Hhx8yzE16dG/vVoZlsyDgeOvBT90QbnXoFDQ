@@ -3,8 +3,8 @@ print(os.date()); GetVersion = tostring(Version);
 
 local env = {}
 env[1] = {
-    ["Build"] = "Private",
-    ["Version"] = "1.0.1",
+    ["Build"] = "Public",
+    ["Version"] = "1.0.2",
     ["UpdateCheckURL"] = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/version.lua",
     ["ScriptURL"] = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/BLR.lua"
 }
@@ -73,6 +73,7 @@ getgenv().closure = {
             ["Threshold"] = 6;
         },
         ["AutoClaimQuests"] = false;
+        ["AutoClaimDaily"] = false;
         ["Auto_Steal"] = {
             ["Enabled"] = false;
             ["Distance"] = 6;
@@ -85,6 +86,22 @@ getgenv().closure = {
         },
         ["AntiRagdoll"] = false;
         ["SkillsNoCd"] = false;
+        ["Goalkeeper"] = {
+            ["Enabled"] = false;
+            ["Range"] = 10;
+        }
+    },
+    ["Spin"] = {
+        ["Flow"] = {
+            ["Enabled"] = false;
+            ["Choosen_Flow"] = nil;
+            ["UseLucky_Spins"] = false;
+        },
+        ["Style"] = {
+            ["Enabled"] = false;
+            ["Choosen_Style"] = nil;
+            ["UseLucky_Spins"] = false;
+        },
     },
     ["UI"] = {
         ["Keybind"] = "N";
@@ -112,6 +129,7 @@ local Window = Library:CreateWindow({ Title = "Tuah - Blue Lock: Rivals" });
 local Tabs = {
     Dashboard = Window:CreateTab({ Title = "Dashboard" }),
     Misc = Window:CreateTab({ Title = "Misc" }),
+    Spin = Window:CreateTab({ Title = "Spin" }),
     Config = Window:CreateTab({ Title = "Config" })
 };
 local Sections = {
@@ -124,6 +142,9 @@ local Sections = {
     Misc_Config = Tabs.Misc:CreateSection({ Title = "Misc Settings", Side = "Left",}),
     Target = Tabs.Misc:CreateSection({ Title = "Target", Side = "Right",}),
     Client = Tabs.Misc:CreateSection({ Title = "Client", Side = "Left",}),
+    GoalKeeper = Tabs.Dashboard:CreateSection({ Title = "Goalkeeper", Side = "Right",}),
+    Flow = Tabs.Spin:CreateSection({ Title = "Flow", Side = "Right",}),
+    Style = Tabs.Spin:CreateSection({ Title = "Style", Side = "Left",})
 };
 
 local UI__Toggle = Sections.UI:CreateKeybind({
@@ -304,6 +325,22 @@ local Misc__AutoClaimQuests = Sections.Misc_Config:CreateToggle({
         end)
     end;
     Flag = "auto_claim_quests";
+})
+
+local Misc__AutoClaimDaily = Sections.Misc_Config:CreateToggle({
+    Text = "Auto Claim Daily",
+    Subtext = "",
+    Default = false,
+    Callback = function(v)
+        getgenv().closure.Main.AutoClaimDaily = v
+
+        task.spawn(function()
+            while getgenv().closure.Main.AutoClaimDaily do task.wait()
+                Rivals_Keeper.AutoClaimDaily(true)
+            end;
+        end)
+    end;
+    Flag = "auto_claim_daily";
 })
 
 local Misc__InfiniteStam = Sections.Misc_Config:CreateToggle({
@@ -570,6 +607,162 @@ local UI__DiscordUpdates = Sections.Discord:CreateLog({
     Default = { };
 })
 
+local Main__ReactionSpeed = Sections.GoalKeeper:CreateSlider({
+    Text = "Range";
+    Alignment = "Left";
+    Default = getgenv().closure.Main.Goalkeeper.Range;
+    Callback = function(v) 
+        getgenv().closure.Main.Goalkeeper.Range = v
+    end;
+    Flag = "goalkeeper_range";
+    Floats = 0; 
+    Limits = { 1, 20 };
+    Increment = 1;
+})
+
+
+local Main__AutoGoalKeeper = Sections.GoalKeeper:CreateToggle({
+    Text = "Auto Catch";
+    Subtext = "Auto defends the Ball";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        getgenv().closure.Main.Goalkeeper.Enabled = v
+
+        if getgenv().closure.Main.Goalkeeper.Enabled then 
+            Rivals_Keeper.AutoGoalkeeper();
+        end;
+    end;
+    Flag = "goalkeeper_enabled";
+})
+
+local FlowChoices = {
+    "Emperor",
+    "Soul Harvester",
+    "Awakened Genius",
+    "Snake",
+    "Dribbler",
+    "Prodigy",
+    "Wild Card",
+    "Crow",
+    "Trap",
+    "Ice",
+    "Chameleon",
+    "Demon Wings",
+    "Monster",
+    "Gale Burst",
+    "Genius",
+    "King's Instinct",
+    "Lightning",
+    "Puzzle",
+}
+local StyleChoices = {
+    "Sae",
+    "Kaiser",
+    "NEL Isagi",
+    "Don Lorenzo",
+    "Shidou",
+    "Kunigami",
+    "Aiku",
+    "Yukimiya",
+    "Rin",
+    "King",
+    "Nagi",
+    "Reo",
+    "Karasu",
+    "Bachira",
+    "Otoya",
+    "Hiori",
+    "Kurona",
+    "Gagamaru",
+    "Isagi",
+    "Chigiri",
+}
+local selectedFlows = {};
+local selectedStyles = {};
+
+local Spin__StyleChoose = Sections.Style:CreateDropdown({
+    Text = "Choose Style",
+    Subtext = "To spin for",
+    Alignment = "Left",
+    Choices = StyleChoices,
+    Multi = true,
+    Default = nil,
+    Callback = function(Value)
+        getgenv().closure.Spin.Style.Choosen_Style = Value
+    end,
+    Flag = "auto_spin_style_choosen_style"
+})
+
+local Spin__FlowChoose = Sections.Flow:CreateDropdown({
+    Text = "Choose Flow",
+    Subtext = "To spin for",
+    Alignment = "Left",
+    Choices = FlowChoices,
+    Multi = true,
+    Default = nil,
+    Callback = function(Value)
+        getgenv().closure.Spin.Flow.Choosen_Flow = Value
+    end,
+    Flag = "auto_spin_flow_choosen_flow"
+})
+
+local Spin__StyleSpin = Sections.Style:CreateToggle({
+    Text = "Auto Spin",
+    Subtext = "Style only",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        getgenv().closure.Spin.Style.Enabled = v
+
+        task.spawn(function()
+            if getgenv().closure.Spin.Style.Enabled then 
+                Rivals_Keeper.AutoSpinStyle();
+            end
+        end)
+    end,
+    Flag = "auto_spin_style_enabled"
+})
+
+local Spin__FlowSpin = Sections.Flow:CreateToggle({
+    Text = "Auto Spin",
+    Subtext = "Flow only",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        getgenv().closure.Spin.Flow.Enabled = v
+
+        task.spawn(function()
+            if getgenv().closure.Spin.Flow.Enabled then 
+                Rivals_Keeper.AutoSpinFlow();
+            end
+        end)
+    end,
+    Flag = "auto_spin_flow_enabled"
+})
+
+local Spin__StyleUseLucky = Sections.Style:CreateToggle({
+    Text = "Use Lucky Spins",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        getgenv().closure.Spin.Style.UseLucky_Spins = Value
+    end,
+    Flag = "auto_spin_style_luckyspins"
+})
+
+local Spin__FlowUseLucky = Sections.Flow:CreateToggle({
+    Text = "Use Lucky Spins",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(Value)
+        getgenv().closure.Spin.Flow.UseLucky_Spins = Value
+    end,
+    Flag = "auto_spin_flow_luckyspins"
+})
+
 -- (( Vars )) 
 
 Players = game:GetService("Players");
@@ -714,7 +907,7 @@ Rivals_Keeper.AutoSteal = function(check)
 end;
 
 Rivals_Keeper.AutoClaimQuests = function(check)
-    remote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("QuestsService"):WaitForChild("RE"):WaitForChild("Quest");
+    remote = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("QuestsService"):WaitForChild("RE"):WaitForChild("Quest");
     check = check or false;
 
     while getgenv().closure.Main.AutoClaimQuests and check do task.wait()
@@ -722,6 +915,16 @@ Rivals_Keeper.AutoClaimQuests = function(check)
             task.wait(math.random(2.1,3))
             remote:FireServer("Quest" ..i);
         end;
+    end;
+end;
+
+Rivals_Keeper.AutoClaimDaily = function(check)
+    remote = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("DailyRewardsService"):WaitForChild("RF"):WaitForChild("Redeem");
+    check = check or false;
+
+    while getgenv().closure.Main.AutoClaimDaily and check do task.wait()
+            task.wait(math.random(2.1,3))
+        remote:InvokeServer();
     end;
 end;
 
@@ -904,15 +1107,94 @@ Rivals_Keeper.SkillsNoCd = function()
         for attributeName, attributeValue in pairs(path:GetAttributes()) do
             originalAttributes[attributeName] = attributeValue  
             path:SetAttribute(attributeName, 1) 
-        end
+        end;
     else
         for attributeName, originalValue in pairs(originalAttributes) do
             path:SetAttribute(attributeName, originalValue) 
+        end;
+    end;
+end;
+
+local AutoGK = function()
+    task.spawn(function()
+        while task.wait(0.05) do
+            if default_config["Misc"]["AutoGoalkeeper"] then
+                local Ball = BallModule.GetBall()
+                if Ball then
+                    local Character = game.Players.LocalPlayer.Character
+                    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+
+                    if HumanoidRootPart then
+                        local distance = (Ball.Position - HumanoidRootPart.Position).magnitude
+                        if distance <= default_config["Misc"]["Goalkeeper_Range"] then
+                            local direction = (Ball.Position - HumanoidRootPart.Position).unit
+                            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + direction)
+                            
+                            task.defer(dash)
+                        elseif Ball:IsDescendantOf(LP.Character) then 
+                            repeat
+                                task.wait(1)
+                            until not Ball.Parent == LP.Character or not Ball:IsDescendantOf(LP.Character) or default_config.Misc.AutoGoalkeeper == false;
+                            -- continue;
+                        end
+                    end
+                end
+            end
         end
-    end
+    end)
 end
 
+Rivals_Keeper.AutoGoalkeeper = function()
+    while task.wait() do
+        if getgenv().closure.Main.Goalkeeper.Enabled then 
+            local ball = Rivals_Keeper.GetBall();
+            local hasBall = Character.Values.HasBall;
 
+            if ball and HumanoidRootPart then
+                local distance = (ball.Position - HumanoidRootPart.Position).magnitude
+                if distance <= getgenv().closure.Main.Goalkeeper.Range then 
+                    local direction = (ball.Position - HumanoidRootPart.Position).unit
+                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + direction)
+                    VIM:Press("Q");
+                    task.wait(0.05)
+
+                elseif hasBall and hasBall.Value == true then 
+                    continue;
+                end;
+            end
+        end
+    end
+end;
+
+Rivals_Keeper.AutoSpinFlow = function()
+    while getgenv().closure.Spin.Flow.Enabled do
+        task.wait(5); 
+        local currentFlow = Client.PlayerStats.Flow.Value;
+
+        for _, flow in ipairs(selectedFlows) do
+            if currentFlow == flow then
+                getgenv().closure.Spin.Flow.Enabled = false
+                return
+            end;
+        end;        
+        ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("FlowService"):WaitForChild("RE"):WaitForChild("Spin"):FireServer(getgenv().closure.Spin.Flow.UseLucky_Spins)
+    end;
+end;
+
+Rivals_Keeper.AutoSpinStyle = function()
+    while getgenv().closure.Spin.Style.Enabled do
+        task.wait(5); 
+        local currentStyle = Client.PlayerStats.Style.Value;
+
+        for _, style in ipairs(selectedStyles) do
+            if currentStyle == style then
+                getgenv().closure.Spin.Style.Enabled = false 
+                return
+            end;
+        end;
+        ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("StyleService"):WaitForChild("RE"):WaitForChild("Spin"):FireServer(getgenv().closure.Spin.Style.UseLucky_Spins)
+    end;
+end;
 
 Library:Notify("Tuah - has been loaded for\n" ..Rivals_Keeper.GetGame(), 4, "Information") 
 --Library:Notify("Status: Online 🟢\nBuild: " ..env[1].Build.. "\nVersion " .. env[1].Version, 5, "Information") 
