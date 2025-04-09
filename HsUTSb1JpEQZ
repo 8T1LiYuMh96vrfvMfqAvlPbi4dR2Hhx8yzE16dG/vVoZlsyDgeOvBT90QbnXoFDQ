@@ -187,11 +187,20 @@ Setup["File"] = function(self)
     function Manager:Write(path, contents)
         if not Allowed then return; end;
         if typeof(path) ~= 'string' then return; end;
-
+    
         local contents = contents or "";
-
-        writefile(path, tostring(contents));
-    end;
+    
+        local executor = identifyexecutor and identifyexecutor() or "f"
+        print("Saving on", executor)
+        print("Attempting to write to", path)
+    
+        if executor:lower():find("swift") then
+            path = path:gsub("%.json", ".txt")
+        end
+    
+        writefile(path, tostring(contents))
+    end
+    
 
     function Manager:CreateFolder(path)
         if not Allowed then return; end;
