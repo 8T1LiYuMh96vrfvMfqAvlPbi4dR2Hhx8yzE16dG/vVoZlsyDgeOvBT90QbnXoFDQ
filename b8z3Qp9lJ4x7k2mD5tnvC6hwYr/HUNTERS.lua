@@ -193,15 +193,22 @@ hunters.AutoDungeon = function()
 end;
 
 hunters.InstantKill = function()
-    while getgenv().closure.Config.Main.auto_dungeon.insta_kill do task.wait()
+    while getgenv().closure.Config.Main.auto_dungeon.insta_kill do
         local mobs = hunters.GetMobs()
-        for _, v in pairs(mobs) do 
-            if v:FindFirstChild("Humanoid") then
-                v.Humanoid.Health = 0;
-            end;
-        end;
-    end;
-end;
+
+        for _, mob in pairs(mobs) do
+            local humanoid = mob:FindFirstChild("Humanoid")
+            if humanoid and humanoid.Health > 0 then
+                task.defer(function()
+                    pcall(function()
+                        humanoid.Health = 0
+                    end)
+                end)
+            end
+        end
+        task.wait(.1)
+    end
+end
 
 hunters.AutoM1 = function()
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Combat"):FireServer();
@@ -494,7 +501,7 @@ local Main__DungeonDifficulty = Sections.Dungeon:CreateDropdown({
     Text = "Difficulty";
     Subtext = "";
     Alignment = "Left";
-    Choices = { "Regular", "Hard" };
+    Choices = { "Regular", "Hard", "Nightmare" };
     Multi = false;
     Default = nil;
     Callback = function(v)
@@ -529,11 +536,9 @@ local Main__InstantKill = Sections.Dungeon:CreateToggle({
     Callback = function(v)
         getgenv().closure.Config.Main.auto_dungeon.insta_kill = v;
 
-        task.spawn(function()
-            task.wait()
-                task.wait() 
-            hunters.InstantKill()
-        end)
+        if v then
+            task.spawn(hunters.InstantKill)
+        end
     end;
     Flag = "insta_kill";
 })
