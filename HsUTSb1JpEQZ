@@ -194,10 +194,6 @@ Setup["File"] = function(self)
         print("Saving on", executor)
         print("Attempting to write to", path)
     
-        if executor:lower():find("swift") then
-            path = path:gsub("%.json", ".txt")
-        end
-    
         writefile(path, tostring(contents))
     end
     
