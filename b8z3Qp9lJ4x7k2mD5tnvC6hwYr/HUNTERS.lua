@@ -274,9 +274,9 @@ local FileService = Setup:File();
 local VIM = Setup:VirtualInputManager();
 Setup:Basics()
 
-Library.Paths.Folder = "\\Tuah"
-Library.Paths.Secondary = "\\" .. tostring(Client.UserId)
-Library.Paths.Data = "\\" .. tostring(game.PlaceId)
+Library.Paths.Folder = "Tuah"
+Library.Paths.Secondary = "/" .. tostring(Client.UserId)
+Library.Paths.Data = "/" .. tostring(game.PlaceId)
 
 local Window = Library:CreateWindow({ Title = "Hunters" })
 local Tabs = {
