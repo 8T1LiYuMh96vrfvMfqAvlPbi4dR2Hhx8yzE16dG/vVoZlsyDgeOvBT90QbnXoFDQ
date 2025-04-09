@@ -78,22 +78,23 @@ do -- Save / Load
     function Library:Save()
         local Paths = Library.Paths;
         local Folder, Secondary = Paths["Folder"], Paths["Secondary"];
-        FileService:CreateFolder(Folder);
+        FileService:CreateFolder(Folder)
+    
         if Secondary then
-            Folder = (Folder .. Secondary); FileService:CreateFolder(Folder);
+            Folder = Folder .. Secondary
+            FileService:CreateFolder(Folder)
         end;
-
-        local Path = Folder .. Library.Paths["Data"] .. ".json";
-
+    
+        local Path = Folder:gsub("\\", "/") .. "/" .. tostring(game.PlaceId) .. ".json";
+    
         local SaveData = {};
         for i, v in pairs(self.Created.Flags) do
-            if v.Value then
+            if v.Value ~= nil then
                 SaveData[i] = v.Value;
             end;
         end;
-
         FileService:Write(Path, HttpService:JSONEncode(SaveData))
-    end;
+    end;  
 
     function Library:Load()
         local Paths = Library.Paths;
