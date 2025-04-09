@@ -3,7 +3,7 @@ getgenv().closure = {
     ["Config"] = {
         ["Main"] = {
             ["auto_spin"] = false;
-            ["auto_sell"] = {
+            ["auto_sell_mode"] = {
                 ["enabled"] = false;
                 ["keep_legendary"] = false;
                 ["keep_epic"] = false;
@@ -15,7 +15,13 @@ getgenv().closure = {
                 ["selected_dungeon"] = nil;
                 ["auto_leave"] = false;
                 ["insta_kill"] = false;
+                ["difficulty"] = nil;
             };
+            ["auto_sell"] = {
+                ["enabled"] = false;
+                ["selected_rarity"] = false;
+            };
+            ["save_hover"] = false;
         };
     };
     ["UI"] = {
@@ -23,6 +29,81 @@ getgenv().closure = {
         ["auto_save"] = true;
     }
 }
+
+hunters.GetGame = function()
+    local m_service = game:GetService("MarketplaceService");
+    local succ, m_info = pcall(m_service.GetProductInfo, m_service, game.PlaceId);
+    return succ and m_info.Name or "Couldnt get GameValues"
+end;
+
+hunters.AutoLoad = function()
+    if identifyexecutor() then
+        pcall(function()
+            task.defer(function()
+                print("in queue..");
+                queue_on_teleport([[loadstring(game:HttpGet("https://raw.githubusercontent.com/TuahScripts/AIuisdgbs-ijbisUDbgisebjHLXJCgdsiutebsKSdge/refs/heads/main/Loader"))()]])
+            end);
+        end);
+    else
+        print("Something went wrong, AutoLoad Issue", type(queue_on_teleport))
+    end;
+end;
+
+hunters.SafeHover = function()
+    local gui = Client:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui");
+    local wave = gui and gui:FindFirstChild("Wave");
+
+    if wave and wave.Visible then
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if not Humanoid then return end
+
+        local hoverHeight = 30;
+        local angle = 0;
+        local radius = 5;
+        local centerPosition = nil;
+
+        while getgenv().closure.Config.Main.safe_hover do
+            if not RootPart or not RootPart.Parent then
+                hunters.RefreshCharacter()
+            end
+
+            local rayOrigin = RootPart.Position
+            local rayDirection = Vector3.new(0, -100, 0) 
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {Character}
+            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+            raycastParams.IgnoreWater = true
+
+            local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+
+            if result then
+                local groundY = result.Position.Y
+                local targetY = groundY + hoverHeight
+                local currentY = RootPart.Position.Y
+
+                if not centerPosition then
+                    centerPosition = Vector3.new(RootPart.Position.X, targetY, RootPart.Position.Z)
+                end;
+
+                if Humanoid.Health < 50 then
+                    angle = angle + math.rad(2)  
+                    local offsetX = math.cos(angle) * radius
+                    local offsetZ = math.sin(angle) * radius
+                    local newPosition = Vector3.new(centerPosition.X + offsetX, targetY, centerPosition.Z + offsetZ)
+                    RootPart.CFrame = CFrame.new(newPosition, centerPosition)  
+                else
+                    if math.abs(currentY - targetY) > 0.1 then
+                        RootPart.CFrame = CFrame.new(RootPart.Position.X, targetY, RootPart.Position.Z)
+                    end;
+                end;
+            end;
+            task.wait();
+        end;
+    else
+        print("not in dungeon;_");
+    end;
+end;
+
 
 hunters.AutoSpin = function()
     remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Roll");
@@ -68,32 +149,35 @@ hunters.GetMobs = function()
 end;
 
 hunters.AutoDungeon = function()
-    local player = game:GetService("Players").LocalPlayer
-    local gui = player:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui")
-    local waveLabel = gui and gui:FindFirstChild("Wave")
-    local dungeonEndFrame = gui and gui:FindFirstChild("DungeonEnd")
+    local gui = Client:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui");
+    local wave = gui and gui:FindFirstChild("Wave");
+    local dungeon_end = gui and gui:FindFirstChild("DungeonEnd");
 
-    if waveLabel and waveLabel.Visible then
-        print("Already in dungeon - skipping join process.")
+    if wave and wave.Visible then
+        print("Already in dungeon")
     else
         local args = {[1] = tostring(getgenv().closure.Config.Main.auto_dungeon.selected_dungeon)}
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("createLobby"):InvokeServer(unpack(args))
-        print("1 - Lobby created")
-        task.wait(2)
-        game:GetService("ReplicatedStorage").Remotes.LobbyStart:FireServer()
-        print("2 - Lobby started")
-        task.wait(2)
-    end
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("createLobby"):InvokeServer(unpack(args))
+        task.wait(math.random(2,3))
+        local args = {[1] = tostring(getgenv().closure.Config.Main.auto_dungeon.difficulty)}
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("LobbyDifficulty"):FireServer(unpack(args))   
+        task.wait(math.random(2,3))     
+        ReplicatedStorage.Remotes.LobbyStart:FireServer()
+        task.wait(math.random(2,3))
+    end;
 
-    game:GetService("ReplicatedStorage").Remotes.DungeonStart:FireServer()
+    ReplicatedStorage.Remotes.DungeonStart:FireServer()
 
     while getgenv().closure.Config.Main.auto_dungeon.enabled do
         task.wait()
-        if dungeonEndFrame and dungeonEndFrame.Visible and getgenv().closure.Config.Main.auto_dungeon.auto_leave then
-            print("Dungeon ended - auto leaving.")
+        if dungeon_end and dungeon_end.Visible and getgenv().closure.Config.Main.auto_dungeon.auto_leave then
             hunters.AutoLeave()
-            break
-        end
+            break;
+        end;
+
+        if not RootPart or not RootPart.Parent then
+            hunters.RefreshCharacter()
+        end;
 
         local mobs = hunters.GetMobs()
         for _, mob in pairs(mobs) do
@@ -103,33 +187,65 @@ hunters.AutoDungeon = function()
                 RootPart.CFrame = CFrame.new(mobPos + offset)
                 RootPart.CFrame = CFrame.lookAt(mobPos + offset, mobPos)
                 hunters.AutoM1()
-            end
-        end
-    end
-end
+            end;
+        end;
+    end;
+end;
 
 hunters.InstantKill = function()
-    while getgenv().closure.Config.Main.auto_dungeon.insta_kill do 
-        task.wait()
+    while getgenv().closure.Config.Main.auto_dungeon.insta_kill do task.wait()
         local mobs = hunters.GetMobs()
         for _, v in pairs(mobs) do 
             if v:FindFirstChild("Humanoid") then
-                v.Humanoid.Health = 0
-            end
-        end
-    end
-end
-
+                v.Humanoid.Health = 0;
+            end;
+        end;
+    end;
+end;
 
 hunters.AutoM1 = function()
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Combat"):FireServer()
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Combat"):FireServer();
 end;
 
 hunters.AutoLeave = function()
-    if getgenv().closure.Config.Main.auto_dungeon.enabled and getgenv().closure.Config.Main.auto_dungeon.auto_leave then 
-    task.wait()
-    game:GetService("ReplicatedStorage").Remotes.LeaveToLobby:FireServer()
-    end
+    if getgenv().closure.Config.Main.auto_dungeon.enabled and getgenv().closure.Config.Main.auto_dungeon.auto_leave then task.wait()
+    ReplicatedStorage.Remotes.LeaveToLobby:FireServer()
+    end;
+end;
+
+hunters.AutoSell = function()
+    local sellRemote = ReplicatedStorage.Remotes.Sell;
+    local icons = require(ReplicatedStorage.Modules.Icons);
+    local inventoryFrame = Client.PlayerGui.ScreenGui.RightAlign.Inventory.ImageLabel.Items.ScrollingFrame;
+
+    local selectedRarities = getgenv().closure.Config.Main.auto_sell.selected_rarity or {}
+    if typeof(selectedRarities) ~= "table" then return; end;
+
+    local assetIdToRarity = {}
+    for rarity, assetId in pairs(icons) do
+        assetIdToRarity[assetId] = rarity;
+    end;
+
+    while getgenv().closure.Config.Main.auto_sell.enabled do
+        for _, item in pairs(inventoryFrame:GetChildren()) do
+            if item:IsA("ImageLabel") and item.Image then
+                local imageId = item.Image;
+                local matchedRarity = assetIdToRarity[imageId]
+
+                if matchedRarity and table.find(selectedRarities, matchedRarity) then
+                    print("AutoSelling:", item.Name, "(rarity:", matchedRarity .. ")")
+                    local args = {
+                        [1] = {
+                            [1] = item.Name
+                        }
+                    }
+                    sellRemote:InvokeServer(unpack(args))
+                    task.wait(.1);
+                end;
+            end;
+        end;
+        task.wait(2);
+    end;
 end;
 
 -- // Variables
@@ -138,6 +254,17 @@ Client = cloneref(Players.LocalPlayer);
 ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"));
 Character = Client.Character or Client.CharacterAdded:Wait();
 RootPart = Character:WaitForChild("HumanoidRootPart");
+Run = game:GetService("RunService");
+
+hunters.RefreshCharacter = function()
+    Character = Client.Character or Client.CharacterAdded:Wait()
+    RootPart = Character:WaitForChild("HumanoidRootPart")
+end;
+
+Client.CharacterAdded:Connect(function()
+    hunters.RefreshCharacter()
+end)
+hunters.RefreshCharacter()
 
 --// UI
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
@@ -153,19 +280,20 @@ Library.Paths.Data = "\\" .. tostring(game.PlaceId)
 
 local Window = Library:CreateWindow({ Title = "Hunters" })
 local Tabs = {
-    Dashboard = Window:CreateTab({ Title = "Dashboard" }),
-    Config = Window:CreateTab({ Title = "Config" })
+    Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://114287454825054" }),
+    Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://120211262975365"})
 };
 local Sections = {
     Data = Tabs.Config:CreateSection({ Title = "Data", Side = "Right",}),
     UI = Tabs.Config:CreateSection({ Title = "UI", Side = "Left",}),
     Main = Tabs.Dashboard:CreateSection({ Title = "Main", Side = "Left",}),
     Dungeon = Tabs.Dashboard:CreateSection({ Title = "Dungeon", Side = "Right",}),
+    Sell = Tabs.Dashboard:CreateSection({ Title = "Sell", Side = "Left",}),
 };
 
 local UI__Toggle = Sections.UI:CreateKeybind({
-    Text = "Toggle";
-    Subtext = "Default";
+    Text = "Toggle UI";
+    Subtext = "Default is " ..tostring(getgenv().closure.UI.keybind);
     Alignment = "Left"; 
     Default = "N"; 
     Callback = function() 
@@ -186,7 +314,6 @@ local uiSave = Sections.Data:CreateButton({
     Text = "Save Config",
     Callback = function()
         Library:Save();
-        print("saved")
     end,
 });
 
@@ -202,6 +329,53 @@ uiSave:CreateSettings():CreateToggle({
         end);
     end,
     Flag = "auto_save",
+});
+
+local AutoLoad_Toggle = Sections.Data:CreateToggle({
+    Text = "Auto Load";
+    Subtext = "Loads script on Teleport";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(al)
+        if al then 
+            task.spawn(function()
+                hunters.AutoLoad()
+            end);
+        end;
+    end;
+    Flag = "AutoLoad"
+});
+
+local Debug_Toggle = Sections.Data:CreateToggle({
+    Text = "Debug Mode";
+    Subtext = "For Debugging Purposes";
+    Alignment = "Left"; 
+    Default = false;
+    Callback = function(v) 
+        if v then
+            print("r");
+        end;
+    end;
+    Flag = "Debug"
+});
+
+local last_t = tick();
+local last_fps = 0;
+Run.RenderStepped:Connect(function()
+    local current_t = tick();
+    last_fps = math.floor(1 / (current_t - last_t));
+    last_t = current_t;
+end)
+
+local Fps_Toggle = Sections.Data:CreateButton({
+    Text = "Unlock Fps";
+    Alignment = "Left"; 
+    Callback = function() 
+        if (not setfpscap) then print("Executor not supported"); return; end;
+
+        setfpscap(math.max(60, 9999));
+        print("FPS: " ..tostring(last_fps));
+    end;
 });
 
 local Main__AutoSpin = Sections.Main:CreateToggle({
@@ -221,25 +395,54 @@ local Main__AutoSpin = Sections.Main:CreateToggle({
     Flag = "auto_spin";
 })
 
-local Main__AutoSell = Sections.Main:CreateToggle({
+local Main__AutoSellRarity = Sections.Sell:CreateDropdown({
+    Text = "Rarity";
+    Subtext = "Rarity for Auto Sell";
+    Alignment = "Left";
+    Choices = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic" };
+    Multi = true;
+    Default = {"Common", "Uncommon"};
+    Callback = function(values)
+        getgenv().closure.Config.Main.auto_sell.selected_rarity = values;
+    end;
+    Flag = "auto_sell_selected";
+})
+
+local Main__AutoSell = Sections.Sell:CreateToggle({
     Text = "Auto Sell";
-    Subtext = "Sells besides Mythic";
+    Subtext = "Equipment only";
     Alignment = "Left";
     Default = false;
     Callback = function(sell)
-        getgenv().closure.Config.Main.auto_sell.enabled = sell;
+        getgenv().closure.Config.Main.auto_sell.enabled = sell
+
+        if sell then
+            task.spawn(hunters.AutoSell)
+        end
+    end;
+    Flag = "auto_sell";
+})
+
+
+local Main__AutoSellMode = Sections.Main:CreateToggle({
+    Text = "Set Sell mode";
+    Subtext = "Sells all besides Mythic";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(sell)
+        getgenv().closure.Config.Main.auto_sell_mode.enabled = sell;
 
         if sell then 
             hunters.AutoSell()
         end;
     end;
-    Flag = "auto_sell";
+    Flag = "auto_sell_mode";
 })
 
 Main__AutoSell:CreateSettings():CreateToggle({
     Text = "Keep Legendary",
     Callback = function(v)
-        getgenv().closure.Config.Main.auto_sell.keep_legendary = v;
+        getgenv().closure.Config.Main.auto_sell_mode.keep_legendary = v;
     end,
     Flag = "keep_legendary",
 });
@@ -287,6 +490,18 @@ local Main__LobbyDungeon = Sections.Dungeon:CreateDropdown({
     Flag = "selected_dungeon";
 })
 
+local Main__DungeonDifficulty = Sections.Dungeon:CreateDropdown({
+    Text = "Difficulty";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = { "Regular", "Hard" };
+    Multi = false;
+    Default = nil;
+    Callback = function(v)
+            getgenv().closure.Config.Main.auto_dungeon.difficulty = v;
+        end;
+    Flag = "difficulty_dungeon";
+})
 
 local Main__AutoDungeon = Sections.Dungeon:CreateToggle({
     Text = "Auto Dungeon";
@@ -317,7 +532,7 @@ local Main__InstantKill = Sections.Dungeon:CreateToggle({
         task.spawn(function()
             task.wait()
                 task.wait() 
-                hunters.InstantKill()
+            hunters.InstantKill()
         end)
     end;
     Flag = "insta_kill";
@@ -334,6 +549,22 @@ local Main__AutoLeave = Sections.Dungeon:CreateToggle({
     Flag = "auto_leave_dungeon";
 })
 
+local Main__SafeHover = Sections.Dungeon:CreateToggle({
+    Text = "Safe Mode",
+    Subtext = "Enable Instant Kill for this",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(v)
+        getgenv().closure.Config.Main.safe_hover = v
 
-Library:Notify("Early ahh version of Hunters", 5, "Tuah")
+        if v then
+            task.spawn(hunters.SafeHover)
+        end
+    end;
+    Flag = "safe_mode_dungeon";
+})
+
+
+
+Library:Notify("Script loaded for: \n" ..tostring(hunters.GetGame()), 5, "Tuah")
 Library:Load();
