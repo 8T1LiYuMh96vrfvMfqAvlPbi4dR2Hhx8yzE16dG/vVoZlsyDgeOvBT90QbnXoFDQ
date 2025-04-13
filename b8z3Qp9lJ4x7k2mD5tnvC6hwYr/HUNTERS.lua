@@ -16,12 +16,17 @@ getgenv().closure = {
                 ["auto_leave"] = false;
                 ["insta_kill"] = false;
                 ["difficulty"] = nil;
+                ["auto_skill"] = false;
             };
             ["auto_sell"] = {
                 ["enabled"] = false;
                 ["selected_rarity"] = false;
             };
             ["save_hover"] = false;
+            ["speed"] = {
+                ["value"] = 0;
+                ["enabled"] = false;
+            };
         };
     };
     ["UI"] = {
@@ -104,7 +109,6 @@ hunters.SafeHover = function()
     end;
 end;
 
-
 hunters.AutoSpin = function()
     remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Roll");
     
@@ -158,12 +162,12 @@ hunters.AutoDungeon = function()
     else
         local args = {[1] = tostring(getgenv().closure.Config.Main.auto_dungeon.selected_dungeon)}
         ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("createLobby"):InvokeServer(unpack(args))
-        task.wait(math.random(2,3))
+        task.wait(math.random(1,2))
         local args = {[1] = tostring(getgenv().closure.Config.Main.auto_dungeon.difficulty)}
         ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("LobbyDifficulty"):FireServer(unpack(args))   
-        task.wait(math.random(2,3))     
+        task.wait(math.random(1,2))     
         ReplicatedStorage.Remotes.LobbyStart:FireServer()
-        task.wait(math.random(2,3))
+        task.wait(math.random(1,2))
     end;
 
     ReplicatedStorage.Remotes.DungeonStart:FireServer()
@@ -183,7 +187,7 @@ hunters.AutoDungeon = function()
         for _, mob in pairs(mobs) do
             if mob and mob:FindFirstChild("HumanoidRootPart") then
                 local mobPos = mob.HumanoidRootPart.Position
-                local offset = Vector3.new(-5, 0, 0)
+                local offset = Vector3.new(0, 10, 0)
                 RootPart.CFrame = CFrame.new(mobPos + offset)
                 RootPart.CFrame = CFrame.lookAt(mobPos + offset, mobPos)
                 hunters.AutoM1()
@@ -194,24 +198,24 @@ end;
 
 hunters.InstantKill = function()
     while getgenv().closure.Config.Main.auto_dungeon.insta_kill do
-        local mobs = hunters.GetMobs()
+        local mobs = hunters.GetMobs();
 
         for _, mob in pairs(mobs) do
-            local humanoid = mob:FindFirstChild("Humanoid")
+            local humanoid = mob:FindFirstChild("Humanoid");
             if humanoid and humanoid.Health > 0 then
                 task.defer(function()
                     pcall(function()
-                        humanoid.Health = 0
+                        humanoid.Health = 0;
                     end)
                 end)
-            end
-        end
-        task.wait(.1)
-    end
-end
+            end;
+        end;
+        task.wait(.1);
+    end;
+end;
 
 hunters.AutoM1 = function()
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Combat"):FireServer();
+    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Combat"):FireServer();
 end;
 
 hunters.AutoLeave = function()
@@ -240,7 +244,7 @@ hunters.AutoSell = function()
                 local matchedRarity = assetIdToRarity[imageId]
 
                 if matchedRarity and table.find(selectedRarities, matchedRarity) then
-                    print("AutoSelling:", item.Name, "(rarity:", matchedRarity .. ")")
+                    --print("AutoSelling:", item.Name, "(rarity:", matchedRarity .. ")")
                     local args = {
                         [1] = {
                             [1] = item.Name
@@ -255,6 +259,77 @@ hunters.AutoSell = function()
     end;
 end;
 
+hunters.AutoSkill = function()
+    local keycodes = {
+        Enum.KeyCode.One,
+        Enum.KeyCode.Two,
+        Enum.KeyCode.Three,
+        Enum.KeyCode.Four,
+    }
+
+    while  getgenv().closure.Config.Main.auto_dungeon.auto_skill do task.wait()
+    for _, keycode in ipairs(keycodes) do
+        VI:SendKeyEvent(true, keycode, false, game)
+        task.wait(.1)
+        VI:SendKeyEvent(false, keycode, false, game)
+        task.wait(.4) 
+    end;
+end;
+end;
+
+hunters.AntiAfk = function()
+local vu = game:GetService("VirtualUser");
+
+Client.Idled:Connect(function()
+    vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+end)
+end;
+
+hunters.BoostLuck = function()
+local RollFunctions = require(game.ReplicatedStorage.Modules.RollFunctions)
+
+RollFunctions.calculateLuck = function(p, p5)
+    return math.huge 
+    end;
+end;
+
+hunters.Speed = function()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local humanoid = char:WaitForChild("Humanoid")
+
+    local existing = hrp:FindFirstChild("SpeedMod")
+    if existing then existing:Destroy() end
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "SpeedMod"
+    bv.MaxForce = Vector3.new(1e5, 0, 1e5)
+    bv.P = 1250
+    bv.Velocity = Vector3.zero
+    bv.Parent = hrp
+
+    local conn
+    conn = game:GetService("RunService").Heartbeat:Connect(function()
+        if not getgenv().closure.Config.Main.speed.enabled or getgenv().closure.Config.Main.speed.value <= 0 then
+            if bv and bv.Parent then
+                bv:Destroy()
+            end
+            if conn then conn:Disconnect() end
+            return
+        end
+
+        if humanoid and hrp and bv and bv.Parent then
+            local moveDir = humanoid.MoveDirection
+            bv.Velocity = moveDir * getgenv().closure.Config.Main.speed.value
+        end
+    end)
+end
+
+
+
 -- // Variables
 Players = cloneref(game:GetService("Players"));
 Client = cloneref(Players.LocalPlayer);
@@ -262,6 +337,7 @@ ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"));
 Character = Client.Character or Client.CharacterAdded:Wait();
 RootPart = Character:WaitForChild("HumanoidRootPart");
 Run = game:GetService("RunService");
+VI = game:GetService("VirtualInputManager");
 
 hunters.RefreshCharacter = function()
     Character = Client.Character or Client.CharacterAdded:Wait()
@@ -288,6 +364,7 @@ Library.Paths.Data = "/" .. tostring(game.PlaceId)
 local Window = Library:CreateWindow({ Title = "Hunters" })
 local Tabs = {
     Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://114287454825054" }),
+    Misc = Window:CreateTab({ Title = "Misc", Icon = "rbxassetid://87313080232273" }),
     Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://120211262975365"})
 };
 local Sections = {
@@ -296,6 +373,8 @@ local Sections = {
     Main = Tabs.Dashboard:CreateSection({ Title = "Main", Side = "Left",}),
     Dungeon = Tabs.Dashboard:CreateSection({ Title = "Dungeon", Side = "Right",}),
     Sell = Tabs.Dashboard:CreateSection({ Title = "Sell", Side = "Left",}),
+    Misc = Tabs.Misc:CreateSection({ Title = "Misc", Side = "Left",}),
+    Local = Tabs.Misc:CreateSection({ Title = "Local", Side = "Right",}),
 };
 
 local UI__Toggle = Sections.UI:CreateKeybind({
@@ -374,7 +453,7 @@ Run.RenderStepped:Connect(function()
     last_t = current_t;
 end)
 
-local Fps_Toggle = Sections.Data:CreateButton({
+local Config__FpsU = Sections.Data:CreateButton({
     Text = "Unlock Fps";
     Alignment = "Left"; 
     Callback = function() 
@@ -384,6 +463,21 @@ local Fps_Toggle = Sections.Data:CreateButton({
         print("FPS: " ..tostring(last_fps));
     end;
 });
+
+local Config__AntiAfk = Sections.Data:CreateToggle({
+    Text = "Anti Afk";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(a)
+        if a then 
+            task.spawn(function()
+                hunters.AntiAfk()
+            end)
+        end;
+    end;
+    Flag = "anti_afk";
+})
 
 local Main__AutoSpin = Sections.Main:CreateToggle({
     Text = "Auto Spin";
@@ -519,6 +613,14 @@ local Main__AutoDungeon = Sections.Dungeon:CreateToggle({
         getgenv().closure.Config.Main.auto_dungeon.enabled = v;
 
         if v then
+            if getgenv().closure.Config.Main.auto_dungeon.selected_dungeon == nil then
+                Library:Notify("Please select a Mode first", 2, "Tuah")
+                print("Please select a Mode first")
+            elseif getgenv().closure.Config.Main.auto_dungeon.difficulty == nil then
+                Library:Notify("Please select a Difficulty", 2, "Tuah")
+                print("Please select a Diff first")
+            end;
+
             task.spawn(function()
                 task.wait()
                 hunters.AutoDungeon()
@@ -541,6 +643,21 @@ local Main__InstantKill = Sections.Dungeon:CreateToggle({
         end
     end;
     Flag = "insta_kill";
+})
+
+local Main__AutoSkill = Sections.Dungeon:CreateToggle({
+    Text = "Auto Skill";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().closure.Config.Main.auto_dungeon.auto_skill = v;
+
+        if v then
+            task.spawn(hunters.AutoSkill)
+        end
+    end;
+    Flag = "auto_skill";
 })
 
 local Main__AutoLeave = Sections.Dungeon:CreateToggle({
@@ -567,6 +684,47 @@ local Main__SafeHover = Sections.Dungeon:CreateToggle({
         end
     end;
     Flag = "safe_mode_dungeon";
+})
+
+local Misc__BoostLuck = Sections.Misc:CreateButton({
+    Text = "Boost Luck";
+    Alignment = "Left"; 
+    Callback = function() 
+        task.spawn(hunters.BoostLuck());
+     end;
+})
+
+local Misc__Speed = Sections.Local:CreateSlider({
+    Text = "Speed";
+    Alignment = "Left";
+    Default = 0;
+    Callback = function(val)
+        getgenv().closure.Config.Main.speed.value = val;
+    end;
+    Flag = "speed_slider";
+    Floats = 0;
+    Limits = { 0, 150 };
+    Increment = 1;
+})
+
+local Misc__SpeedToggle = Sections.Local:CreateToggle({
+    Text = "Speed";
+    Subtext = "Enables movement";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(enabled)
+        getgenv().closure.Config.Main.speed.enabled = enabled;
+
+        if enabled then
+            hunters.Speed()
+        else
+            local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and hrp:FindFirstChild("SpeedMod") then
+                hrp:FindFirstChild("SpeedMod"):Destroy()
+            end;
+        end;
+    end;
+    Flag = "speed_toggle";
 })
 
 
