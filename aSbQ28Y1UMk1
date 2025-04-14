@@ -155,7 +155,26 @@ local Library = {
         
             ["Font"] = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
             ["NotiFont"] = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
-        },                    
+        },   
+        ["Lotus Dark"] = {
+            ["Title"] = RGB(255, 255, 255),
+        
+            ["Background"] = RGB(15, 15, 20),
+            ["Background2"] = RGB(20, 20, 28),  
+            ["Tone"] = RGB(25, 25, 35),         
+        
+            ["Accent1"] = RGB(35, 35, 45),      
+            ["Highlight"] = RGB(127, 101, 255),
+            ["Hover"] = RGB(155, 130, 255),
+            ["Selected"] = RGB(175, 150, 255),
+        
+            ["Text"] = RGB(235, 235, 255),
+            ["Subtext"] = RGB(180, 180, 200),
+            ["Icons"] = RGB(200, 200, 255),
+        
+            ["Font"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+        },                         
     },
 
     Black = RGB(0, 0, 0),
