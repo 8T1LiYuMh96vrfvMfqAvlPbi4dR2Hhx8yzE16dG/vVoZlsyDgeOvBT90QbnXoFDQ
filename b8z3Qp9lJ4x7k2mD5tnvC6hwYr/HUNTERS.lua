@@ -27,6 +27,7 @@ getgenv().closure = {
                 ["value"] = 0;
                 ["enabled"] = false;
             };
+            ["auto_claim_daily"] = false;
         };
     };
     ["UI"] = {
@@ -326,9 +327,26 @@ hunters.Speed = function()
             bv.Velocity = moveDir * getgenv().closure.Config.Main.speed.value
         end
     end)
-end
+end;
 
+hunters.Stats = function()
+    local remoteS = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("PointTo");
 
+    if getgenv().selected_stat ~= nil and getgenv().stat_enabled then 
+        while getgenv().stat_enabled do task.wait()
+            remoteS:InvokeServer(tostring(getgenv().selected_stat));
+        end;
+    end;
+end;
+
+hunters.ClaimDaily = function()
+    local remoteC = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ClaimDaily");
+
+    for i = 1, 6 do 
+        task.wait()
+        remoteC:FireServer(tostring(i))
+    end;
+end;
 
 -- // Variables
 Players = cloneref(game:GetService("Players"));
@@ -373,8 +391,10 @@ local Sections = {
     Main = Tabs.Dashboard:CreateSection({ Title = "Main", Side = "Left",}),
     Dungeon = Tabs.Dashboard:CreateSection({ Title = "Dungeon", Side = "Right",}),
     Sell = Tabs.Dashboard:CreateSection({ Title = "Sell", Side = "Left",}),
-    Misc = Tabs.Misc:CreateSection({ Title = "Misc", Side = "Left",}),
+    Misc = Tabs.Misc:CreateSection({ Title = "Other", Side = "Left",}),
     Local = Tabs.Misc:CreateSection({ Title = "Local", Side = "Right",}),
+    Themes = Tabs.Config:CreateSection({ Title = "Themes", Side = "Left",}),
+    Stats = Tabs.Misc:CreateSection({ Title = "Stats", Side = "Left",}),
 };
 
 local UI__Toggle = Sections.UI:CreateKeybind({
@@ -489,7 +509,6 @@ local Main__AutoSpin = Sections.Main:CreateToggle({
 
         if spin then 
             hunters.AutoSpin()
-            print(type(hunters.AutoSpin))
             Library:Notify("Currently Spinning!!", 2, "Tuah")
         end;
     end;
@@ -727,7 +746,83 @@ local Misc__SpeedToggle = Sections.Local:CreateToggle({
     Flag = "speed_toggle";
 })
 
+getgenv().theme_set = nil;
 
+local Config__ThemeSet = Sections.Themes:CreateInput({
+    Text = "Theme Name";
+    Subtext = "Desired Theme here";
+    Alignment = "Left";
+    Default = "";
+    Placeholder = "";
+    Callback = function(v)
+        getgenv().theme_set = v;
+    end;
+    Flag = "theme_selected";
+})
+
+local Config__DarkTheme = Sections.Themes:CreateToggle({
+    Text = "Set Theme";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        if v and getgenv().theme_set ~= nil then
+            Library.Theme = tostring(getgenv().theme_set);
+        else
+            Library.Theme = "Default";
+        end;
+    end;
+    Flag = "theme_set";
+})
+
+local Config__AvailableThemes = Sections.Themes:CreateLog({
+    Default = { "Dark", "Light", "Midnight", "Bloom", "Minecraft", "Windows 11", "Lotus Dark", "Default" };
+})
+
+getgenv().selected_stat = nil;
+getgenv().stat_enabled = false;
+local Misc__SelectedStats = Sections.Stats:CreateDropdown({
+    Text = "Stat";
+    Subtext = "Stat to upgrade";
+    Alignment = "Left";
+    Choices = { "Strength", "Agility", "Perception", "Vitality", "Intellect" };
+    Multi = false;
+    Default = nil;
+    Callback = function(v)
+        getgenv().selected_stat = v;
+        end;
+    Flag = "selected_stat";
+})
+
+local Misc__StatSelected = Sections.Stats:CreateToggle({
+    Text = "Put Stat in";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().stat_enabled = v;
+
+        if getgenv().stat_enabled then 
+            hunters.Stats()
+        end;
+    end;
+    Flag = "set_stat";
+})
+
+local Misc__ClaimDaily = Sections.Misc:CreateToggle({
+    Text = "Auto Claim Daily";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().closure.Config.Main.auto_claim_daily = v;
+
+        if getgenv().closure.Config.Main.auto_claim_daily then 
+            hunters.ClaimDaily()
+        end;
+    end;
+    Flag = "auto_claim_daily";
+})
 
 Library:Notify("Script loaded for: \n" ..tostring(hunters.GetGame()), 5, "Tuah")
 Library:Load();
