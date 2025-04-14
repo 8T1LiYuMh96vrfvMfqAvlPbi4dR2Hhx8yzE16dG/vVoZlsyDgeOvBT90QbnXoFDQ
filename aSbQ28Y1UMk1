@@ -62,24 +62,100 @@ local Library = {
                 Enum.FontStyle.Normal)
         },
         ["Light"] = {
-            ["Title"] = RGB(0, 0, 0),
+            ["Title"] = RGB(25, 25, 25),
         
-            ["Background"] = RGB(240, 240, 240),
-            ["Background2"] = RGB(255, 255, 255),
-            ["Tone"] = RGB(220, 220, 220),
+            ["Background"] = RGB(250, 250, 255), 
+            ["Background2"] = RGB(245, 245, 250),
+            ["Tone"] = RGB(225, 225, 235),
         
-            ["Accent1"] = RGB(200, 200, 200),
-            ["Highlight"] = RGB(100, 149, 237), 
-            ["Hover"] = RGB(180, 180, 180),
-            ["Selected"] = RGB(100, 149, 237),
+            ["Accent1"] = RGB(205, 205, 220),
+            ["Highlight"] = RGB(100, 175, 255),
+            ["Hover"] = RGB(180, 200, 255),
+            ["Selected"] = RGB(140, 190, 255),
         
-            ["Text"] = RGB(20, 20, 20),
-            ["Subtext"] = RGB(90, 90, 90),
-            ["Icons"] = RGB(20, 20, 20),
+            ["Text"] = RGB(30, 30, 40),
+            ["Subtext"] = RGB(120, 120, 130),
+            ["Icons"] = RGB(50, 50, 60),
         
-            ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
-            ["NotiFont"] = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+            ["Font"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/GothamBlack.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
         },
+        ["Bloom"] = {
+            ["Title"] = RGB(255, 180, 220),
+        
+            ["Background"] = RGB(255, 245, 250),
+            ["Background2"] = RGB(250, 235, 245),
+            ["Tone"] = RGB(240, 220, 235),
+        
+            ["Accent1"] = RGB(255, 210, 230),
+            ["Highlight"] = RGB(255, 130, 180),
+            ["Hover"] = RGB(255, 160, 200),
+            ["Selected"] = RGB(255, 100, 160),
+        
+            ["Text"] = RGB(80, 30, 60),
+            ["Subtext"] = RGB(150, 90, 120),
+            ["Icons"] = RGB(80, 30, 60),
+        
+            ["Font"] = Font.new("rbxasset://fonts/families/Cartoon.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/Cartoon.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+        },
+        ["Minecraft"] = {
+            ["Title"] = RGB(255, 255, 255),
+        
+            ["Background"] = RGB(111, 154, 87),
+            ["Background2"] = RGB(89, 125, 68),
+            ["Tone"] = RGB(78, 113, 60),
+        
+            ["Accent1"] = RGB(61, 90, 46),
+            ["Highlight"] = RGB(170, 113, 64),
+            ["Hover"] = RGB(140, 80, 50),
+            ["Selected"] = RGB(190, 140, 90),
+        
+            ["Text"] = RGB(255, 255, 255),
+            ["Subtext"] = RGB(220, 220, 220),
+            ["Icons"] = RGB(255, 255, 255),
+        
+            ["Font"] = Font.new("rbxasset://fonts/families/Arcade.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/Arcade.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+        },
+        ["Windows 11"] = {
+            ["Title"] = RGB(20, 20, 20),
+        
+            ["Background"] = RGB(240, 246, 255),
+            ["Background2"] = RGB(225, 235, 250),
+            ["Tone"] = RGB(200, 220, 245),
+        
+            ["Accent1"] = RGB(180, 205, 235),
+            ["Highlight"] = RGB(0, 120, 215),
+            ["Hover"] = RGB(0, 100, 200),
+            ["Selected"] = RGB(0, 145, 255),
+        
+            ["Text"] = RGB(20, 20, 25),
+            ["Subtext"] = RGB(100, 100, 110),
+            ["Icons"] = RGB(30, 30, 40),
+        
+            ["Font"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/GothamBlack.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+        },
+        ["Midnight"] = {
+            ["Title"] = RGB(255, 255, 255),
+        
+            ["Background"] = RGB(15, 18, 27),
+            ["Background2"] = RGB(20, 23, 35),
+            ["Tone"] = RGB(25, 30, 45),
+        
+            ["Accent1"] = RGB(40, 45, 60),
+            ["Highlight"] = RGB(95, 135, 255),
+            ["Hover"] = RGB(60, 70, 110),
+            ["Selected"] = RGB(110, 140, 255),
+        
+            ["Text"] = RGB(220, 220, 255),
+            ["Subtext"] = RGB(130, 130, 160),
+            ["Icons"] = RGB(220, 220, 255),
+        
+            ["Font"] = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+        },                    
     },
 
     Black = RGB(0, 0, 0),
