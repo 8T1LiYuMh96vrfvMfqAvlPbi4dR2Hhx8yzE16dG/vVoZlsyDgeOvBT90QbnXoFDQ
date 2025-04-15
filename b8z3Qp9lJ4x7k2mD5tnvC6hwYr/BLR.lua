@@ -12,8 +12,8 @@ env[2] = {
     ["Shutdown"] = function(reason)
         print("[!] Script is shutting down: " .. reason)
         task.wait(1) 
-        game.Players.LocalPlayer:Kick("[Tuah] - " .. reason)
-    end
+        Client:Kick("[Tuah] - " .. reason)
+    end;
 }
 env[3] = {
     ["CheckForUpdates"] = function()
@@ -27,20 +27,20 @@ env[3] = {
             if versionData then
                 if versionData.Force_Update == true then
                     env[2]["Shutdown"]("Force update enabled by the developer")
-                end
+                end;
 
                 local serverVersion = tostring(versionData.Version)
                 if serverVersion and serverVersion ~= tostring(env[1]["Version"]) then
                     print("[!] New update detected: " .. serverVersion)
                     env[2]["Shutdown"]("New version available")
-                end
+                end;
             else
-                print("[!] Failed to parse version data")
-            end
+                print("[!] Failed to parse version data");
+            end;
         else
-            print("[!] Failed to check for updates, Running in offline mode")
-        end
-    end
+            print("[!] Failed to check for updates, Running in offline mode");
+        end;
+    end;
 }
 env[4] = {
     ["VerifyIntegrity"] = function()
@@ -435,7 +435,7 @@ local Main__SpeedChanger = Sections.Client:CreateSlider({
     Alignment = "Left"; 
     Default = 4; 
     Floats = 1; 
-    Limits = { 2, 50 }; 
+    Limits = { 4, 50 }; 
     Callback = function(v)
         if getgenv().closure.Main.Speed.Enabled then 
             Rivals_Keeper.Speed(v);
@@ -655,6 +655,7 @@ local FlowChoices = {
     "King's Instinct",
     "Lightning",
     "Puzzle",
+    "Buddha's Blessing"
 }
 local StyleChoices = {
     "Sae",
@@ -677,6 +678,7 @@ local StyleChoices = {
     "Gagamaru",
     "Isagi",
     "Chigiri",
+    "Igaguri",
 }
 local selectedFlows = {};
 local selectedStyles = {};
