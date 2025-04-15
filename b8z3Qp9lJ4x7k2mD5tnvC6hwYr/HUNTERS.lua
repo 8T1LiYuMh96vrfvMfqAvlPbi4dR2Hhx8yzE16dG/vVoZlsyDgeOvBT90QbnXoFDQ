@@ -28,6 +28,12 @@ getgenv().closure = {
                 ["enabled"] = false;
             };
             ["auto_claim_daily"] = false;
+            ["auto_replay"] = false;
+            ["auto_potion"] = false;
+            ["selected_potion"] = nil;
+            ["Potions"] = {
+                ["Luck Potion"] = "LuckPotion1";
+            };
         };
     };
     ["UI"] = {
@@ -348,6 +354,22 @@ hunters.ClaimDaily = function()
     end;
 end;
 
+hunters.AutoReplay = function()
+    remoteR = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ReplayDungeon");
+
+    if getgenv().closure.Config.Main.auto_replay then 
+    remoteR:FireServer();
+    end;
+end;
+
+hunters.UsePotion = function()
+    potionRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("UsePotion")
+
+    while getgenv().closure.Config.Main.auto_potion do task.wait(math.random())
+    potionRemote:FireServer(tostring(getgenv().closure.Config.Main.selected_potion))
+    end;
+end;
+
 -- // Variables
 Players = cloneref(game:GetService("Players"));
 Client = cloneref(Players.LocalPlayer);
@@ -395,6 +417,7 @@ local Sections = {
     Local = Tabs.Misc:CreateSection({ Title = "Local", Side = "Right",}),
     Themes = Tabs.Config:CreateSection({ Title = "Themes", Side = "Left",}),
     Stats = Tabs.Misc:CreateSection({ Title = "Stats", Side = "Left",}),
+    Potions = Tabs.Misc:CreateSection({ Title = "Potions", Side = "Right",}),
 };
 
 local UI__Toggle = Sections.UI:CreateKeybind({
@@ -501,7 +524,7 @@ local Config__AntiAfk = Sections.Data:CreateToggle({
 
 local Main__AutoSpin = Sections.Main:CreateToggle({
     Text = "Auto Spin";
-    Subtext = "RNG";
+    Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(spin)
@@ -690,6 +713,21 @@ local Main__AutoLeave = Sections.Dungeon:CreateToggle({
     Flag = "auto_leave_dungeon";
 })
 
+local Main__AutoReplay = Sections.Dungeon:CreateToggle({
+    Text = "Auto Replay";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().closure.Config.Main.auto_replay = v;
+
+        if getgenv().closure.Config.Main.auto_replay then 
+            hunters.AutoReplay()
+        end;
+    end;
+    Flag = "auto_replay";
+})
+
 local Main__SafeHover = Sections.Dungeon:CreateToggle({
     Text = "Safe Mode",
     Subtext = "Enable Instant Kill for this",
@@ -822,6 +860,45 @@ local Misc__ClaimDaily = Sections.Misc:CreateToggle({
         end;
     end;
     Flag = "auto_claim_daily";
+})
+
+local potionNames = {};
+for name, _ in pairs(getgenv().closure.Config.Main.Potions) do
+    table.insert(potionNames, name)
+end;
+
+local Misc__Potions = Sections.Potions:CreateDropdown({ 
+    Text = "Choose Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = potionNames;
+    Multi = false;
+    Default = nil;
+    Callback = function(v)
+        local potionId = getgenv().closure.Config.Main.Potions[v];
+        if potionId then
+            getgenv().closure.Config.Main.selected_potion = potionId
+            print("Selected potion:", v, "→", potionId)
+        else
+            warn("Invalid potion selection")
+        end
+    end;
+    Flag = "potions_choosen";
+})
+
+local Misc__UsePotion = Sections.Potions:CreateToggle({
+    Text = "Auto use Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        getgenv().closure.Config.Main.auto_potion = v;
+
+        if getgenv().closure.Config.Main.auto_potion then 
+            task.spawn(hunters.UsePotion())
+        end;
+    end;
+    Flag = "potion_use";
 })
 
 Library:Notify("Script loaded for: \n" ..tostring(hunters.GetGame()), 5, "Tuah")
