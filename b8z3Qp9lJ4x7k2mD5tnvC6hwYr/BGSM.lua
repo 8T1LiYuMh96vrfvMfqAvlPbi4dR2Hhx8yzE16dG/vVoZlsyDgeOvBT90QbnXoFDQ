@@ -664,7 +664,7 @@ local Misc__UseAllLuckyPotion = Sections.Potions:CreateToggle({
 })
 
 local Misc__UseAllMythicPotion = Sections.Potions:CreateToggle({
-    Text = "Auto use Lucky Potion";
+    Text = "Auto use Mythic Potion";
     Subtext = "";
     Alignment = "Left";
     Default = false;
