@@ -702,7 +702,7 @@ local Misc__HatchEgg; Misc__HatchEgg = Sections.Hatch:CreateToggle({
                     local args = {
                         [1] = "HatchEgg",
                         [2] = tostring(Kaugummi.Config.Misc.choosen_egg),
-                        [3] = 1
+                        [3] = 2
                     }
                 network:WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
                 else
