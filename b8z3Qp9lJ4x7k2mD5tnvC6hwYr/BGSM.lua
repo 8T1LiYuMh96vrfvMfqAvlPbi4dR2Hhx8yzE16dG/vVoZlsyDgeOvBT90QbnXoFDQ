@@ -20,6 +20,8 @@ local Kaugummi = {
             ["auto_buy_next_gum"] = false;
             ["auto_sell_custom"] = nil;
             ["auto_sell_custom_enabled"] = false;
+            ["auto_win_dog_game"] = false;
+            ["auto_chest_farm"] = false;
         };
         ["Misc"] = {
             ["auto_claim_prizes"] = false;
@@ -28,9 +30,16 @@ local Kaugummi = {
             ["auto_claim_playtime"] = false;
             ["auto_claim_wheel_spin"] = false;
             ["auto_coins_potion"] = false;
+            ["auto_speed_potion"] = false;
+            ["auto_mythic_potion"] = false;
+            ["auto_lucky_potion"] = false;
             ["auto_hatch"] = false;
             ["choosen_egg"] = nil;
             ["auto_collect_coins"] = false;
+            ["auto_gift"] = {
+                ["enabled"] = false;
+                ["open_value"] = 10;
+            };
         };
     };
     UI = {
@@ -74,16 +83,51 @@ function bubble:ClaimPlaytime()
     end;
 end;
 
+function bubble:AutoGift()
+    local getRemoteM = network:WaitForChild("Remote"):WaitForChild("Event")
+    local openCount = tonumber(Kaugummi.Config.Misc.auto_gift.open_value) or 5 
+    local NetworkFolder = game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote")
+    getRemoteM:FireServer("UseGift", "Mystery Box", openCount)
+    task.wait(.5)
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    for i = 1, openCount do
+        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, false, game, 0)
+        print("Clicked gift #" .. i)
+        task.wait(0.15)
+    end;
+end;
+
 function bubble:UseAllCoinPotions()
     getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
-    local args = {
-        [1] = "UsePotion",
-        [2] = "Coins",
-        [3] = 3
-    }
-    for i = 1, 5 do 
+    for i = 1, 6 do 
         task.wait()
         getRemoteK:FireServer("UsePotion", "Coins", tonumber(i))
+    end;
+end;
+
+function bubble:UseAllLuckyPotions()
+    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
+    for i = 1, 6 do 
+        task.wait()
+        getRemoteK:FireServer("UsePotion", "Lucky", tonumber(i))
+    end;
+end;
+
+function bubble:UseAllSpeedPotions()
+    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
+    for i = 1, 6 do 
+        task.wait()
+        getRemoteK:FireServer("UsePotion", "Speed", tonumber(i))
+    end;
+end;
+
+function bubble:UseAllMythicPotions()
+    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
+    for i = 1, 6 do 
+        task.wait()
+        getRemoteK:FireServer("UsePotion", "Mythic", tonumber(i))
     end;
 end;
 
@@ -139,6 +183,36 @@ function bubble:SellBubbles()
     local arg1 = "SellBubble"
     while (Kaugummi.Config.Dashboard.auto_sell_bubblegum and getRemoteH) do task.wait()
         getRemoteH:FireServer(tostring(arg1))
+    end;
+end;
+
+function bubble:SellBubblesCustom()
+    local getRemoteH = network:WaitForChild("Remote"):WaitForChild("Event");
+    local arg1 = "SellBubble"
+    while (Kaugummi.Config.Dashboard.auto_sell_custom and getRemoteH) do
+        local bubbleLabel = client.PlayerGui.ScreenGui.HUD.Left.Currency.Bubble.Frame.Label
+        if bubbleLabel then
+            local text = bubbleLabel.ContentText or ""
+            local current = text:match("([%d,]+)")
+            if current then
+                current = current:gsub(",", ""):gsub("%s", "")
+                local currentNum = tonumber(current)
+                local customTarget = tonumber(Kaugummi.Config.Dashboard.custom_sell_value)
+
+                if currentNum and customTarget and currentNum >= customTarget then
+                    getRemoteH:FireServer(tostring(arg1))
+                end;
+            end;
+        end;
+        task.wait(1);
+    end;
+end;
+
+function bubble:AutoWinDogGame()
+    local getRemoteL = network:WaitForChild("Remote"):WaitForChild("Event");
+
+    while (Kaugummi.Config.Dashboard.auto_win_dog_game and getRemoteL) do task.wait()
+        getRemoteL:FireServer("DoggyJumpWin", tonumber("3"))
     end;
 end;
 
@@ -286,6 +360,7 @@ local Sections = {
     Misc = Tabs.Misc:CreateSection({ Title = "Misc", Side = "Left",}),
     Themes = Tabs.Config:CreateSection({ Title = "Themes", Side = "Left",}),
     Teleport = Tabs.Misc:CreateSection({ Title = "Teleport", Side = "Right",}),
+    Opening = Tabs.Misc:CreateSection({ Title = "Opening", Side = "Right",}),
     Potions = Tabs.Misc:CreateSection({ Title = "Potion", Side = "Left",}),
     Hatch = Tabs.Misc:CreateSection({ Title = "Hatch", Side = "Left",}),
 };
@@ -358,6 +433,36 @@ local Dashboard__AutoSell = Sections.Main:CreateToggle({
         end;
     end;
     Flag = "auto_sell_max";
+})
+
+local Dashboard__AutoSellCustomToggle = Sections.Main:CreateToggle({
+    Text = "Auto Sell Custom";
+    Subtext = "Sells custom bubbles Value";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.auto_sell_custom = v;
+
+        if v then 
+            task.spawn(function()
+                bubble:SellBubblesCustom()
+            end)
+        end;
+    end;
+    Flag = "auto_sell_custom";
+})
+
+local Dashboard__AutoSellCustomInput = Sections.Main:CreateInput({
+    Text = "Set Custom Sell Value";
+    Subtext = "Example: 1000";
+    Alignment = "Left";
+    Default = "";
+    Placeholder = "Enter bubble amount";
+    Callback = function(Value) 
+        Kaugummi.Config.Dashboard.custom_sell_value = tonumber(Value)
+        print("Custom Sell Value set to: " .. tostring(Value)) 
+    end;
+    Flag = "custom_sell_value";
 })
 
 local Dashboard__AutoBuyNextFlavor = Sections.Shop:CreateToggle({
@@ -486,6 +591,24 @@ local Misc__AutoCollectCoins = Sections.Misc:CreateToggle({
     Flag = "auto_collect_coins";
 })
 
+local Misc__AutoWinDogGame = Sections.Misc:CreateToggle({
+    Text = "Auto Win Dog";
+    Subtext = "Wins the Dog game!";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Misc.auto_win_dog_game = v;
+
+        while Kaugummi.Config.Misc.auto_win_dog_game do
+            task.wait(1);
+            task.spawn(function()
+                bubble:AutoWinDogGame()       
+            end)
+        end;
+    end;
+    Flag = "auto_win_dog_game";
+})
+
 local Misc__UseAllCoinsPotion = Sections.Potions:CreateToggle({
     Text = "Auto use Coins Potion";
     Subtext = "";
@@ -504,6 +627,91 @@ local Misc__UseAllCoinsPotion = Sections.Potions:CreateToggle({
     Flag = "auto_coins_potion";
 })
 
+local Misc__UseAllSpeedPotion = Sections.Potions:CreateToggle({
+    Text = "Auto use Speed Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Misc.auto_speed_potion = v;
+
+        while Kaugummi.Config.Misc.auto_speed_potion do
+            task.wait(1);
+            task.spawn(function()
+                bubble:UseAllSpeedPotions()       
+            end)
+        end;
+    end;
+    Flag = "auto_speed_potion";
+})
+
+local Misc__UseAllLuckyPotion = Sections.Potions:CreateToggle({
+    Text = "Auto use Lucky Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Misc.auto_lucky_potion = v;
+
+        while Kaugummi.Config.Misc.auto_lucky_potion do
+            task.wait(1);
+            task.spawn(function()
+                bubble:UseAllLuckyPotions()       
+            end)
+        end;
+    end;
+    Flag = "auto_lucky_potion";
+})
+
+local Misc__UseAllMythicPotion = Sections.Potions:CreateToggle({
+    Text = "Auto use Lucky Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Misc.auto_mythic_potion = v;
+
+        while Kaugummi.Config.Misc.auto_mythic_potion do
+            task.wait(1);
+            task.spawn(function()
+                bubble:UseAllMythicPotions()       
+            end)
+        end;
+    end;
+    Flag = "auto_mythic_potion";
+})
+
+local Misc__AutoGiftValue = Sections.Opening:CreateSlider({
+    Text = "Gifts to open";
+    Alignment = "Left";
+    Default = 10;
+    Callback = function(v)
+         Kaugummi.Config.Misc.auto_gift.open_value = v;
+        end;
+    Flag = "auto_gift_value";
+    Floats = 0; 
+    Limits = { 1, 10 }; 
+    Increment = 1;
+})
+
+local Misc__AutoGift = Sections.Opening:CreateToggle({
+    Text = "Auto Gift";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Misc.auto_gift.enabled = v;
+
+        while Kaugummi.Config.Misc.auto_gift.enabled do
+            task.wait(1);
+            task.spawn(function()
+                bubble:AutoGift()       
+            end)
+        end;
+    end;
+    Flag = "auto_gift";
+})
+
 local Misc__RedeemAllCodes = Sections.Misc:CreateButton({
     Text = "Redeem All Codes";
     Alignment = "Left";
@@ -513,7 +721,6 @@ local Misc__RedeemAllCodes = Sections.Misc:CreateButton({
         end)
     end;
 })
-
 
 local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Teleport:CreateButton({
     Text = "Unlock all Islands";
@@ -551,7 +758,6 @@ local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Teleport:CreateB
         Misc__UnlockAllIslands:ChangeText("Unlock all Islands");
     end;
 })
-
 
 local UI__Toggle = Sections.UI:CreateKeybind({
     Text = "Toggle UI";
