@@ -743,14 +743,6 @@ local Main__SafeHover = Sections.Dungeon:CreateToggle({
     Flag = "safe_mode_dungeon";
 })
 
-local Misc__BoostLuck = Sections.Misc:CreateButton({
-    Text = "Boost Luck";
-    Alignment = "Left"; 
-    Callback = function() 
-        task.spawn(hunters.BoostLuck());
-     end;
-})
-
 local Misc__Speed = Sections.Local:CreateSlider({
     Text = "Speed";
     Alignment = "Left";
