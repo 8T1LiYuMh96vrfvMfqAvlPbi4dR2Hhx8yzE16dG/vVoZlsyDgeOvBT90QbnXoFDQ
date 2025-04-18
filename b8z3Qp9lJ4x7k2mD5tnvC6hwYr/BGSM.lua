@@ -40,6 +40,7 @@ local Kaugummi = {
                 ["enabled"] = false;
                 ["open_value"] = 10;
             };
+            ["selected_zone"] = nil;
         };
     };
     UI = {
@@ -123,6 +124,108 @@ function bubble:UseAllSpeedPotions()
     end;
 end;
 
+function bubble:MonitorEggDrops()
+    local http_request = http and http.request or request or (syn and syn.request) or (fluxus and fluxus.request) or (krnl and krnl.request)
+    if not http_request then
+        warn("[Tuah EggMonitor] ❌ Your executor does not support HTTP requests")
+        return
+    end
+
+    local HttpService = game:GetService("HttpService")
+    local Players = game:GetService("Players")
+    local TeleportService = game:GetService("TeleportService")
+    local WebhookURL = "https://discord.com/api/webhooks/1285020936919318623/mU1tULBtfwQza2v0pB0QYK3s5gPFmjEjxkBoF6oWRrpGbEKVzSv9TULdJrUak-8iAnXp"
+
+    local allowedNames = {
+        ["rainbow-egg"] = true,
+        ["nightmare-egg"] = true,
+        ["void-egg"] = true,
+        ["royal-chest"] = true,
+    }
+
+    local colorMap = {
+        ["rainbow-egg"] = 0xFF55FF,
+        ["nightmare-egg"] = 0x8B0000,
+        ["void-egg"] = 0x000000,
+        ["royal-chest"] = 0xFFD700,
+    }
+
+    local function getDropDetails(model)
+        local timerText = "N/A"
+        local luckText = "N/A"
+
+        local display = model:FindFirstChild("Display")
+        if display and display:FindFirstChild("SurfaceGui") then
+            local gui = display.SurfaceGui
+            local timer = gui:FindFirstChild("Timer")
+            local icon = gui:FindFirstChild("Icon")
+            local luck = icon and icon:FindFirstChild("Luck")
+
+            if timer and timer:IsA("TextLabel") then
+                timerText = timer.Text
+            end
+            if luck and luck:IsA("TextLabel") then
+                luckText = luck.Text
+            end
+        end
+
+        return timerText, luckText
+    end
+    local function sendEmbed(itemName, model)
+        local embedColor = colorMap[itemName] or 0xA14EFF 
+        local timerText, luckText = getDropDetails(model)
+        local playerCount = #Players:GetPlayers()
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+    
+        local teleportScript = string.format([[
+    ```lua
+    game:GetService('TeleportService'):TeleportToPlaceInstance(%d, '%s', game.Players.LocalPlayer)
+    ```]], placeId, jobId)
+    
+        local titleFormatted = itemName:gsub("(%a)([%w_']*)", function(first, rest)
+            return first:upper() .. rest:lower()
+        end):gsub("%-", " ")
+    
+        local embed = {
+            ["username"] = "Tuah - Rift Alert",
+            ["embeds"] = { {
+                ["title"] = "🌌 A " .. titleFormatted .. " Just Spawned!",
+                ["color"] = embedColor,
+                ["fields"] = {
+                    { ["name"] = "🎯 Name", value = "`" .. itemName .. "`", inline = true },
+                    { ["name"] = "⏱️ Timer", value = "`" .. timerText .. "`", inline = true },
+                    { ["name"] = "🍀 Luck Bonus", value = "`" .. luckText .. "`", inline = true },
+                    { ["name"] = "👥 Players in Server", value = "`" .. tostring(playerCount) .. "`", inline = true },
+                    { ["name"] = "🌐 Server Info", value = string.format("PlaceId: `%d`\nJobId: `%s`", placeId, jobId), inline = false },
+                    { ["name"] = "🚀 Teleport Script", value = teleportScript, inline = false }
+                },
+                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }}
+        }
+    
+        http_request({
+            Url = WebhookURL,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode(embed)
+        })
+    end
+local riftsFolder = workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
+for _, child in ipairs(riftsFolder:GetChildren()) do
+    if child:IsA("Model") and allowedNames[child.Name] then
+        sendEmbed(child.Name, child)
+    end
+end
+
+riftsFolder.ChildAdded:Connect(function(child)
+    if child:IsA("Model") and allowedNames[child.Name] then
+        sendEmbed(child.Name, child)
+    end
+end)
+end
+bubble:MonitorEggDrops()
+
 function bubble:UseAllMythicPotions()
     getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
     for i = 1, 6 do 
@@ -140,6 +243,22 @@ function bubble:GetAllEggs()
         end;
     end;
     return eggs;
+end;
+
+local getZones = {
+    "Floating Island", "Outer Space", "Twilight", "The Void", "Zen";
+}
+function bubble:ZoneTeleport()
+
+
+    trim = "Workspace.Worlds.The Overworld.Islands.".. tostring(Kaugummi.Config.Misc.selected_zone) ..".Island.Portal.Spawn"
+
+    local args = {
+    [1] = "Teleport",
+    [2] = trim;
+    }
+
+    network:WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
 end;
 
 function bubble:GetIslands()
@@ -720,6 +839,27 @@ local Misc__RedeemAllCodes = Sections.Misc:CreateButton({
             bubble:RedeemAllCodes()
         end)
     end;
+})
+
+local Misc__ZoneToTeleport = Sections.Teleport:CreateDropdown({
+    Text = "Select Zone";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = getZones;
+    Multi = false;
+    Default = nil;
+    Callback = function(v) 
+        Kaugummi.Config.Misc.selected_zone = v;
+     end;
+    Flag = "selected_zone";
+})
+
+local Misc__TeleportZone = Sections.Teleport:CreateButton({
+    Text = "Teleport";
+    Alignment = "Left"; 
+    Callback = function() 
+        bubble:ZoneTeleport();
+     end;
 })
 
 local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Teleport:CreateButton({
