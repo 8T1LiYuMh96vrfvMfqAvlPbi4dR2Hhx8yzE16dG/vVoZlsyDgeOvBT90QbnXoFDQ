@@ -134,7 +134,7 @@ function bubble:MonitorEggDrops()
     local HttpService = game:GetService("HttpService")
     local Players = game:GetService("Players")
     local TeleportService = game:GetService("TeleportService")
-    local WebhookURL = "https://discord.com/api/webhooks/1285020936919318623/mU1tULBtfwQza2v0pB0QYK3s5gPFmjEjxkBoF6oWRrpGbEKVzSv9TULdJrUak-8iAnXp"
+    local WebhookURL = "https://discord.com/api/webhooks/1337008350843506729/SJ3pWhAvx4GtawhD8qIrgiuFvawV56sPe6RuuOhS3uPDIJybsw5cCtcgKxjNgz_-Otc5"
 
     local allowedNames = {
         ["rainbow-egg"] = true,
