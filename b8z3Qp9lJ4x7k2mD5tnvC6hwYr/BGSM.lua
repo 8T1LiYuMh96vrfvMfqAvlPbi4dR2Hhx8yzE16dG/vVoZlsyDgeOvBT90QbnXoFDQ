@@ -1,7 +1,76 @@
-bubble = {}; --storing here
+bubble = {}; --storing here 
 config = {};
-manager = {};
-handler = {};
+handler = {
+    ["__"] = {Version = 1.11}
+}; print("Checking " ..tostring(handler.__.Version), tostring(os.date()))
+
+-- TODO: 
+-- Disable Hatch Animation
+-- Auto Mastery
+-- Auto Alien Shop Purchase
+-- Auto Black Market Purchase
+-- Auto Equip Best
+-- Auto Rift Open
+
+local Kaugummi = {
+    Config = {
+        ["Dashboard"] = {
+            ["Information"] = {
+                {...};
+            };
+            ["Farm"] = {
+                ["auto_bubble"] = false;
+                ["auto_sell"] = false;
+                ["auto_sell_ifmax"] = false;
+                ["auto_sell_custom"] = false;
+                ["auto_sell_custom_value"] = nil;
+                ["collect_loot"] = false;
+                ["Unlocks"] = {
+                    ["auto_claim_prizes"] = false;
+                    ["auto_claim_daily"] = false;
+                    ["auto_claim_playtime"] = false;
+                    ["auto_spin_wheel"] = false;
+                    ["auto_win_doggy_game"] = false;
+                    ["auto_claim_season"] = false;
+                };
+            };
+            ["Shop"] = {
+                ["auto_buy_next_flavor"] = false;
+                ["auto_buy_next_gum"] = false;
+                ["auto_use_potion"] = false;  
+                ["potion_type"] = "Lucky"; 
+                ["potion_count"] = 6;  
+                ["auto_use_potion_limit"] = 3;
+                ["auto_black_market"] = false;
+                ["auto_black_marketselected"] = nil;
+            };
+            ["Pets"] = {
+                ["selected_egg"] = nil;
+                ["auto_hatch"] = false;
+                ["event_selected_egg"] = nil;
+                ["event_hatch"] = false;
+            }
+        };
+        ["Misc"] = {
+            ["selected_zone"] = nil;
+        };
+    };
+    Ui = {
+        ["auto_save"] = false;
+    };
+    Game = {
+        ["Zones"] = {
+            "Floating Island", "Outer Space", "Twilight", "The Void", "Zen", "Event";
+        };
+    };
+    Cache = {...};
+    Logs = {
+        ["discord"] = {
+            ["invite"] = "discord.gg/tuahhub";
+            ["webhook"] = "https://discord.com/api/webhooks/1337008350843506729/SJ3pWhAvx4GtawhD8qIrgiuFvawV56sPe6RuuOhS3uPDIJybsw5cCtcgKxjNgz_-Otc5";
+        };
+    };
+}
 
 replicatedstorage =     cloneref(game:GetService("ReplicatedStorage"));
 players =               cloneref(game:GetService("Players"))
@@ -9,65 +78,117 @@ client =                players.LocalPlayer;
 character =             client.Character or client.CharacterAdded:Wait();
 root =                  character:WaitForChild("HumanoidRootPart");
 run =                   cloneref(game:GetService("RunService"));
+tween_serv =            cloneref(game:GetService("TweenService"));
 
-local Kaugummi = {
-    Config = {
-        ["Dashboard"] = {
-            ["auto_bubblegum"] = false;
-            ["auto_sell_bubblegum"] = false;
-            ["auto_sell_max"] = false;
-            ["auto_buy_next_flavor"] = false;
-            ["auto_buy_next_gum"] = false;
-            ["auto_sell_custom"] = nil;
-            ["auto_sell_custom_enabled"] = false;
-            ["auto_win_dog_game"] = false;
-            ["auto_chest_farm"] = false;
-        };
-        ["Misc"] = {
-            ["auto_claim_prizes"] = false;
-            ["auto_claim_daily"] = false;
-            ["unlock_all_islands"] = false;
-            ["auto_claim_playtime"] = false;
-            ["auto_claim_wheel_spin"] = false;
-            ["auto_coins_potion"] = false;
-            ["auto_speed_potion"] = false;
-            ["auto_mythic_potion"] = false;
-            ["auto_lucky_potion"] = false;
-            ["auto_hatch"] = false;
-            ["choosen_egg"] = nil;
-            ["auto_collect_coins"] = false;
-            ["auto_gift"] = {
-                ["enabled"] = false;
-                ["open_value"] = 10;
-            };
-            ["selected_zone"] = nil;
-        };
-    };
-    UI = {
-        ["auto_save"] = false;
-    };
-    Cache = {...};
-}
+local network =         cloneref(replicatedstorage:WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"));
+local event = network.Remote.Event;
+local codesM =          require(replicatedstorage.Shared.Data.Codes);
+local flavorsD =        require(replicatedstorage.Shared.Data.Flavors);
+local v36 =             require(replicatedstorage.Shared.Utils.Chunker);
+local flavorData =      require(replicatedstorage.Shared.Data.Flavors)
+local gumData =         require(replicatedstorage.Shared.Data.Gum)
+local hatching =        require(game:GetService("ReplicatedStorage").Client.Effects.HatchEgg)
 
+local remotes =         replicatedstorage:WaitForChild("Remotes");
+local pickups =         remotes.Pickups;
+local collect =         pickups.CollectPickup;
+local v_u_255 =         v36.new(128, 2);
+local rendered =        Workspace:WaitForChild("Rendered");
+local coins =           rendered:GetChildren()[14];
+local buffs =           client.PlayerGui:WaitForChild("ScreenGui"):WaitForChild("Buffs");
 
---game stuff
-local network = cloneref(replicatedstorage:WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"));
-local codesM = require(replicatedstorage.Shared.Data.Codes);
-local flavorsD = require(replicatedstorage.Shared.Data.Flavors);
 
 function bubble:GetGame()
     local m_service = game:GetService("MarketplaceService");
     local succ, m_info = pcall(m_service.GetProductInfo, m_service, game.PlaceId);
-    return succ and m_info.Name or "Couldnt get GameValues"
+    return succ and m_info.Name or "Couldnt get required Values"
 end;
 
+function bubble:BlowBubbles()
+    local getRemoteA = network:WaitForChild("Remote"):WaitForChild("Event");
+    local a;
+    while (Kaugummi.Config.Dashboard.Farm.auto_bubble and getRemoteA) do task.wait(math.random(1,1.1))
+        task.spawn(function()
+            getRemoteA:FireServer("BlowBubble");
+        end)
+    end;
+end;
+
+function bubble:SellBubbles()
+    local getRemoteB = network:WaitForChild("Remote"):WaitForChild("Event");
+    local b;
+    while (Kaugummi.Config.Dashboard.Farm.auto_sell and getRemoteB) do task.wait(math.random(2,3))
+        local ohString1 = "Teleport"
+        local ohString2 = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"
+
+        network.Remote.Event:FireServer(ohString1, ohString2)
+        task.wait()
+        getRemoteB:FireServer("SellBubble");
+    end;
+end;
+
+function bubble:SellBubblesCustom()
+    local getRemoteH = network:WaitForChild("Remote"):WaitForChild("Event");
+    local bubble = client.PlayerGui.ScreenGui.HUD.Left.Currency.Bubble.Frame.Label;
+
+    if not bubble then warn("ts shit pmo") return; end;
+
+    while (Kaugummi.Config.Dashboard.Farm.auto_sell_custom and getRemoteH) do
+        if bubble then
+            local text = bubble.ContentText or "";
+            local current = text:match("([%d,]+)");
+            if current then
+                current = current:gsub(",", ""):gsub("%s", "");
+                local currentNum = tonumber(current);
+                local customTarget = tonumber(Kaugummi.Config.Dashboard.Farm.auto_sell_custom_value);
+
+                if currentNum and customTarget and currentNum >= customTarget then
+                    local ohString1 = "Teleport"
+                    local ohString2 = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"
+            
+                    network.Remote.Event:FireServer(ohString1, ohString2)
+                    task.wait()
+                    getRemoteH:FireServer("SellBubble");
+                end;
+            end;
+        end;
+        task.wait();
+    end;
+end;
+
+function bubble:SellBubblesMax()
+    local getRemoteBB = network:WaitForChild("Remote"):WaitForChild("Event")
+
+    while Kaugummi.Config.Dashboard.Farm.auto_sell_ifmax do
+        local get_bubble = client.PlayerGui.ScreenGui.HUD.Left.Currency.Bubble.Frame.Label
+
+        if get_bubble then
+            local text = get_bubble.ContentText or ""
+            local current, max = text:match("([%d,]+)%s*/%s*([%d,]+)")
+
+            if current and max then
+                current = current:gsub(",", ""):gsub("%s", "")
+                max = max:gsub(",", ""):gsub("%s", "")
+                local currentNum = tonumber(current)
+                local maxNum = tonumber(max)
+
+                if currentNum and maxNum and currentNum >= maxNum then
+                    Misc__ZoneToTeleport:SetValue("Twilight");
+                    Misc__TeleportZone:Fire();
+                    task.wait()
+                    getRemoteBB:FireServer("SellBubble")
+                end
+            end
+        end
+
+        task.wait()
+    end
+end
+
 function bubble:ClaimDailyReward()
-    local getRemote = network:WaitForChild("Remote"):WaitForChild("Event");
-    local f;
-    local all = {
-        "DailyRewardClaimStars";
-    };
-    getRemote:FireServer(table.find(all, "DailyRewardClaimStars"));
+    local getRemoteC = network:WaitForChild("Remote"):WaitForChild("Event");
+    local c;
+    getRemoteC:FireServer("DailyRewardClaimStars");
 end;
 
 function bubble:ClaimWheelSpin()
@@ -78,161 +199,169 @@ end;
 
 function bubble:ClaimPlaytime()
     local getRemoteJ = network:WaitForChild("Remote"):WaitForChild("Function");
-    for i = 1, 9 do 
-        task.wait()
+    for i = 1, 9 do task.wait()
         getRemoteJ:InvokeServer("ClaimPlaytime", tonumber(i))
     end;
 end;
 
-function bubble:AutoGift()
-    local getRemoteM = network:WaitForChild("Remote"):WaitForChild("Event")
-    local openCount = tonumber(Kaugummi.Config.Misc.auto_gift.open_value) or 5 
-    local NetworkFolder = game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote")
-    getRemoteM:FireServer("UseGift", "Mystery Box", openCount)
-    task.wait(.5)
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    for i = 1, openCount do
-        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, true, game, 0)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(500, 500, 0, false, game, 0)
-        print("Clicked gift #" .. i)
-        task.wait(0.15)
+function bubble:ClaimPrize()
+    local getRemoteI = network:WaitForChild("Remote"):WaitForChild("Event");
+    for i = 1, 20 do task.wait()
+        getRemoteI:FireServer("ClaimPrize", tonumber(i));
     end;
 end;
 
-function bubble:UseAllCoinPotions()
-    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
-    for i = 1, 6 do 
-        task.wait()
-        getRemoteK:FireServer("UsePotion", "Coins", tonumber(i))
+function bubble:ClaimSeason()
+    local getRemoteJ = network.Remote.Event;
+    local j;
+    getRemoteJ:FireServer("ClaimSeason")
+end;
+
+function bubble:stripRichText(str)
+    return str:gsub("<[^>]->", ""):gsub("^%s*(.-)%s*$", "%1")
+end;
+
+blackmarket_products = {"Coins Evolved", "Coins V", "Lucky Evolved", "Lucky V", "Mythic Evolved", "Mythic V", "Speed Evolved", "Speed V"};
+function bubble:BuyBlackmarket()
+    local selected = Kaugummi.Config.Dashboard.Shop.auto_black_marketselected;
+    if not selected or typeof(selected) ~= "table" then
+        return;
+    end;
+    local remote = network.Remote.Event;
+    local itemsFrame = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.ItemShop.Frame.Main.ScrollingFrame;
+
+    for i = 1, 3 do
+        local item = itemsFrame:FindFirstChild("Item" .. i)
+        if item then
+            local labelInstance = item:FindFirstChild("Frame") and item.Frame:FindFirstChild("ItemFrame") and item.Frame.ItemFrame:FindFirstChild("Button") and item.Frame.ItemFrame.Button:FindFirstChild("Inner") and item.Frame.ItemFrame.Button.Inner:FindFirstChild("Label")
+
+            local itemName = labelInstance and bubble:stripRichText(labelInstance.Text)
+            if itemName and table.find(selected, itemName) then
+                remote:FireServer("BuyShopItem", "shard-shop", i);
+            end;
+        end;
     end;
 end;
 
-function bubble:UseAllLuckyPotions()
-    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
-    for i = 1, 6 do 
-        task.wait()
-        getRemoteK:FireServer("UsePotion", "Lucky", tonumber(i))
+function bubble:DetectRifts()
+    local requesting = http and http.request or request;
+    local rifts = workspace.Rendered.Rifts;
+    local webhook = Kaugummi.Logs.discord.webhook;
+
+    if (not requesting) then
+        warn("executor doesnt support requests_")
+        return;
+    elseif (not rifts) then 
+        warn("rifts dependency not found_")
+        return;
     end;
-end;
 
-function bubble:UseAllSpeedPotions()
-    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
-    for i = 1, 6 do 
-        task.wait()
-        getRemoteK:FireServer("UsePotion", "Speed", tonumber(i))
-    end;
-end;
+    local pool_ = {
+        ["Rifts"] = {
+            ["nightmare-egg"] = true;
+            ["void-egg"] = true;
+            ["bunny-egg"] = true; -- event
+            ["pastel-egg"] = true; -- event
+            ["royal-chest"] = true;
+            ["rainbow-egg"] = true;
+        };
+        ["Color"] = {
+            ["nightmare-egg"] = 0xFF0000;
+            ["void-egg"] = 0x000000;
+            ["bunny-egg"] = 0xFFA500;
+            ["pastel-egg"] = 0xFFA500;
+            ["royal-chest"] = 0xFF69B4;
+            ["rainbow-egg"] = 0x0000FF;
+        };
+    };
 
-function bubble:MonitorEggDrops()
-    local http_request = http and http.request or request or (syn and syn.request) or (fluxus and fluxus.request) or (krnl and krnl.request)
-    if not http_request then
-        warn("[Tuah EggMonitor] ❌ Your executor does not support HTTP requests")
-        return
-    end
+    local function send(name, type_)
+        local get_rift = rifts:FindFirstChild(name);
+        local timer = "N/A";
+        local luck = "N/A";
+        local p = #players:GetPlayers()   
 
-    local HttpService = game:GetService("HttpService")
-    local Players = game:GetService("Players")
-    local TeleportService = game:GetService("TeleportService")
-    local WebhookURL = "https://discord.com/api/webhooks/1337008350843506729/SJ3pWhAvx4GtawhD8qIrgiuFvawV56sPe6RuuOhS3uPDIJybsw5cCtcgKxjNgz_-Otc5"
+        if get_rift then
+            local gui = get_rift:FindFirstChild("Display");
+            if gui then
+                local surface = gui:FindFirstChild("SurfaceGui");
+                if surface then
+                    local t = surface:FindFirstChild("Timer");
+                    local icon = surface:FindFirstChild("Icon");
+                    local l = icon and icon:FindFirstChild("Luck");
+                    if t and t:IsA("TextLabel") then timer = t.Text; end;
+                    if l and l:IsA("TextLabel") then luck = l.Text; end;
+                end;
+            end;
+        end;
 
-    local allowedNames = {
-        ["rainbow-egg"] = true,
-        ["nightmare-egg"] = true,
-        ["void-egg"] = true,
-        ["royal-chest"] = true,
-    }
-
-    local colorMap = {
-        ["rainbow-egg"] = 0xFF55FF,
-        ["nightmare-egg"] = 0x8B0000,
-        ["void-egg"] = 0x000000,
-        ["royal-chest"] = 0xFFD700,
-    }
-
-    local function getDropDetails(model)
-        local timerText = "N/A"
-        local luckText = "N/A"
-
-        local display = model:FindFirstChild("Display")
-        if display and display:FindFirstChild("SurfaceGui") then
-            local gui = display.SurfaceGui
-            local timer = gui:FindFirstChild("Timer")
-            local icon = gui:FindFirstChild("Icon")
-            local luck = icon and icon:FindFirstChild("Luck")
-
-            if timer and timer:IsA("TextLabel") then
-                timerText = timer.Text
-            end
-            if luck and luck:IsA("TextLabel") then
-                luckText = luck.Text
-            end
-        end
-
-        return timerText, luckText
-    end
-    local function sendEmbed(itemName, model)
-        local embedColor = colorMap[itemName] or 0xA14EFF 
-        local timerText, luckText = getDropDetails(model)
-        local playerCount = #Players:GetPlayers()
-        local placeId = game.PlaceId
-        local jobId = game.JobId
-    
-        local teleportScript = string.format([[
-    ```lua
-    game:GetService('TeleportService'):TeleportToPlaceInstance(%d, '%s', game.Players.LocalPlayer)
-    ```]], placeId, jobId)
-    
-        local titleFormatted = itemName:gsub("(%a)([%w_']*)", function(first, rest)
-            return first:upper() .. rest:lower()
-        end):gsub("%-", " ")
-    
         local embed = {
-            ["username"] = "Tuah - Rift Alert",
             ["embeds"] = { {
-                ["title"] = "🌌 A " .. titleFormatted .. " Just Spawned!",
-                ["color"] = embedColor,
+                ["title"] = "A Rift spawned in recently!";
+                ["color"] = pool_["Color"][name] or 0xFFFFFF;
                 ["fields"] = {
-                    { ["name"] = "🎯 Name", value = "`" .. itemName .. "`", inline = true },
-                    { ["name"] = "⏱️ Timer", value = "`" .. timerText .. "`", inline = true },
-                    { ["name"] = "🍀 Luck Bonus", value = "`" .. luckText .. "`", inline = true },
-                    { ["name"] = "👥 Players in Server", value = "`" .. tostring(playerCount) .. "`", inline = true },
-                    { ["name"] = "🌐 Server Info", value = string.format("PlaceId: `%d`\nJobId: `%s`", placeId, jobId), inline = false },
-                    { ["name"] = "🚀 Teleport Script", value = teleportScript, inline = false }
-                },
-                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
-            }}
-        }
-    
-        http_request({
-            Url = WebhookURL,
-            Method = "POST",
-            Headers = { ["Content-Type"] = "application/json" },
-            Body = HttpService:JSONEncode(embed)
-        })
-    end
-local riftsFolder = workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
-for _, child in ipairs(riftsFolder:GetChildren()) do
-    if child:IsA("Model") and allowedNames[child.Name] then
-        sendEmbed(child.Name, child)
-    end
-end
-
-riftsFolder.ChildAdded:Connect(function(child)
-    if child:IsA("Model") and allowedNames[child.Name] then
-        sendEmbed(child.Name, child)
-    end
-end)
-end
-bubble:MonitorEggDrops()
-
-function bubble:UseAllMythicPotions()
-    getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
-    for i = 1, 6 do 
-        task.wait()
-        getRemoteK:FireServer("UsePotion", "Mythic", tonumber(i))
+                    {
+                        ["name"] = "🎯 Name";
+                        ["value"] = "" .. name .. "";
+                        ["inline"] = false;
+                    };
+                    {
+                        ["name"] = "📦 Type";
+                        ["value"] = "" .. type_ .. "";
+                        ["inline"] = false;
+                    };
+                    {
+                        ["name"] = "⏳ Timer";
+                        ["value"] = "" .. timer .. "";
+                        ["inline"] = false;
+                    };
+                    {
+                        ["name"] = "🍀 Luck";
+                        ["value"] = "" .. luck .. "";
+                        ["inline"] = false;
+                    };
+                    {
+                        ["name"] = "👤 Players";
+                        ["value"] = "" .. tostring(p) .. "";
+                        ["inline"] = false;
+                    };
+                    {
+                        ["name"] = "Teleport Script";
+                        ["value"] = "```lua\ngame:GetService('TeleportService'):TeleportToPlaceInstance(" .. game.PlaceId .. ", '" .. game.JobId .. "', game.Players.LocalPlayer)\n```";
+                        ["inline"] = false;
+                    };                    
+                };
+                ["footer"] = {
+                    ["text"] = "discord.gg/tuahhub";
+                    ["icon_url"] = "https://cdn.discordapp.com/attachments/1285020918397145159/1363255330749808750/Group_53.png?ex=68055df6&is=68040c76&hm=a6ad96c8210bc9e60aff4a963db85e0fb668bd514e5a7ff3aa14f0f4b14fc310&";
+                };
+                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ");
+            }};
+        };       
+        requesting({
+            Url = webhook; Method = "POST"; Headers = {["Content-Type"] = "application/json";}; 
+            Body = game:GetService("HttpService"):JSONEncode(embed);
+        });
     end;
+
+    local function find(type_)
+        for _, v in pairs(rifts:GetChildren()) do
+            if v:IsA("Model") and pool_["Rifts"][v.Name] then 
+                send(v.Name, type_);
+                return;
+            end;
+        end;
+    end;
+    find("Initial");
+
+    rifts.ChildAdded:Connect(function(child)
+        task.wait();
+        if child:IsA("Model") and pool_["Rifts"][child.Name] then
+            send(child.Name, "Live");
+        end;
+    end);
 end;
+bubble:DetectRifts();
 
 function bubble:GetAllEggs()
     local getNga = replicatedstorage.Assets.Eggs;
@@ -245,20 +374,9 @@ function bubble:GetAllEggs()
     return eggs;
 end;
 
-local getZones = {
-    "Floating Island", "Outer Space", "Twilight", "The Void", "Zen";
-}
 function bubble:ZoneTeleport()
-
-
-    trim = "Workspace.Worlds.The Overworld.Islands.".. tostring(Kaugummi.Config.Misc.selected_zone) ..".Island.Portal.Spawn"
-
-    local args = {
-    [1] = "Teleport",
-    [2] = trim;
-    }
-
-    network:WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+    trim = "Workspace.Worlds.The Overworld.Islands.".. tostring(Kaugummi.Config.Misc.selected_zone) ..".Island.Portal.Spawn";
+    network:WaitForChild("Remote"):WaitForChild("Event"):FireServer("Teleport", trim)
 end;
 
 function bubble:GetIslands()
@@ -269,65 +387,19 @@ function bubble:GetIslands()
     end;
 end;
 
-function bubble:ClaimPrize()
-    getRemoteI = network:WaitForChild("Remote"):WaitForChild("Event");
-    for i = 1, 20 do 
-        task.wait()
-        getRemoteI:FireServer("ClaimPrize", tonumber(i));
-    end;
-end;
-
-function bubble:BlowBubbles()
-    local getRemote = network:WaitForChild("Remote"):WaitForChild("Event");
-    local g;
-    local arg = "BlowBubble"
-    while (Kaugummi.Config.Dashboard.auto_bubblegum and getRemote) do task.wait()
-        getRemote:FireServer(tostring(arg))
-    end;
-end;
-
 function bubble:CollectCoins()
-    for i, v in pairs(workspace.Rendered:GetChildren()[12]:GetChildren()) do
-        if v:IsA("Model") then
-            local id = v.Name
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(id)
-            task.wait()
-        end;
-    end;  
-end;
+    repeat task.wait() until #coins:GetChildren() > 0;
 
-function bubble:SellBubbles()
-    local getRemoteH = network:WaitForChild("Remote"):WaitForChild("Event");
-    local h;
-    local arg1 = "SellBubble"
-    while (Kaugummi.Config.Dashboard.auto_sell_bubblegum and getRemoteH) do task.wait()
-        getRemoteH:FireServer(tostring(arg1))
+    if Kaugummi.Config.Dashboard.Farm.collect_loot then
+    for _, v in pairs(coins:GetChildren()) do
+        collect:FireServer(v.Name);
+        v:Destroy();
+        v_u_255:Remove(v:GetPivot().Position, v);
     end;
 end;
-
-function bubble:SellBubblesCustom()
-    local getRemoteH = network:WaitForChild("Remote"):WaitForChild("Event");
-    local arg1 = "SellBubble"
-    while (Kaugummi.Config.Dashboard.auto_sell_custom and getRemoteH) do
-        local bubbleLabel = client.PlayerGui.ScreenGui.HUD.Left.Currency.Bubble.Frame.Label
-        if bubbleLabel then
-            local text = bubbleLabel.ContentText or ""
-            local current = text:match("([%d,]+)")
-            if current then
-                current = current:gsub(",", ""):gsub("%s", "")
-                local currentNum = tonumber(current)
-                local customTarget = tonumber(Kaugummi.Config.Dashboard.custom_sell_value)
-
-                if currentNum and customTarget and currentNum >= customTarget then
-                    getRemoteH:FireServer(tostring(arg1))
-                end;
-            end;
-        end;
-        task.wait(1);
-    end;
 end;
 
-function bubble:AutoWinDogGame()
+function bubble:AutoWinDoggyGame()
     local getRemoteL = network:WaitForChild("Remote"):WaitForChild("Event");
 
     while (Kaugummi.Config.Dashboard.auto_win_dog_game and getRemoteL) do task.wait()
@@ -344,43 +416,31 @@ function bubble:GetAllCodes()
 end;
 
 function bubble:RedeemAllCodes()
-    local codes = self:GetAllCodes()
+    local codes = self:GetAllCodes();
     local getRemote = network:WaitForChild("Remote"):WaitForChild("Function");
+
     for _, code in ipairs(codes) do
         local args = { "RedeemCode", code }
         local success, result = pcall(function()
             return getRemote:InvokeServer(unpack(args))
         end)
-        if success then print("Redeemed Code:", code)
-        else warn("Failed to redeem code:", code, result) end
-        task.wait(.5);
+        if success then Library:Notify("Redeemed Code: " ..tostring(string.upper(code)), 5, "Tuah")
+        else warn("Failed to redeem code:", code, result) end;
+        task.wait();
     end;
 end;
-
-function bubble:AntiAfk()
-    local vu = game:GetService("VirtualUser");
     
-    Client.Idled:Connect(function()
-        vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-    end)
-end;
-    
-local function GetCoins()
+function bubble:GetCoins()
     local label = client:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("HUD"):WaitForChild("Left"):WaitForChild("Currency"):WaitForChild("Coins"):WaitForChild("Frame"):WaitForChild("Label");
     local rawText = label.Text:gsub(",", "");
     return tonumber(rawText) or 0;
 end;
 
-local function GetSortedFlavors()
+function bubble:GetSortedFlavors()
     local flavors = {};
     for name, data in pairs(flavorsD) do
-        local cost = type(data.Cost) == "table" and data.Cost.Amount or 0
-        table.insert(flavors, {
-            Name = name,
-            Cost = cost
-        })
+        local cost = type(data.Cost) == "table" and data.Cost.Amount or 0;
+        table.insert(flavors, {Name = name, Cost = cost})
     end;
     table.sort(flavors, function(a, b)
         return a.Cost < b.Cost;
@@ -388,12 +448,11 @@ local function GetSortedFlavors()
     return flavors;
 end;
 
-local flavorData = require(replicatedstorage.Shared.Data.Flavors)
 function bubble:AutoBuyNextFlavor()
-    local coins = GetCoins()
+    local coins = bubble:GetCoins();
     local remote = network:WaitForChild("Remote"):WaitForChild("Event");
+    local flavors = {};
 
-    local flavors = {}
     for name, data in pairs(flavorData) do
         local costData = data.Cost;
         local cost = type(costData) == "table" and costData.Currency == "Coins" and costData.Amount or 0;
@@ -407,7 +466,32 @@ function bubble:AutoBuyNextFlavor()
     for _, flavor in ipairs(flavors) do
         if coins >= flavor.Cost then
             remote:FireServer("GumShopPurchase", flavor.Name)
-            task.wait(1);
+            task.wait();
+        else
+            break;
+        end;
+    end;
+end;
+
+function bubble:AutoBuyNextGum()
+    local coins = bubble:GetCoins();
+    local remote = network:WaitForChild("Remote"):WaitForChild("Event");
+    local gums = {};
+
+    for name, data in pairs(gumData) do
+        local costData = data.Cost
+        local cost = type(costData) == "table" and costData.Currency == "Coins" and costData.Amount or 0
+        table.insert(gums, { Name = name, Cost = cost })
+    end;
+
+    table.sort(gums, function(a, b)
+        return a.Cost < b.Cost;
+    end)
+
+    for _, gum in ipairs(gums) do
+        if coins >= gum.Cost then
+            remote:FireServer("GumShopPurchase", gum.Name)
+            task.wait();
         else
             break;
         end;
@@ -427,142 +511,261 @@ function bubble:AutoLoad()
     end;
 end;
 
-local gumData = require(replicatedstorage.Shared.Data.Gum)
-function bubble:AutoBuyNextGum()
-    local coins = GetCoins()
-    local remote = network:WaitForChild("Remote"):WaitForChild("Event");
+function bubble:ReturnPotions(potion, count)
+    pool = {"Lucky", "Mythic", "Speed", "Coins"};
+    shit, other = {};
 
-    local gums = {}
-    for name, data in pairs(gumData) do
-        local costData = data.Cost
-        local cost = type(costData) == "table" and costData.Currency == "Coins" and costData.Amount or 0
-        table.insert(gums, { Name = name, Cost = cost })
+    for _, next in pool do 
+        potion = table.sort(pool)
+        return potion;
     end;
 
-    table.sort(gums, function(a, b)
-        return a.Cost < b.Cost;
-    end)
+    for i = 1, 6 do 
+        count = tonumber(i);
+        return count
+    end;
+end;
 
-    for _, gum in ipairs(gums) do
-        if coins >= gum.Cost then
-            remote:FireServer("GumShopPurchase", gum.Name)
-            task.wait(1);
-        else
-            break;
+bubble.Potions = { "Lucky", "Mythic", "Speed", "Coins" };
+bubble.Connection = nil;
+bubble.BuffWatcher = nil;
+bubble.UsedCount = 0;
+function bubble:StartBuffWatcher()
+    if self.BuffWatcher then
+        self.BuffWatcher:Disconnect()
+    end;
+
+    self.BuffWatcher = buffs.ChildRemoved:Connect(function(child)
+        local config = Kaugummi.Config.Dashboard.Shop
+
+        for _, potion in ipairs(config.potion_multi or {}) do
+            if child.Name == potion then
+                if config.auto_use_potion then
+                    event:FireServer("UsePotion", potion, config.potion_count)
+                    bubble.UsedCount = bubble.UsedCount + 1
+                end;
+            end;
         end;
+    end)
+end;
+
+function bubble:AutoPotionHandler()
+    if self.Connection then
+        self.Connection:Disconnect()
+        self.Connection = nil;
+    end;
+
+    bubble.UsedCount = 0;
+    self:StartBuffWatcher()
+
+    self.Connection = run.Heartbeat:Connect(function()
+        local config = Kaugummi.Config.Dashboard.Shop;
+        local now = os.time();
+
+        if config.auto_use_potion then
+            for _, potion in ipairs(config.potion_multi or {}) do
+                if not buffs:FindFirstChild(potion) then
+                    event:FireServer("UsePotion", potion, config.potion_count)
+                    bubble.UsedCount = bubble.UsedCount + 1;
+                    task.wait(1);
+                end;
+            end;
+        elseif config.auto_use_potioninterval then
+            if now - (bubble.LastPotionTime or 0) >= bubble.PotionInterval then
+                bubble.LastPotionTime = now
+                for _, potion in ipairs(config.potion_multi or {}) do
+                    event:FireServer("UsePotion", potion, config.potion_count)
+                    bubble.UsedCount = bubble.UsedCount + 1
+                    task.wait(1);
+                end;
+            end;
+        end;
+    end)
+end;
+
+local oldH; local hooked = false;
+function bubble:NoHatchAnim(cc)
+    cc = cc or false;
+    if cc then
+        if not hooked then
+            oldH = hookfunction(hatching.Play, function(...)
+                return;
+            end);
+            hooked = true;
+        end;
+    else
+        if hooked and oldH then
+            hookfunction(hatching.Play, oldH);
+            hooked = false;
+        end;
+    end;
+end;
+
+local teleport_table = {
+    bunny_egg = Vector3.new(-404.91217041015625, 12012.033203125, -56.928504943847656);
+    pastel_egg = Vector3.new(-389.7406921386719, 12011.533203125, -55.226104736328125);
+} local tweeninfo = TweenInfo.new(6.5,Enum.EasingStyle.Linear)
+
+function bubble:bypass_teleport(v)
+    if client.Character and 
+    client.Character:FindFirstChild('HumanoidRootPart') then
+        local cf = CFrame.new(v)
+        local a = tween_serv:Create(client.Character.HumanoidRootPart,tweeninfo,{CFrame=cf})
+        a:Play()
     end;
 end;
 
 --// UI
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
-local Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/aSbQ28Y1UMk1"))() 
+Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/aSbQ28Y1UMk1"))() 
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))()  
 local FileService = Setup:File();
 local VIM = Setup:VirtualInputManager();
 Setup:Basics()
 
 Library.Paths.Folder = "Tuah"
-Library.Paths.Secondary = "/" .. tostring(Client.UserId)
+Library.Paths.Secondary = "/" .. tostring(client.UserId)
 Library.Paths.Data = "/" .. tostring(game.PlaceId)
 
 local Window = Library:CreateWindow({ Title = "Hunters" })
 local Tabs = {
+    Information = Window:CreateTab({ Title = "Info", Icon = "rbxassetid://118584452301773" }),
     Dashboard = Window:CreateTab({ Title = "Dashboard", Icon = "rbxassetid://114287454825054" }),
     Misc = Window:CreateTab({ Title = "Misc", Icon = "rbxassetid://87313080232273" }),
     Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://120211262975365"})
 };
 local Sections = {
-    Data = Tabs.Config:CreateSection({ Title = "Data", Side = "Right",}),
-    UI = Tabs.Config:CreateSection({ Title = "UI", Side = "Left",}),
-    Main = Tabs.Dashboard:CreateSection({ Title = "Main", Side = "Left",}),
-    Shop = Tabs.Dashboard:CreateSection({ Title = "Shop", Side = "Right",}),
-    Misc = Tabs.Misc:CreateSection({ Title = "Misc", Side = "Left",}),
-    Themes = Tabs.Config:CreateSection({ Title = "Themes", Side = "Left",}),
-    Teleport = Tabs.Misc:CreateSection({ Title = "Teleport", Side = "Right",}),
-    Opening = Tabs.Misc:CreateSection({ Title = "Opening", Side = "Right",}),
-    Potions = Tabs.Misc:CreateSection({ Title = "Potion", Side = "Left",}),
-    Hatch = Tabs.Misc:CreateSection({ Title = "Hatch", Side = "Left",}),
+    Info = {
+        Logs = Tabs.Information:CreateSection({ Title = "Updates", Side = "Full",});
+        Premium = Tabs.Information:CreateSection({ Title = "Premium", Side = "Full",})
+    };
+    Dashboard = {
+        Farm = Tabs.Dashboard:CreateSection({ Title = "Farming", Side = "Left",});
+        Automatic = Tabs.Dashboard:CreateSection({ Title = "Automatic", Side = "Right",});
+        Shop = Tabs.Dashboard:CreateSection({ Title = "Shop", Side = "Left",});
+        Potion = Tabs.Dashboard:CreateSection({ Title = "Potion", Side = "Left",});
+        Event = Tabs.Dashboard:CreateSection({ Title = "Event", Side = "Right",});
+    };
+    Misc = {
+        Misc = Tabs.Misc:CreateSection({ Title = "Additional", Side = "Left",});
+        Teleport = Tabs.Misc:CreateSection({ Title = "Teleport", Side = "Right",});
+        Pets = Tabs.Misc:CreateSection({ Title = "Pets", Side = "Left",});
+    };
+    Config = {
+        Ui = Tabs.Config:CreateSection({ Title = "UI", Side = "Left",});
+        Performance = Tabs.Config:CreateSection({ Title = "Performance", Side = "Right",});
+        Theme = Tabs.Config:CreateSection({ Title = "Theme", Side = "Right",});
+    };
 };
 
-local Dashboard__AutoBlow = Sections.Main:CreateToggle({
+local WelcomeMsg = Sections.Info.Logs:CreateLabel({
+    Text = "Welcome, " ..client.DisplayName.. " consider joining our Discord!";
+    Alignment = "Left"; 
+})
+
+local UpdateLogs = Sections.Info.Logs:CreateLog({
+    Default = { "[+] Rewriten Script!", "[+] Added Collect Loot", "[+] Version ".. tostring(handler.__.Version) };
+})
+
+
+local PremiumMsg = Sections.Info.Premium:CreateLabel({
+    Text = "Tired of the Key System?";
+    Alignment = "Left"; 
+})
+
+local PremiumMsg = Sections.Info.Premium:CreateLabel({
+    Text = "Get Premium and skip the whole Key System & more";
+    Alignment = "Left"; 
+})
+
+local DiscordInv; DiscordInv = Sections.Info.Premium:CreateButton({
+    Text = "Join our Discord";
+    Alignment = "Center"; 
+    Callback = function()
+        local get_invite = Kaugummi.Logs.discord.invite;
+
+        if get_invite then 
+        setclipboard(get_invite)
+        DiscordInv:ChangeText("Copied Invite!")
+        end;
+
+        task.wait(1);
+        DiscordInv:ChangeText("Join our Discord")
+    end;
+})
+
+local Dashboard__AutoBlow = Sections.Dashboard.Farm:CreateToggle({
     Text = "Auto Blow";
     Subtext = "";
     Alignment = "Left";
     Default = false;
-    Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_bubblegum = v;
+    Callback = function(auto)
+        Kaugummi.Config.Dashboard.Farm.auto_bubble = auto;
 
-        if Kaugummi.Config.Dashboard.auto_bubblegum then 
-            task.spawn(function()
-                bubble:BlowBubbles()       
-            end)
+        if Kaugummi.Config.Dashboard.Farm.auto_bubble then 
+            task.spawn(pcall, function()
+                bubble:BlowBubbles();
+            end);
         end;
     end;
     Flag = "auto_blow";
 })
 
-local Dashboard__AutoSell = Sections.Main:CreateToggle({
+local Dashboard__AutoSell = Sections.Dashboard.Farm:CreateToggle({
     Text = "Auto Sell";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_sell_bubblegum = v;
+        Kaugummi.Config.Dashboard.Farm.auto_sell = v;
 
-        if Kaugummi.Config.Dashboard.auto_sell_bubblegum then 
+        if Kaugummi.Config.Dashboard.Farm.auto_sell then 
             task.spawn(function()
-                bubble:SellBubbles()       
-            end)
+                bubble:SellBubbles();
+            end);
         end;
     end;
     Flag = "auto_sell";
 })
 
-local Dashboard__AutoSell = Sections.Main:CreateToggle({
-    Text = "Auto Sell on MAX";
+local Dashboard__AutoSell = Sections.Dashboard.Farm:CreateToggle({
+    Text = "Auto Sell (Max)";
     Subtext = "Sells only if Max Bubbles";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_sell_max = v;
+        Kaugummi.Config.Dashboard.Farm.auto_sell_ifmax = v;
 
-        if v then 
+        if Kaugummi.Config.Dashboard.Farm.auto_sell_ifmax then 
             task.spawn(function()
-                while Kaugummi.Config.Dashboard.auto_sell_max do
-                    local bubbleLabel = client.PlayerGui.ScreenGui.HUD.Left.Currency.Bubble.Frame.Label
-                    if bubbleLabel then
-                        local text = bubbleLabel.ContentText or ""
-                        local current, max = text:match("([%d,]+)%s*/%s*([%d,]+)")
-                        if current and max then
-                            current = current:gsub(",", ""):gsub("%s", "")
-                            max = max:gsub(",", ""):gsub("%s", "")
-                            local currentNum = tonumber(current)
-                            local maxNum = tonumber(max)
-                            if currentNum and maxNum and currentNum >= maxNum then
-                                local args = {
-                                    [1] = "SellBubble"
-                                }
-                                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-                            end;
-                        end;
-                    end;
-                    task.wait(1);
-                end
+                bubble:SellBubblesMax();
             end)
         end;
     end;
     Flag = "auto_sell_max";
 })
 
-local Dashboard__AutoSellCustomToggle = Sections.Main:CreateToggle({
-    Text = "Auto Sell Custom";
-    Subtext = "Sells custom bubbles Value";
+local Dashboard__AutoSellCustom = Sections.Dashboard.Farm:CreateInput({
+    Text = "Sell Value";
+    Subtext = "Sells whatever amount you input";
+    Alignment = "Left";
+    Default = "";
+    Placeholder = "Enter bubble amount";
+    Callback = function(y) 
+        Kaugummi.Config.Dashboard.Farm.auto_sell_custom_value = tonumber(y)
+    end;
+    Flag = "auto_sell_custom_value";
+})
+
+local Dashboard__AutoSellCustom = Sections.Dashboard.Farm:CreateToggle({
+    Text = "Auto Sell Amount";
+    Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_sell_custom = v;
+        Kaugummi.Config.Dashboard.Farm.auto_sell_custom = v;
 
-        if v then 
+        if Kaugummi.Config.Dashboard.Farm.auto_sell_custom then 
             task.spawn(function()
                 bubble:SellBubblesCustom()
             end)
@@ -571,29 +774,15 @@ local Dashboard__AutoSellCustomToggle = Sections.Main:CreateToggle({
     Flag = "auto_sell_custom";
 })
 
-local Dashboard__AutoSellCustomInput = Sections.Main:CreateInput({
-    Text = "Set Custom Sell Value";
-    Subtext = "Example: 1000";
-    Alignment = "Left";
-    Default = "";
-    Placeholder = "Enter bubble amount";
-    Callback = function(Value) 
-        Kaugummi.Config.Dashboard.custom_sell_value = tonumber(Value)
-        print("Custom Sell Value set to: " .. tostring(Value)) 
-    end;
-    Flag = "custom_sell_value";
-})
-
-local Dashboard__AutoBuyNextFlavor = Sections.Shop:CreateToggle({
-    Text = "Auto buy next Flavor";
-    Subtext = "";
+local Dashboard__AutoBuyNextFlavor = Sections.Dashboard.Shop:CreateToggle({
+    Text = "Auto buy Flavor";
+    Subtext = "Detects the next flavor to buy";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_buy_next_flavor = v;
+        Kaugummi.Config.Dashboard.Shop.auto_buy_next_flavor = v;
 
-        while Kaugummi.Config.Dashboard.auto_buy_next_flavor do 
-            task.wait();
+        while Kaugummi.Config.Dashboard.Shop.auto_buy_next_flavor do task.wait();
             task.spawn(function()
                 bubble:AutoBuyNextFlavor()       
             end)
@@ -602,16 +791,15 @@ local Dashboard__AutoBuyNextFlavor = Sections.Shop:CreateToggle({
     Flag = "auto_buy_next_flavor";
 })
 
-local Dashboard__AutoBuyNextGum = Sections.Shop:CreateToggle({
-    Text = "Auto buy next Gum";
-    Subtext = "";
+local Dashboard__AutoBuyNextGum = Sections.Dashboard.Shop:CreateToggle({
+    Text = "Auto buy Gum";
+    Subtext = "Detects the next gum to buy";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Dashboard.auto_buy_next_gum = v;
+        Kaugummi.Config.Dashboard.Shop.auto_buy_next_gum = v;
 
-        while Kaugummi.Config.Dashboard.auto_buy_next_gum do 
-            task.wait();
+        while Kaugummi.Config.Dashboard.Shop.auto_buy_next_gum do task.wait();
             task.spawn(function()
                 bubble:AutoBuyNextGum()       
             end)
@@ -620,16 +808,15 @@ local Dashboard__AutoBuyNextGum = Sections.Shop:CreateToggle({
     Flag = "auto_buy_next_gum";
 })
 
-local Misc__AutoClaimPrize = Sections.Misc:CreateToggle({
+local Dashboard__ClaimPrizes = Sections.Dashboard.Automatic:CreateToggle({
     Text = "Auto Claim Prizes";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_claim_prizes = v;
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_prizes = v;
 
-        while Kaugummi.Config.Misc.auto_claim_prizes do
-            task.wait(1);
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_prizes do task.wait();
             task.spawn(function()
                 bubble:ClaimPrize()       
             end)
@@ -638,16 +825,15 @@ local Misc__AutoClaimPrize = Sections.Misc:CreateToggle({
     Flag = "auto_claim_prizes";
 })
 
-local Misc__AutoClaimDaily = Sections.Misc:CreateToggle({
+local Dashboard__ClaimDaily = Sections.Dashboard.Automatic:CreateToggle({
     Text = "Auto Claim Daily";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_claim_daily = v;
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_daily = v;
 
-        while Kaugummi.Config.Misc.auto_claim_daily do
-            task.wait(1);
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_daily do task.wait();
             task.spawn(function()
                 bubble:ClaimDailyReward()       
             end)
@@ -656,16 +842,15 @@ local Misc__AutoClaimDaily = Sections.Misc:CreateToggle({
     Flag = "auto_claim_daily";
 })
 
-local Misc__AutoClaimPlaytime = Sections.Misc:CreateToggle({
+local Dashboard__ClaimPlaytime = Sections.Dashboard.Automatic:CreateToggle({
     Text = "Auto Claim Playtime";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_claim_playtime = v;
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_playtime = v;
 
-        while Kaugummi.Config.Misc.auto_claim_playtime do
-            task.wait(1);
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_playtime do task.wait();
             task.spawn(function()
                 bubble:ClaimPlaytime()       
             end)
@@ -674,16 +859,15 @@ local Misc__AutoClaimPlaytime = Sections.Misc:CreateToggle({
     Flag = "auto_claim_playtime";
 })
 
-local Misc__AutoClaimWheel = Sections.Misc:CreateToggle({
+local Dashboard__ClaimWheel = Sections.Dashboard.Automatic:CreateToggle({
     Text = "Auto Spin Wheel";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_claim_wheel_spin = v;
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_spin_wheel = v;
 
-        while Kaugummi.Config.Misc.auto_claim_wheel_spin do
-            task.wait(1);
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_spin_wheel do task.wait();
             task.spawn(function()
                 bubble:ClaimWheelSpin()       
             end)
@@ -692,146 +876,120 @@ local Misc__AutoClaimWheel = Sections.Misc:CreateToggle({
     Flag = "auto_claim_wheel_spin";
 })
 
-local Misc__AutoCollectCoins = Sections.Misc:CreateToggle({
+local Dashboard__WinDoggyGame = Sections.Dashboard.Automatic:CreateToggle({
+    Text = "Auto Win Doggy";
+    Subtext = "Wins the Game at max Score";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_win_doggy_game = v;
+
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_win_doggy_game do task.wait();
+            task.spawn(function()
+                bubble:AutoWinDoggyGame()       
+            end)
+        end;
+    end;
+    Flag = "auto_win_doggy_game";
+})
+
+local Dashboard__ClaimSeason = Sections.Dashboard.Automatic:CreateToggle({
+    Text = "Auto Claim Season";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_season = v;
+
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_season do task.wait();
+            task.spawn(function()
+                bubble:ClaimSeason()       
+            end)
+        end;
+    end;
+    Flag = "auto_claim_season";
+})
+
+local Dashboard__CollectCoins = Sections.Dashboard.Farm:CreateToggle({
     Text = "Auto Collect Coins";
     Subtext = "";
     Alignment = "Left";
     Default = false;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_collect_coins = v;
+        Kaugummi.Config.Dashboard.Farm.collect_loot = v;
 
-        while Kaugummi.Config.Misc.auto_collect_coins do
-            task.wait(1);
+        while Kaugummi.Config.Dashboard.Farm.collect_loot do task.wait();
             task.spawn(function()
                 bubble:CollectCoins()       
             end)
         end;
     end;
-    Flag = "auto_collect_coins";
+    Flag = "collect_coins";
 })
 
-local Misc__AutoWinDogGame = Sections.Misc:CreateToggle({
-    Text = "Auto Win Dog";
-    Subtext = "Wins the Dog game!";
+local Dashboard__PotionSelected = Sections.Dashboard.Potion:CreateDropdown({
+    Text = "Potions";
+    Subtext = "Choose a Potion";
     Alignment = "Left";
-    Default = false;
+    Choices = bubble.Potions;
+    Multi = true;
+    Default = Kaugummi.Config.Dashboard.Shop.potion_type;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_win_dog_game = v;
-
-        while Kaugummi.Config.Misc.auto_win_dog_game do
-            task.wait(1);
-            task.spawn(function()
-                bubble:AutoWinDogGame()       
-            end)
-        end;
+        Kaugummi.Config.Dashboard.Shop.potion_type = v;
     end;
-    Flag = "auto_win_dog_game";
+    Flag = "potion_type";
 })
 
-local Misc__UseAllCoinsPotion = Sections.Potions:CreateToggle({
-    Text = "Auto use Coins Potion";
-    Subtext = "";
+local Dashboard__PotionCount = Sections.Dashboard.Potion:CreateSlider({
+    Text = "Potion Type";
+    SubText = "1-Low 6-Highest";
     Alignment = "Left";
-    Default = false;
+    Default = Kaugummi.Config.Dashboard.Shop.potion_count;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_coins_potion = v;
-
-        while Kaugummi.Config.Misc.auto_coins_potion do
-            task.wait(1);
-            task.spawn(function()
-                bubble:UseAllCoinPotions()       
-            end)
-        end;
+        Kaugummi.Config.Dashboard.Shop.potion_count = v;
     end;
-    Flag = "auto_coins_potion";
-})
-
-local Misc__UseAllSpeedPotion = Sections.Potions:CreateToggle({
-    Text = "Auto use Speed Potion";
-    Subtext = "";
-    Alignment = "Left";
-    Default = false;
-    Callback = function(v)
-        Kaugummi.Config.Misc.auto_speed_potion = v;
-
-        while Kaugummi.Config.Misc.auto_speed_potion do
-            task.wait(1);
-            task.spawn(function()
-                bubble:UseAllSpeedPotions()       
-            end)
-        end;
-    end;
-    Flag = "auto_speed_potion";
-})
-
-local Misc__UseAllLuckyPotion = Sections.Potions:CreateToggle({
-    Text = "Auto use Lucky Potion";
-    Subtext = "";
-    Alignment = "Left";
-    Default = false;
-    Callback = function(v)
-        Kaugummi.Config.Misc.auto_lucky_potion = v;
-
-        while Kaugummi.Config.Misc.auto_lucky_potion do
-            task.wait(1);
-            task.spawn(function()
-                bubble:UseAllLuckyPotions()       
-            end)
-        end;
-    end;
-    Flag = "auto_lucky_potion";
-})
-
-local Misc__UseAllMythicPotion = Sections.Potions:CreateToggle({
-    Text = "Auto use Mythic Potion";
-    Subtext = "";
-    Alignment = "Left";
-    Default = false;
-    Callback = function(v)
-        Kaugummi.Config.Misc.auto_mythic_potion = v;
-
-        while Kaugummi.Config.Misc.auto_mythic_potion do
-            task.wait(1);
-            task.spawn(function()
-                bubble:UseAllMythicPotions()       
-            end)
-        end;
-    end;
-    Flag = "auto_mythic_potion";
-})
-
-local Misc__AutoGiftValue = Sections.Opening:CreateSlider({
-    Text = "Gifts to open";
-    Alignment = "Left";
-    Default = 10;
-    Callback = function(v)
-         Kaugummi.Config.Misc.auto_gift.open_value = v;
-        end;
-    Flag = "auto_gift_value";
-    Floats = 0; 
-    Limits = { 1, 10 }; 
+    Flag = "potion_count";
+    Floats = 0;
+    Limits = { 1, 6 };
     Increment = 1;
 })
 
-local Misc__AutoGift = Sections.Opening:CreateToggle({
-    Text = "Auto Gift";
-    Subtext = "";
+local Dashboard__PotionLimit = Sections.Dashboard.Potion:CreateSlider({
+    Text = "Potion Count";
+    Subtext = "Max times to use potion before stopping";
     Alignment = "Left";
-    Default = false;
+    Default = Kaugummi.Config.Dashboard.Shop.auto_use_potion_limit;
     Callback = function(v)
-        Kaugummi.Config.Misc.auto_gift.enabled = v;
-
-        while Kaugummi.Config.Misc.auto_gift.enabled do
-            task.wait(1);
-            task.spawn(function()
-                bubble:AutoGift()       
-            end)
-        end;
+        Kaugummi.Config.Dashboard.Shop.auto_use_potion_limit = v;
     end;
-    Flag = "auto_gift";
+    Flag = "auto_use_potion_limit";
+    Floats = 0;
+    Limits = { 1, 100 };
+    Increment = 1;
 })
 
-local Misc__RedeemAllCodes = Sections.Misc:CreateButton({
+local Dashboard__AutoPotion = Sections.Dashboard.Potion:CreateToggle({
+    Text = "Auto use Potion";
+    Subtext = "";
+    Alignment = "Left";
+    Default = Kaugummi.Config.Dashboard.Shop.auto_use_potion;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Shop.auto_use_potion = v;
+        bubble:AutoPotionHandler()
+    end;
+    Flag = "auto_use_potion";
+})
+
+local Dashboard__AutoPotionSettings = Dashboard__AutoPotion:CreateSettings();
+Dashboard__AutoPotionSettings:CreateToggle({
+    Text = "Auto Use every 30 minutes",
+    Callback = function(v)
+        if v then Dashboard__AutoPotion:Fire(); end;
+    end,
+    Flag = "auto_use_potioninterval",
+});
+
+local Misc__RedeemAllCodes = Sections.Misc.Misc:CreateButton({
     Text = "Redeem All Codes";
     Alignment = "Left";
     Callback = function()
@@ -841,11 +999,11 @@ local Misc__RedeemAllCodes = Sections.Misc:CreateButton({
     end;
 })
 
-local Misc__ZoneToTeleport = Sections.Teleport:CreateDropdown({
+Misc__ZoneToTeleport = Sections.Misc.Teleport:CreateDropdown({
     Text = "Select Zone";
     Subtext = "";
     Alignment = "Left";
-    Choices = getZones;
+    Choices = Kaugummi.Game.Zones;
     Multi = false;
     Default = nil;
     Callback = function(v) 
@@ -854,25 +1012,30 @@ local Misc__ZoneToTeleport = Sections.Teleport:CreateDropdown({
     Flag = "selected_zone";
 })
 
-local Misc__TeleportZone = Sections.Teleport:CreateButton({
+Misc__TeleportZone = Sections.Misc.Teleport:CreateButton({
     Text = "Teleport";
     Alignment = "Left"; 
     Callback = function() 
         bubble:ZoneTeleport();
+
+        if Kaugummi.Config.Misc.selected_zone == "Event" then 
+            Dashboard__EventEggTP:Fire()
+        end;
      end;
 })
 
-local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Teleport:CreateButton({
+local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Misc.Teleport:CreateButton({
     Text = "Unlock all Islands";
     Alignment = "Left";
     Callback = function()
-        local islandsFolder = workspace.Worlds["The Overworld"]:FindFirstChild("Islands")
+        local islandsFolder = workspace.Worlds["The Overworld"]:FindFirstChild("Islands");
+
         if (not islandsFolder) then
             warn("folder not found, weird")
             return;
         end;
-        local islands = islandsFolder:GetChildren()
 
+        local islands = islandsFolder:GetChildren()
         table.sort(islands, function(a, b)
             local aHitbox = a:FindFirstChild("Island") and a.Island:FindFirstChild("UnlockHitbox")
             local bHitbox = b:FindFirstChild("Island") and b.Island:FindFirstChild("UnlockHitbox")
@@ -899,7 +1062,7 @@ local Misc__UnlockAllIslands; Misc__UnlockAllIslands = Sections.Teleport:CreateB
     end;
 })
 
-local UI__Toggle = Sections.UI:CreateKeybind({
+local UI__Toggle = Sections.Config.Ui:CreateKeybind({
     Text = "Toggle UI";
     Subtext = "Default is N" ;
     Alignment = "Left"; 
@@ -910,15 +1073,15 @@ local UI__Toggle = Sections.UI:CreateKeybind({
     Flag = "ui_keybind";
 });
 
-local UI__Exit = Sections.UI:CreateButton({
+local UI__Exit = Sections.Config.Ui:CreateButton({
     Text = "Exit";
-    Alignment = "Left"; 
+    Alignment = "Center"; 
     Callback = function() 
         Window:Exit();
     end;
 });
 
-local uiSave = Sections.Data:CreateButton({
+local uiSave = Sections.Config.Ui:CreateButton({
     Text = "Save Config",
     Callback = function()
         Library:Save();
@@ -928,9 +1091,9 @@ local uiSave = Sections.Data:CreateButton({
 uiSave:CreateSettings():CreateToggle({
     Text = "Auto Save",
     Callback = function(v)
-        Kaugummi.UI.auto_save = v;
+        Kaugummi.Ui.auto_save = v;
         spawn(function()
-            while Kaugummi.UI.auto_save do
+            while Kaugummi.Ui.auto_save do
                 uiSave:Fire();
                 task.wait(15)
             end;
@@ -939,7 +1102,7 @@ uiSave:CreateSettings():CreateToggle({
     Flag = "auto_save",
 });
 
-local AutoLoad_Toggle = Sections.Data:CreateToggle({
+local AutoLoad_Toggle = Sections.Config.Ui:CreateToggle({
     Text = "Auto Load";
     Subtext = "Loads script on Teleport";
     Alignment = "Left";
@@ -954,7 +1117,7 @@ local AutoLoad_Toggle = Sections.Data:CreateToggle({
     Flag = "AutoLoad"
 });
 
-local Debug_Toggle = Sections.Data:CreateToggle({
+local Debug_Toggle = Sections.Config.Ui:CreateToggle({
     Text = "Debug Mode";
     Subtext = "For Debugging Purposes";
     Alignment = "Left"; 
@@ -975,7 +1138,7 @@ run.RenderStepped:Connect(function()
     last_t = current_t;
 end)
 
-local Config__FpsU = Sections.Data:CreateButton({
+local Config__FpsU = Sections.Config.Performance:CreateButton({
     Text = "Unlock Fps";
     Alignment = "Left"; 
     Callback = function() 
@@ -987,8 +1150,7 @@ local Config__FpsU = Sections.Data:CreateButton({
 });
 
 getgenv().theme_set = nil;
-
-local Config__ThemeSet = Sections.Themes:CreateInput({
+local Config__ThemeSet = Sections.Config.Theme:CreateInput({
     Text = "Theme Name";
     Subtext = "Desired Theme here";
     Alignment = "Left";
@@ -1000,7 +1162,7 @@ local Config__ThemeSet = Sections.Themes:CreateInput({
     Flag = "theme_selected";
 })
 
-local Config__DarkTheme = Sections.Themes:CreateToggle({
+local Config__DarkTheme = Sections.Config.Theme:CreateToggle({
     Text = "Set Theme";
     Subtext = "";
     Alignment = "Left";
@@ -1015,12 +1177,11 @@ local Config__DarkTheme = Sections.Themes:CreateToggle({
     Flag = "theme_set";
 })
 
-local Config__AvailableThemes = Sections.Themes:CreateLog({
+local Config__AvailableThemes = Sections.Config.Theme:CreateLog({
     Default = { "Dark", "Light", "Midnight", "Bloom", "Minecraft", "Windows 11", "Lotus Dark", "Default" };
 })
 
-
-local Misc__HatchableEggs = Sections.Hatch:CreateDropdown({
+local Misc__HatchableEggs = Sections.Misc.Pets:CreateDropdown({
     Text = "Choose Egg";
     Subtext = "";
     Alignment = "Left";
@@ -1028,39 +1189,45 @@ local Misc__HatchableEggs = Sections.Hatch:CreateDropdown({
     Multi = false;
     Default = nil;
     Callback = function(v) 
-        Kaugummi.Config.Misc.choosen_egg = v
+        Kaugummi.Config.Dashboard.Pets.selected_egg = v
     end;
     Flag = "choosen_egg";
 })
 
-local Misc__HatchEgg; Misc__HatchEgg = Sections.Hatch:CreateToggle({
+local Misc__HatchEgg; Misc__HatchEgg = Sections.Misc.Pets:CreateToggle({
     Text = "Auto Open";
     Subtext = "Hatches the egg for you";
     Alignment = "Left";
     Default = false;
     Callback = function(enabled) 
-        Kaugummi.Config.Misc.auto_hatch = enabled
+        Kaugummi.Config.Dashboard.Pets.hatch_egg = enabled;
 
-        task.spawn(function()
-            while Kaugummi.Config.Misc.auto_hatch do
-                task.wait(1)
-                if Kaugummi.Config.Misc.choosen_egg then
-                    local args = {
-                        [1] = "HatchEgg",
-                        [2] = tostring(Kaugummi.Config.Misc.choosen_egg),
-                        [3] = 2
-                    }
-                network:WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-                else
-                    warn("No egg selected")
-                end
-            end
-        end)
+        while Kaugummi.Config.Dashboard.Pets.hatch_egg do task.wait()
+            task.spawn(function()
+                local ohString1 = "HatchEgg"
+                local ohString2 = tostring(Kaugummi.Config.Dashboard.Pets.selected_egg)
+                local ohNumber3 = 6
+                
+                network.Remote.Event:FireServer(ohString1, ohString2, ohNumber3)
+            end)
+        end
     end;
     Flag = "auto_hatch";
 })
 
-local Misc__Refresh = Sections.Hatch:CreateButton({
+local Misc__HatchEggAnim; Misc__HatchEggAnim = Sections.Misc.Pets:CreateToggle({
+    Text = "Disable Animation";
+    Subtext = "Rejoin to undo";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(enabled) 
+        bubble:NoHatchAnim(enabled)
+    end;
+    Flag = "auto_hatch_disableanim";
+})
+
+
+local Misc__Refresh = Sections.Misc.Pets:CreateButton({
     Text = "Refresh Eggs";
     Callback = function()
         local reEggs = bubble:GetAllEggs();
@@ -1070,7 +1237,7 @@ local Misc__Refresh = Sections.Hatch:CreateButton({
     end;
 })
 
-local Config__AntiAfk = Sections.Data:CreateToggle({
+local Config__AntiAfk = Sections.Config.Performance:CreateToggle({
     Text = "Anti Afk";
     Subtext = "";
     Alignment = "Left";
@@ -1083,6 +1250,90 @@ local Config__AntiAfk = Sections.Data:CreateToggle({
         end;
     end;
     Flag = "anti_afk";
+})
+
+local Dashboard__BlackMarketProducts = Sections.Dashboard.Shop:CreateDropdown({
+    Text = "Market Products";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = blackmarket_products;
+    Multi = true;
+    Default = nil;
+    Callback = function(Value)
+         Kaugummi.Config.Dashboard.Shop.auto_black_marketselected = Value;
+        end;
+    Flag = "black_market_products";
+})
+
+Dashboard__AutoBlackMarket = Sections.Dashboard.Shop:CreateToggle({
+    Text = "Auto Buy Blackmarket",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(enabled)
+        Kaugummi.Config.Dashboard.Shop.auto_black_market = enabled
+        if enabled then
+            task.spawn(function()
+                while Kaugummi.Config.Dashboard.Shop.auto_black_market do
+                    bubble:BuyBlackmarket()
+                    task.wait(5)
+                end
+            end)
+        end
+    end,
+    Flag = "black_market_autobuy"
+})
+
+local Dashboard__EventEggSelected = Sections.Dashboard.Event:CreateDropdown({
+    Text = "Select Egg";
+    Subtext = "";
+    Alignment = "Left";
+    Choices = {"Bunny Egg", "Pastel Egg"};
+    Multi = false;
+    Default = nil;
+    Callback = function(Value)
+         Kaugummi.Config.Dashboard.Pets.selected_egg = Value;
+        end;
+    Flag = "event_hatch_selected";
+})
+
+local Dashboard__EventEgg = Sections.Dashboard.Event:CreateToggle({
+    Text = "Auto Hatch",
+    Subtext = "",
+    Alignment = "Left",
+    Default = false,
+    Callback = function(enabled)
+        Kaugummi.Config.Dashboard.Pets.hatch_egg = enabled
+
+        if enabled then
+            task.spawn(function()
+                Dashboard__EventEggTP:Fire()
+                task.wait(2)
+    
+             if Kaugummi.Config.Dashboard.Pets.selected_egg == "Bunny Egg" then 
+                bubble:bypass_teleport(teleport_table.bunny_egg)
+             elseif Kaugummi.Config.Dashboard.Pets.selected_egg == "Pastel Egg" then 
+                bubble:bypass_teleport(teleport_table.pastel_egg)
+             end
+    
+                while Kaugummi.Config.Dashboard.Pets.hatch_egg do
+                    task.wait(1.2)
+                    network.Remote.Event:FireServer("HatchEgg", tostring(Kaugummi.Config.Dashboard.Pets.selected_egg), 6)
+                end
+            end)
+        end
+    end,
+    Flag = "event_hatch"
+})
+
+Dashboard__EventEggTP = Sections.Dashboard.Event:CreateButton({
+    Text = "Teleport to Event";
+    Alignment = "Left";
+    Callback = function()
+    local ohString1 = "Teleport"
+    local ohString2 = "Workspace.Event.Portal.Spawn"
+    network.Remote.Event:FireServer(ohString1, ohString2)
+    end;
 })
 
 Library:Notify("Script loaded for: \n" ..tostring(bubble:GetGame()), 5, "Tuah")
