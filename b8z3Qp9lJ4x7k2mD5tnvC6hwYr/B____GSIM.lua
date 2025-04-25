@@ -1,7 +1,7 @@
 bubble = {}; --storing here 
 config = {};
 handler = {
-    ["__"] = {Version = 1.11}
+    ["__"] = {Version = 1.12}
 }; print("Checking " ..tostring(handler.__.Version), tostring(os.date()))
 
 -- Auto Hatch Throwback egg Event
@@ -28,7 +28,11 @@ local Kaugummi = {
                     ["auto_spin_wheel"] = false;
                     ["auto_win_doggy_game"] = false;
                     ["auto_claim_season"] = false;
+                    ["auto_claim_chests"] = false;
+                    ["auto_mystery_box"] = false;
                 };
+                ["auto_golden_chest"] = false;
+                ["auto_royal_chest"] = false;
             };
             ["Shop"] = {
                 ["auto_buy_next_flavor"] = false;
@@ -49,6 +53,7 @@ local Kaugummi = {
         };
         ["Misc"] = {
             ["selected_zone"] = nil;
+            ["auto_genie_quest"] = false;
         };
     };
     Ui = {
@@ -229,6 +234,19 @@ function bubble:ClaimSeason()
     local getRemoteJ = network.Remote.Event;
     local j;
     getRemoteJ:FireServer("ClaimSeason")
+end;
+
+function bubble:ClaimChest()
+    local getRemoteK = network:WaitForChild("Remote"):WaitForChild("Event");
+
+    local pool__ = {
+        "Giant Chest", "Void Chest", "Infinity Chest"
+    };
+
+    for _, chestName in ipairs(pool__) do
+        getRemoteK:FireServer("ClaimChest", chestName, true)
+        task.wait(60);
+    end;
 end;
 
 function bubble:stripRichText(str)
@@ -643,7 +661,11 @@ function bubble:bypass_teleport(pos, duration)
     getgenv().tween_lock = false
 end;
 
-
+function bubble:AntiAfk()
+    for i, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
+        v:Disable();
+    end;
+end;
 
 --// UI
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
@@ -680,6 +702,9 @@ local Sections = {
         Misc = Tabs.Misc:CreateSection({ Title = "Additional", Side = "Left",});
         Teleport = Tabs.Misc:CreateSection({ Title = "Teleport", Side = "Right",});
         Pets = Tabs.Misc:CreateSection({ Title = "Pets", Side = "Left",});
+        Use = Tabs.Misc:CreateSection({ Title = "Use", Side = "Right",});
+        Quest = Tabs.Misc:CreateSection({ Title = "Quest", Side = "Left",});
+        Chest = Tabs.Misc:CreateSection({ Title = "Chest", Side = "Left",});
     };
     Config = {
         Ui = Tabs.Config:CreateSection({ Title = "UI", Side = "Left",});
@@ -694,7 +719,7 @@ local WelcomeMsg = Sections.Info.Logs:CreateLabel({
 })
 
 local UpdateLogs = Sections.Info.Logs:CreateLog({
-    Default = { "[+] Rewriten Script!", "[+] Added Collect Loot", "[+] Version ".. tostring(handler.__.Version) };
+    Default = { "[+] Rewriten Script!", "[+] Added Collect Loot", "[+] Added Auto Chests", "[+] Added Auto Quest", "[+] Some Bux Fixes", "[+] Version ".. tostring(handler.__.Version) };
 })
 
 
@@ -855,6 +880,90 @@ local Dashboard__ClaimPrizes = Sections.Dashboard.Automatic:CreateToggle({
         end;
     end;
     Flag = "auto_claim_prizes";
+})
+
+local Misc__AutoGoldenChest = Sections.Misc.Chest:CreateToggle({
+    Text = "Auto Golden Chest";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Farm.auto_golden_chest = v;
+
+        if Kaugummi.Config.Dashboard.Farm.auto_golden_chest then
+        task.spawn(function()
+            if game:GetService("Workspace").Rendered.Rifts:FindFirstChild("golden-chest") then
+                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("Teleport", "Workspace.Worlds.The Overworld.FastTravel.Spawn");
+                task.wait(1);
+                local CFrameValue = Instance.new("CFrameValue");
+                CFrameValue.Value = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+                CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
+                    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrameValue.Value;
+                end);
+                game:GetService("TweenService"):Create(CFrameValue, TweenInfo.new(15, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Value = game:GetService("Workspace").Rendered.Rifts["golden-chest"].Chest["golden-chest"].CFrame + Vector3.new(0, 6, 0)}):Play();
+                task.wait(15);
+                local __tick = tick();
+                repeat
+                    task.wait();
+                    game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("UnlockRiftChest", "golden-chest", false)
+                until tick() - __tick >= 300;
+            elseif Kaugummi.Config.Dashboard.Farm.auto_golden_chest == false then 
+                Tween:Cancel();
+            end;
+        end);
+    end
+    end;
+    Flag = "auto_golden_chest";
+})
+
+local Misc__AutoRoyalChest = Sections.Misc.Chest:CreateToggle({
+    Text = "Auto Royal Chest";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Farm.auto_royal_chest = v;
+
+        if Kaugummi.Config.Dashboard.Farm.auto_royal_chest then
+        task.spawn(function()
+            if game:GetService("Workspace").Rendered.Rifts:FindFirstChild("royal-chest") then
+                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("Teleport", "Workspace.Worlds.The Overworld.FastTravel.Spawn");
+                task.wait(1);
+                local CFrameValue = Instance.new("CFrameValue");
+                CFrameValue.Value = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+                CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
+                    game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame = CFrameValue.Value;
+                end);
+                game:GetService("TweenService"):Create(CFrameValue, TweenInfo.new(15, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Value = game:GetService("Workspace").Rendered.Rifts["royal-chest"].Chest["royal-chest"].CFrame + Vector3.new(0, 6, 0)}):Play();
+                task.wait(15);
+                local __tick = tick();
+                repeat
+                    task.wait();
+                    game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("UnlockRiftChest", "royal-chest", false)
+                until tick() - __tick >= 300;
+            end;
+        end);
+    end
+    end;
+    Flag = "auto_royal_chest";
+})
+
+
+local Dashboard__ClaimChests = Sections.Misc.Chest:CreateToggle({
+    Text = "Auto Claim Chests";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v)
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_chests = v;
+
+        while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_claim_chests do task.wait();
+            task.spawn(function()
+                bubble:ClaimChest()       
+            end)
+        end;
+    end;
+    Flag = "auto_claim_chests";
 })
 
 local Dashboard__ClaimDaily = Sections.Dashboard.Automatic:CreateToggle({
@@ -1048,11 +1157,11 @@ Misc__TeleportZone = Sections.Misc.Teleport:CreateButton({
     Text = "Teleport";
     Alignment = "Left"; 
     Callback = function() 
-        bubble:ZoneTeleport();
-
         if Kaugummi.Config.Misc.selected_zone == "Event" then 
             Dashboard__EventEggTP:Fire()
         end;
+
+        bubble:ZoneTeleport();
      end;
 })
 
@@ -1253,7 +1362,9 @@ local Misc__HatchEggAnim; Misc__HatchEggAnim = Sections.Misc.Pets:CreateToggle({
     Alignment = "Left";
     Default = false;
     Callback = function(enabled) 
-        bubble:NoHatchAnim(enabled)
+        task.spawn(function()
+            bubble:NoHatchAnim(enabled)
+        end)
     end;
     Flag = "auto_hatch_disableanim";
 })
@@ -1366,6 +1477,44 @@ Dashboard__EventEggTP = Sections.Dashboard.Event:CreateButton({
     local ohString2 = "Workspace.Event.Portal.Spawn"
     network.Remote.Event:FireServer(ohString1, ohString2)
     end;
+})
+
+local Misc__OpenMysteryBox = Sections.Misc.Use:CreateToggle({
+    Text = "Open Mystery Box";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        Kaugummi.Config.Dashboard.Farm.Unlocks.auto_mystery_box = v;
+        task.spawn(function()
+            while Kaugummi.Config.Dashboard.Farm.Unlocks.auto_mystery_box do task.wait();
+                network:WaitForChild("Remote"):WaitForChild("Event"):FireServer("UseGift", "Mystery Box", 1);
+                for i, v in next, game:GetService("Workspace").Rendered.Gifts:GetChildren() do
+                    network:WaitForChild("Remote"):WaitForChild("Event"):FireServer("ClaimGift", v.Name);
+                    task.wait();
+                    v:Destroy();
+                end;
+            end;
+        end);
+    end;
+    Flag = "auto_mystery_box";
+})
+
+local Misc__GenieQuest = Sections.Misc.Quest:CreateToggle({
+    Text = "Auto Genie Quest";
+    Subtext = "";
+    Alignment = "Left";
+    Default = false;
+    Callback = function(v) 
+        Kaugummi.Config.Misc.auto_genie_quest = v;
+        task.spawn(function()
+            while Kaugummi.Config.Misc.auto_genie_quest do
+                network:WaitForChild("Remote"):WaitForChild("Event"):FireServer("StartGenieQuest", math.random(1, 3));
+                task.wait(3600);
+            end;
+        end);
+    end;
+    Flag = "auto_mystery_box";
 })
 
 Library:Notify("Script loaded for: \n" ..tostring(bubble:GetGame()), 5, "Tuah")
