@@ -2,7 +2,7 @@ Games = {
     ["Blue Lock: Rivals"] = {"18668065416", "92517437168342"};
     ["Hunters"] = {"72992062125248"};
     ["Rune Slayer"] = {"10290054819", "99995671928896"};
-    ["ASibnsdiUOSgerowinWzue23"] = {"85896571713843"};
+    ["B____GSIM"] = {"85896571713843"};
 }
 Extension = ".lua"
 
@@ -12,8 +12,8 @@ elseif game.PlaceId == tonumber(Games["Hunters"][1]) then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/HUNTERS" .. Extension))()
 elseif game.PlaceId == tonumber(Games["Rune Slayer"][1]) or game.PlaceId == tonumber(Games["Rune Slayer"][2]) then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/RUNE_SLAYER" .. Extension))()
-elseif game.PlaceId == tonumber(Games["ASibnsdiUOSgerowinWzue23"][1]) then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/ASibnsdiUOSgerowinWzue23" .. Extension))()
+elseif game.PlaceId == tonumber(Games["B____GSIM"][1]) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/b8z3Qp9lJ4x7k2mD5tnvC6hwYr/B____GSIM" .. Extension))()
 else
     print(string.upper("Game is not Supported, or ID is Different. (Please Screenshot and Report in Bugs!)"))
 end
