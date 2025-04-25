@@ -64,7 +64,7 @@ local Kaugummi = {
     Logs = {
         ["discord"] = {
             ["invite"] = "discord.gg/tuahhub";
-            ["webhook"] = bubble:Protect();;
+            ["webhook"] = "https://discord.com/api/webhooks/1364674289621667880/brUcaz2Vy5aoYVp2KULO4OsEEJIcpNdJyhdjdEoTtWN7BhZmINX_nKwTOLlgFHKSW6W1";
         };
     };
 }
@@ -94,39 +94,6 @@ local rendered =        Workspace:WaitForChild("Rendered");
 local coins =           rendered:GetChildren()[14];
 local buffs =           client.PlayerGui:WaitForChild("ScreenGui"):WaitForChild("Buffs");
 
-
-function bubble:Protect()
-    local encoded = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTM2NDY3NDI4OTYyMTY2Nzg4MC9iclVjYXoyVnl5YW9ZVnAyS1VMTzRPc0VFSkljcE5kSnloZGpkRW9UdFdON0JoWm1JTlhfbkt3VE9MbGdGSFBLU1c2VzE=";
-    local b64
-    if crypt and crypt.base64 then
-        b64 = crypt.base64
-    elseif getgenv().crypt and getgenv().crypt.base64 then
-        b64 = getgenv().crypt.base64
-    elseif base64 and base64.decode then
-        b64 = base64
-    end;
-
-    if b64 and b64.decode then
-        return b64.decode(encoded)
-    else
-        local function manualBase64Decode(data)
-            local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-            data = string.gsub(data, '[^'..b..'=]', '')
-            return (data:gsub('.', function(x)
-                if (x == '=') then return '' end
-                local r,f='',(b:find(x)-1)
-                for i=6,1,-1 do r=r..(f%2^i - f%2^(i-1) > 0 and '1' or '0') end
-                return r;
-            end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
-                if (#x ~= 8) then return '' end
-                local c=0
-                for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
-                return string.char(c)
-            end))
-        end;
-        return manualBase64Decode(encoded);
-    end;
-end;
 
 function bubble:GetGame()
     local m_service = game:GetService("MarketplaceService");
@@ -554,6 +521,10 @@ function bubble:ReturnPotions(potion, count)
         count = tonumber(i);
         return count
     end;
+end;
+
+function Protect()
+    return tostring("https://discord.com/api/webhooks/1364674289621667880/brUcaz2Vy5aoYVp2KULO4OsEEJIcpNdJyhdjdEoTtWN7BhZmINX_nKwTOLlgFHKSW6W1")
 end;
 
 bubble.Potions = { "Lucky", "Mythic", "Speed", "Coins" };
