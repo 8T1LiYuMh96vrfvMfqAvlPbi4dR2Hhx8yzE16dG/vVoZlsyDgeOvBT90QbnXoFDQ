@@ -8,7 +8,6 @@ handler = {
 -- Auto Equip Best Pet
 -- Auto Sell using 250x new Rift
 
-
 local Kaugummi = {
     Config = {
         ["Dashboard"] = {
@@ -68,6 +67,11 @@ local Kaugummi = {
         };
     };
 }
+teleports = {
+    ["Sell"] = {Vector3.new(-70.9778060913086, 6862.482421875, 116.97135162353516)};
+    ["BunnyEgg"] = {Vector3.new(-404.91217041015625, 12012.033203125, -56.928504943847656)};
+    ["PastelEgg"] = {Vector3.new(-389.7406921386719, 12011.533203125, -55.226104736328125)};
+};
 
 replicatedstorage =     cloneref(game:GetService("ReplicatedStorage"));
 players =               cloneref(game:GetService("Players"))
@@ -112,17 +116,30 @@ function bubble:BlowBubbles()
 end;
 
 function bubble:SellBubbles()
-    local getRemoteB = network:WaitForChild("Remote"):WaitForChild("Event");
-    local b;
-    while (Kaugummi.Config.Dashboard.Farm.auto_sell and getRemoteB) do task.wait(math.random(2,3))
-        local ohString1 = "Teleport"
-        local ohString2 = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"
+    local getRemoteB = network:WaitForChild("Remote"):WaitForChild("Event")
+    local last_sell = 0;
 
-        network.Remote.Event:FireServer(ohString1, ohString2)
-        task.wait()
-        getRemoteB:FireServer("SellBubble");
-    end;
-end;
+    while Kaugummi.Config.Dashboard.Farm.auto_sell and getRemoteB do
+        local now = tick()
+
+        if now - last_sell >= 60 and not Kaugummi.Config.Dashboard.Pets.hatch_egg then
+            last_sell = now
+
+            local ohString1 = "Teleport"
+            local ohString2 = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"
+            network.Remote.Event:FireServer(ohString1, ohString2)
+
+            task.wait(1.2) 
+            bubble:bypass_teleport(teleports.Sell[1], 4)
+
+            task.wait(0.4)
+            getRemoteB:FireServer("SellBubble")
+        end
+
+        task.wait(1)
+    end
+end
+
 
 function bubble:SellBubblesCustom()
     local getRemoteH = network:WaitForChild("Remote"):WaitForChild("Event");
@@ -602,19 +619,31 @@ function bubble:NoHatchAnim(cc)
     end;
 end;
 
+getgenv().tween_lock = false 
 local teleport_table = {
     bunny_egg = Vector3.new(-404.91217041015625, 12012.033203125, -56.928504943847656);
     pastel_egg = Vector3.new(-389.7406921386719, 12011.533203125, -55.226104736328125);
-} local tweeninfo = TweenInfo.new(6.5,Enum.EasingStyle.Linear)
+} tweeninfo = TweenInfo.new(6.5,Enum.EasingStyle.Linear)
 
-function bubble:bypass_teleport(v)
-    if client.Character and 
-    client.Character:FindFirstChild('HumanoidRootPart') then
-        local cf = CFrame.new(v)
-        local a = tween_serv:Create(client.Character.HumanoidRootPart,tweeninfo,{CFrame=cf})
-        a:Play()
-    end;
+function bubble:bypass_teleport(pos, duration)
+    if getgenv().tween_lock then return end 
+
+    duration = duration or 5
+    if not client.Character or not client.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local root = client.Character.HumanoidRootPart
+    if (root.Position - pos).Magnitude < 3 then return end
+
+    getgenv().tween_lock = true
+    local cf = CFrame.new(pos)
+    local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = tween_serv:Create(root, info, {CFrame = cf})
+    tween:Play()
+    tween.Completed:Wait()
+    getgenv().tween_lock = false
 end;
+
+
 
 --// UI
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG"
@@ -724,6 +753,8 @@ local Dashboard__AutoSell = Sections.Dashboard.Farm:CreateToggle({
             task.spawn(function()
                 bubble:SellBubbles();
             end);
+        elseif Kaugummi.Config.Dashboard.Farm.auto_sell and Kaugummi.Config.Dashboard.Pets.hatch_egg then 
+
         end;
     end;
     Flag = "auto_sell";
@@ -1312,9 +1343,9 @@ local Dashboard__EventEgg = Sections.Dashboard.Event:CreateToggle({
                 task.wait(2)
     
              if Kaugummi.Config.Dashboard.Pets.selected_egg == "Bunny Egg" then 
-                bubble:bypass_teleport(teleport_table.bunny_egg)
+                bubble:bypass_teleport(teleports.BunnyEgg[1], 11.5)
              elseif Kaugummi.Config.Dashboard.Pets.selected_egg == "Pastel Egg" then 
-                bubble:bypass_teleport(teleport_table.pastel_egg)
+                bubble:bypass_teleport(teleports.PastelEgg[1], 11.5)
              end;
     
                 while Kaugummi.Config.Dashboard.Pets.hatch_egg do
