@@ -624,7 +624,7 @@ local Main__LobbyDungeon = Sections.Dungeon:CreateDropdown({
     Text = "Select Dungeon";
     Subtext = "";
     Alignment = "Left";
-    Choices = { "DoubleDungeonD", "GoblinCave", "SpiderCavern" };
+    Choices = { "DoubleDungeonD", "GoblinCave", "SpiderCavern", "EnchantedCourtyard" };
     Multi = false;
     Default = nil;
     Callback = function(v)
@@ -741,6 +741,14 @@ local Main__SafeHover = Sections.Dungeon:CreateToggle({
         end
     end;
     Flag = "safe_mode_dungeon";
+})
+
+local Misc__BoostLuck = Sections.Misc:CreateButton({
+    Text = "Boost Luck";
+    Alignment = "Left"; 
+    Callback = function() 
+        task.spawn(hunters.BoostLuck());
+     end;
 })
 
 local Misc__Speed = Sections.Local:CreateSlider({
