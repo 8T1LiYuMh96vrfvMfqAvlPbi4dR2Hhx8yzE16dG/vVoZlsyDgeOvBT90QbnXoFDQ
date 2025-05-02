@@ -2413,7 +2413,6 @@ function Library:CreateWindow(WINFO)
 
                 local Found;
                 for Object, Value in pairs(self.Contents) do
-                    print(Value)
                     local l1, l2 = string.lower(Value), string.lower(s);
 
                     if string.match(l1, l2) then
@@ -2430,7 +2429,6 @@ function Library:CreateWindow(WINFO)
             Section.Contents = { [SF] = Section.Title };
             function Section:AddContent(Object, Value)
                 if (not Value) or (not Object) then return; end;
-                print(self.Contents)
                 self.Contents[Object] = Value;
             end;
 
@@ -2448,14 +2446,5 @@ function Library:CreateWindow(WINFO)
 
     return Window;
 end;
-
-local Window = Library:CreateWindow({ Title = "Lunar || ALS" });
-local Subwindow = Library:CreateSubWindow({ Title = "Subframe", Draggable = true });
-local Tab = Window:CreateTab({ Title = "Main" });
-local Section = Tab:CreateSection({ Title = "" });
-local Log = Section:CreateLog();
-
-local Toggle = Section:CreateToggle({ Text = "This is a toggle!" });
-Toggle:AssignSub(Subwindow);
 
 return Library;
