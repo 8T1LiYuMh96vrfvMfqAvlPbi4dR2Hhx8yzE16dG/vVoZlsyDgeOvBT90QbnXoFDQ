@@ -1840,6 +1840,130 @@ local ScreenUI = Library.Create("ScreenGui", {
 getgenv().tslib = Library;
 Library.ScreenUI = ScreenUI;
 
+function Library:Notify(Message, Duration, Title)
+    if (not Message) or (not Library.ScreenUI) then return; end;
+
+    Duration = Duration or 7.5;
+    Title = Title or "Notificaiton!";
+
+    local NotiUI;
+    if not getgenv().NotiUI then
+        NotiUI = Library.Create("Frame", {
+            Parent = Library.ScreenUI,
+            AnchorPoint = Vector2.new(1, 0),
+            BackgroundTransparency = 1,
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(0, 250, 1, 0),
+        });
+
+        Library:ApplyPadding(NotiUI, 5);
+        Library.Create("UIListLayout", {
+            Parent = NotiUI,
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            VerticalAlignment = Enum.VerticalAlignment.Bottom,
+            Padding = UDim.new(0, 5),
+        });
+    else
+        NotiUI = getgenv().NotiUI;
+    end;
+
+    local Fake = Library.Create("Frame", {
+        Parent = NotiUI,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    });
+
+    local NotiBack = Library.Create("Frame", {
+        Parent = Fake,
+        Position = UDim2.new(2, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    }, { BackgroundColor3 = "Background" });
+
+    Library:ApplyCorner(NotiBack, 5);
+    Library:ApplyPadding(NotiBack, 5);
+    Library:ApplyStroke(NotiBack, "Highlight", 1, "Round");
+
+    local TitleLabel = Library.Create("TextLabel", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(0, .75),
+        BackgroundTransparency = 1,
+        Size = UDim2.new(.5, 0, 0, 20),
+        TextSize = 20,
+        RichText = true,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Text = tostring(Title),
+    }, { TextColor3 = "Text", FontFace = "NotiFont" });
+
+    Library:ApplyStroke(TitleLabel, "Highlight", 1, "Round");
+
+    local Description = Library.Create("Frame", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(.5, 0),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(.5, 0, 0, 10),
+        Size = UDim2.new(.9, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+    });
+
+    Library.Create("UIPadding", {
+        Parent = Description,
+        PaddingBottom = UDim.new(0, 20),
+    });
+
+    Library.Create("TextLabel", {
+        Parent = Description,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(.9, 0, 0, 50),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        TextSize = 12,
+        RichText = true,
+        Text = tostring(Message),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top
+    }, { TextColor3 = "Text", FontFace = "Font" });
+
+    local DurationBar = Library.Create("Frame", {
+        Parent = NotiBack,
+        AnchorPoint = Vector2.new(.5, 1),
+        Position = UDim2.new(.5, 0, 1, -2),
+        Size = UDim2.new(.9, 0, 0, 5),
+    }, { BackgroundColor3 = "Background2" });
+
+    Library:ApplyCorner(DurationBar, 100);
+    Library:ApplyStroke(DurationBar, "Highlight", 1, "Round");
+
+    local Fill = Library.Create("Frame", {
+        Parent = DurationBar,
+        Size = UDim2.new(1, 0, 1, 0)
+    }, { BackgroundColor3 = "Highlight" });
+
+    Library:ApplyCorner(Fill, 100);
+
+    local Click = Library:ApplyClick(NotiBack);
+    local Tween;
+
+    task.spawn(function()
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Position = UDim2.new(0, 0, 0, 0) }):Play();
+
+        Tween = TweenService:Create(Fill, TweenInfo.new(Duration, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Size = UDim2.new(0, 0, 1, 0) });
+        Tween:Play();
+        Tween.Completed:Wait();
+
+        TweenService:Create(NotiBack, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+            { Position = UDim2.new(2, 0, 0, 0) }):Play();
+    end);
+
+    Click.MouseButton1Up:Connect(function()
+        if Tween then Tween:Cancel(); end;
+    end);
+
+    getgenv().NotiUI = NotiUI;
+end;
+
 function Library:CreateSubWindow(INFO)
     local Settings = { isSub = true };
     INFO = INFO or {};
