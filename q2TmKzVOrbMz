@@ -695,6 +695,7 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = 31; --bsbsbsb
         });
 
         local Title = Library.Create("TextLabel", {
