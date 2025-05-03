@@ -2044,6 +2044,7 @@ function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
     Window.Title = Window.Title or "Window";
     Window.Icon = Window.Image or "rbxassetid://106336924150777";
+    Window.Size = Window.Size or UDim2.new(1, 0, 1, 0)
     -- Window.Icon = { Image, Size } ; ImageID, UDim2 | Having a image will replace the title
 
     local Background = Library.Create("Frame", {
@@ -2280,15 +2281,16 @@ function Library:CreateWindow(WINFO)
         end;
     end;
 
-    if Window.Image then
+    if Window.Image and Window.Size then
         local Image = Window.Image;
+        local Size = Window.Size;
 
         Library.Create("ImageLabel", {
             Parent = LeftTop,
             AnchorPoint = Vector2.new(.5, .5),
             BackgroundTransparency = 1,
             Position = UDim2.new(.5, 0, .5, 0),
-            Size = UDim2.new(1, 0, 1, 0),
+            Size = Window.Size or UDim2.new(1, 0, 1, 0),
             Image = Window.Image or "rbxassetid://106336924150777",
         }, { ImageColor3 = "Title" });
     else
