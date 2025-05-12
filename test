@@ -1,3 +1,43 @@
+-- Check if has key / redeem key
+local HttpService = game:GetService("HttpService")
+
+local newdata = HttpService:JSONEncode({Key = getgenv().Key, HWID = gethwid()});
+local request = http_request or request or HttpPost or syn.request
+local success, response = pcall(function()
+    return request({
+        Url = "http://127.0.0.1:5000/redeem",
+        Body = newdata,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        }
+    });
+end);
+
+if HttpService:JSONDecode(response).StatusCode ~= 200 then return; end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- ALS Lobby
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
