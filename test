@@ -1,4 +1,4 @@
--- Check if has key / redeem key
+-- Check if has key / redeem ke
 local HttpService = game:GetService("HttpService")
 
 local newdata = HttpService:JSONEncode({Key = getgenv().Key, HWID = gethwid()});
