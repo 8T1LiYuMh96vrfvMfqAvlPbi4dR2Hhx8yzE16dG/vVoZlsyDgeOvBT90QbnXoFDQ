@@ -1,0 +1,228 @@
+-- ALS Lobby
+
+local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
+local Library = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/q2TmKzVOrbMz"))();
+local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
+Setup:Basics();
+
+
+
+
+
+
+
+
+
+
+
+
+
+local function ALS()
+    local function Lobby()
+        Library.Paths = {
+            ["Folder"] = "Pallas",
+            ["Secondary"] = "ALS1",
+            ["Data"] = "Data",
+            ["Themes"] = "Themes",
+        };
+
+        local Window = Library:CreateWindow({ Title = "Pallas" });
+        local Tabs = {
+            Main = Window:CreateTab({ Title = "Main" }),
+            Settings = Window:CreateTab({ Title = "Settings" }),
+        };
+
+        local Sections = {
+            Auto = Tabs.Main:CreateSection({ Title = "Auto", Side = "Left" }),
+            Misc = Tabs.Main:CreateSection({ Title = "Misc", Side = "Right" }),
+            Settings = Tabs.Settings:CreateSection({ Title = "Settings", Side = "Full" }),
+        };
+
+        local Hidden_SW = Library:CreateSubWindow();
+        local HideUI = Hidden_SW:CreateToggle({
+            Text = "Visibility",
+            Default = true,
+            Callback = function(Value)
+                Window:Visibility(Value);
+            end,
+
+            Flag = "ui_visiblity",
+        });
+
+        local hideKey = Hidden_SW:CreateKeybind({
+            Text = "Hide Key",
+            Default = "RightShift",
+
+            Callback = function()
+                HideUI:Switch();
+            end,
+
+            Flag = "hideKey",
+        });
+
+        local savef;
+        local autoSave = Hidden_SW:CreateToggle({
+            Text = "Auto Save",
+            Callback = function(Value)
+                if savef then
+                    savef:Disconnect();
+                    savef = nil;
+                end;
+
+                if Value then
+                    savef = Client.Destroying:Once(function()
+                        Library:Save();
+                    end);
+                end;
+            end,
+            Flag = "ui_Autosave"
+        })
+
+        local wtraits = {};
+        Sections.Auto:CreateToggle({
+            Text = "Auto trait roll",
+            Subtext = "Roll on the unit to start.",
+            Callback = function(Value)
+                autotrait = Value;
+            end,
+        });
+
+        Sections.Auto:CreateDropdown({
+            Text = "Traits",
+            Choices = { "Glitched", "Avatar", "Overlord", "Entrepreneur" },
+            Default = { "Glitched" },
+            Multi = true,
+            Callback = function(Value)
+                wtraits = Value;
+            end,
+
+            Flag = "als_traits"
+        });
+
+        local wenchants = {};
+        Sections.Auto:CreateToggle({
+            Text = "Auto enchant roll",
+            Subtext = "Roll on the unit to start.",
+            Callback = function(Value)
+                autoenchant = Value;
+            end,
+        });
+
+        Sections.Auto:CreateDropdown({
+            Text = "Enchants",
+            Choices = { "Mystical", "Glorious", "Midas", "Efficiency" },
+            Default = { "Mystical", "Midas" },
+            Multi = true,
+            Callback = function(Value)
+                wenchants = Value;
+            end,
+
+            Flag = "als_enchant"
+        });
+
+        local Remotes = Replicated:WaitForChild("Remotes");
+        local Quirks = Remotes:WaitForChild("Quirks");
+        local Enchants = Remotes:WaitForChild("Enchants");
+        local TraitRoll = Quirks:WaitForChild("Roll");
+        local EnchantRoll = Enchants:WaitForChild("RollEnchant");
+
+        local SafeNotify = Instance.new("BindableEvent")
+        SafeNotify.Event:Connect(function(...)
+            Library:Notify(...)
+        end)
+
+        local rollingT;
+        local StartTrait = function(a1, Previous)
+            local Rolled = 0;
+            rollingT = true;
+            while typeof(Previous) == "string" and not table.find(wtraits, Previous) and autotrait do
+                Previous = (function()
+                    local l;
+                    repeat
+                        task.wait();
+                        l = TraitRoll:InvokeServer(a1, Previous);
+                    until l; return l;
+                end)();
+
+                Rolled = Rolled + 1;
+            end;
+
+            rollingT = false;
+
+            if table.find(wtraits, Previous) then
+                SafeNotify:Fire("You rolled: " .. Previous .. " in " .. Rolled .. " Rolls!")
+            end;
+        end;
+
+        local rollingE;
+        local StartEnchant = function(a1, a2, Previous)
+            local Rolled = 0;
+            rollingE = true;
+            while typeof(Previous) == "string" and not table.find(wenchants, Previous) and autoenchant do
+                Previous = (function()
+                    local l;
+                    repeat
+                        task.wait();
+                        l = EnchantRoll:InvokeServer(a1, a2, Previous);
+                    until l; return l;
+                end)();
+
+                Rolled = Rolled + 1;
+            end;
+
+            rollingE = false;
+            if table.find(wenchants, Previous) then
+                SafeNotify:Fire("You rolled: " .. Previous .. " in " .. Rolled .. " Rolls!")
+            end;
+        end;
+
+        local Old
+        Old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            local method = getnamecallmethod();
+            local args = { ... };
+
+            if not rollingT and not checkcaller() and method == "InvokeServer" then
+                local Returned = Old(self, ...);
+
+                if self == TraitRoll then
+                    if typeof(Returned) == "string" and not table.find(wtraits, Returned) and autotrait then
+                        task.spawn(StartTrait, args[1], Returned);
+                    end;
+                end;
+
+                return Returned;
+            end;
+
+            return Old(self, ...);
+        end));
+
+        local oldIndex
+        oldIndex = hookmetamethod(game, "__index", newcclosure(function(self, key)
+            if not rollingE and not checkcaller() and key == "InvokeServer" then
+                local original = oldIndex(self, key);
+
+                if self == EnchantRoll and typeof(original) == "function" then
+                    return function(_, ...)
+                        local args = { ... };
+                        local Returned = original(_, unpack(args));
+
+                        if typeof(Returned) == "string" and not table.find(wenchants, Returned) and autoenchant then
+                            task.spawn(StartEnchant, args[1], args[2], Returned);
+                        end;
+
+                        return Returned;
+                    end;
+                end;
+
+                return original;
+            end;
+
+            return oldIndex(self, key);
+        end));
+    end;
+
+    Lobby();
+    Library:Load();
+end;
+
+ALS();
