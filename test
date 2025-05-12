@@ -14,7 +14,7 @@ local success, response = pcall(function()
     });
 end);
 
-if HttpService:JSONDecode(response).StatusCode ~= 200 then return; end;
+if response.StatusCode ~= 200 then return; end;
 
 
 
