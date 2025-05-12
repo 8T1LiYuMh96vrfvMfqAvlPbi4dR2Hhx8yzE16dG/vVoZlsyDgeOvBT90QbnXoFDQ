@@ -695,7 +695,6 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
-            ZIndex = 31; --bsbsbsb
         });
 
         local Title = Library.Create("TextLabel", {
@@ -1845,7 +1844,7 @@ function Library:Notify(Message, Duration, Title)
     if (not Message) or (not Library.ScreenUI) then return; end;
 
     Duration = Duration or 7.5;
-    Title = Title or "Notificaiton!";
+    Title = Title or "Notification!";
 
     local NotiUI;
     if not getgenv().NotiUI then
@@ -1966,7 +1965,7 @@ function Library:Notify(Message, Duration, Title)
 end;
 
 function Library:CreateSubWindow(INFO)
-    local Settings = { isSub = true };
+    local Settings = { isSetting = true };
     INFO = INFO or {};
 
     Title = INFO.Title or "";
@@ -2043,8 +2042,7 @@ local MinSize, MaxSize = UDim2.new(0, 750, 0, 50), UDim2.new(0, 750, 0, 500);
 function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
     Window.Title = Window.Title or "Window";
-    Window.Icon = Window.Image or "rbxassetid://106336924150777";
-    Window.Size = Window.Size or UDim2.new(1, 0, 1, 0)
+    Window.Icon = nil;
     -- Window.Icon = { Image, Size } ; ImageID, UDim2 | Having a image will replace the title
 
     local Background = Library.Create("Frame", {
@@ -2281,17 +2279,16 @@ function Library:CreateWindow(WINFO)
         end;
     end;
 
-    if Window.Image and Window.Size then
-        local Image = Window.Image;
-        local Size = Window.Size;
+    if Window.Icon then
+        local Image, Size = table.unpack(Window.Icon);
 
         Library.Create("ImageLabel", {
             Parent = LeftTop,
             AnchorPoint = Vector2.new(.5, .5),
             BackgroundTransparency = 1,
             Position = UDim2.new(.5, 0, .5, 0),
-            Size = Window.Size or UDim2.new(1, 0, 1, 0),
-            Image = Window.Image or "rbxassetid://106336924150777",
+            Size = Size or UDim2.new(1, 0, 1, 0),
+            Image = Image or "rbxassetid://122142349354490",
         }, { ImageColor3 = "Title" });
     else
         Library:ApplyStroke(Library.Create("TextLabel", {
