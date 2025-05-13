@@ -1469,7 +1469,7 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             Visible = false,
-            ZIndex = ParentUI.ZIndex + 1,
+            ZIndex = ParentUI.ZIndex + 10,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library.Create("UIPadding", {
