@@ -1940,7 +1940,7 @@ function Library:Notify(Message, Duration, Title)
         AnchorPoint = Vector2.new(.5, 0),
         BackgroundTransparency = 1,
         Position = UDim2.new(.5, 0, 0, 10),
-        Size = UDim2.new(.9, 0, 0, 50),
+        Size = UDim2.new(.9, 0, 0, 20),
         AutomaticSize = Enum.AutomaticSize.Y,
     });
 
