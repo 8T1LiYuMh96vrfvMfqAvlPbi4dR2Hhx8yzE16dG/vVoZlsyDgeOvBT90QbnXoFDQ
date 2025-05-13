@@ -532,6 +532,7 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Label = Library.Create("TextLabel", {
@@ -541,6 +542,7 @@ local SubFunctions; SubFunctions = {
             Text = nself.Text,
             TextXAlignment = (nself.Alignment and Enum.TextXAlignment[nself.Alignment]) or
                 Enum.TextXAlignment.Center,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Label, (isSetting and 14) or 18);
@@ -583,6 +585,7 @@ local SubFunctions; SubFunctions = {
         local Background = Library.Create("Frame", {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 15) or 25),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         local Stroke = Library:ApplyStroke(Background, "Accent1", 1, "Round");
@@ -592,6 +595,7 @@ local SubFunctions; SubFunctions = {
             Parent = Background,
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Label, (isSetting and 11) or 15);
@@ -695,12 +699,14 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
 
         }, { FontFace = "Font", TextColor3 = "Text" });
 
@@ -717,6 +723,7 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(.75, 0, .5, 0),
             Position = UDim2.new(0, 0, 1, 0),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Subtext" });
 
         Library:ApplyTextSize(Description, (isSetting and 10) or 14);
@@ -732,6 +739,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, .5),
             Position = UDim2.new(1, 0, .5, 0),
             Size = UDim2.new(1, 0, .66, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyRatio(Slider, 2, "Height");
@@ -743,6 +751,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(0, .5),
             Position = UDim2.new(.1, 0, .5, 0),
             Size = UDim2.new(.4, 0, .8, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Text" });
 
         Library:ApplyCorner(Circle, 10);
@@ -844,12 +853,14 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Title, (isSetting and 12) or 16);
@@ -865,7 +876,7 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(.75, 0, .5, 0),
             Position = UDim2.new(0, 0, 1, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Subtext" });
 
         Library:ApplyTextSize(Description, (isSetting and 10) or 14);
@@ -881,6 +892,7 @@ local SubFunctions; SubFunctions = {
             Position = UDim2.new(1, 0, .5, 0),
             Size = UDim2.new(.1, 0, .75, 0),
             AutomaticSize = Enum.AutomaticSize.X,
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyCorner(Subframe, 4);
@@ -895,6 +907,7 @@ local SubFunctions; SubFunctions = {
             Text = nself.Value or "",
             AutomaticSize = Enum.AutomaticSize.X,
             RichText = true,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         -- Functions
@@ -1029,13 +1042,14 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Title, (isSetting and 12) or 16);
@@ -1050,6 +1064,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, 0),
             Position = UDim2.new(1, 0, 0, 0),
             Size = UDim2.new(.2, 0, .5, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyCorner(Subframe, 4);
@@ -1060,6 +1075,7 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Text = tostring(nself.Value),
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(ValueBox, 14);
@@ -1069,7 +1085,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(.5, 1),
             Position = UDim2.new(.5, 0, 1, 0),
             Size = UDim2.new(1, 0, .185, 0),
-
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Tone" });
 
         Library:ApplyCorner(Slider_Back, 10);
@@ -1078,6 +1094,7 @@ local SubFunctions; SubFunctions = {
         local Slider_Fill = Library.Create("Frame", {
             Parent = Slider_Back,
             Size = UDim2.new(0, 0, 1, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Highlight" });
 
         Library:ApplyCorner(Slider_Fill, 10);
@@ -1087,6 +1104,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, .5),
             Size = UDim2.new(1, 0, 1.85, 0),
             Position = UDim2.new(1, 0, .5, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Text" });
 
         Library:ApplyCorner(SliderCircle, 10);
@@ -1212,13 +1230,14 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Title, (isSetting and 12) or 16);
@@ -1234,7 +1253,7 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(.75, 0, .5, 0),
             Position = UDim2.new(0, 0, 1, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Subtext" });
 
         Library:ApplyTextSize(Description, (isSetting and 10) or 14);
@@ -1250,6 +1269,7 @@ local SubFunctions; SubFunctions = {
             Position = UDim2.new(1, 0, .5, 0),
             Size = UDim2.new(.25, 0, .75, 0),
             ClipsDescendants = true,
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyCorner(Subframe, 4);
@@ -1266,6 +1286,7 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClearTextOnFocus = false,
             RichText = true,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library.Create("UIPadding", {
@@ -1361,13 +1382,14 @@ local SubFunctions; SubFunctions = {
             Parent = ParentUI,
             Size = UDim2.new(1, 0, 0, (isSetting and 20) or 30),
             BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Title = Library.Create("TextLabel", {
             Parent = Background,
             Size = UDim2.new(.75, 0, (nself.Subtext == "" and 1) or .5, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library:ApplyTextSize(Title, (isSetting and 12) or 16);
@@ -1383,7 +1405,7 @@ local SubFunctions; SubFunctions = {
             Size = UDim2.new(.75, 0, .5, 0),
             Position = UDim2.new(0, 0, 1, 0),
             BackgroundTransparency = 1,
-
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Subtext" });
 
         Library:ApplyTextSize(Description, (isSetting and 10) or 14);
@@ -1398,6 +1420,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, 0),
             Position = UDim2.new(1, 0, 0, 0),
             Size = UDim2.new(.4, 0, 1, 0),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyCorner(Subframe, 6);
@@ -1412,6 +1435,7 @@ local SubFunctions; SubFunctions = {
             Parent = Subframe,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 30),
+            ZIndex = ParentUI.ZIndex,
         });
 
         local Circle = Library.Create("Frame", {
@@ -1419,6 +1443,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, .5),
             Position = UDim2.new(1, -2, .5, 0),
             Size = UDim2.new(0, 5, 0, 5),
+            ZIndex = ParentUI.ZIndex,
         }, { BackgroundColor3 = "Text" });
 
         Library:ApplyCorner(Circle, 100);
@@ -1431,6 +1456,7 @@ local SubFunctions; SubFunctions = {
             Text = "None",
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
+            ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         local SearchBox = Library.Create("TextBox", {
@@ -1443,7 +1469,7 @@ local SubFunctions; SubFunctions = {
             TextXAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             Visible = false,
-            ZIndex = 10,
+            ZIndex = ParentUI.ZIndex + 1,
         }, { FontFace = "Font", TextColor3 = "Text" });
 
         Library.Create("UIPadding", {
@@ -1462,6 +1488,7 @@ local SubFunctions; SubFunctions = {
             CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 1,
             Visible = false,
+            ZIndex = ParentUI.ZIndex,
         }, { ScrollBarImageColor3 = "Highlight" });
 
         Library:ApplyPadding(ItemHolder, 5);
@@ -1705,6 +1732,7 @@ local SubFunctions; SubFunctions = {
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             ScrollBarThickness = 1,
             CanvasSize = UDim2.new(0, 0, 0, 0),
+            ZIndex = ParentUI.ZIndex,
         });
 
         Library:ApplyStroke(Background, "Accent1", 1, "Round");
@@ -1720,6 +1748,7 @@ local SubFunctions; SubFunctions = {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, (isSetting and .2) or .3, 0),
             LayoutOrder = 999999,
+            ZIndex = ParentUI.ZIndex,
         });
 
         local function Update()
@@ -1755,7 +1784,8 @@ local SubFunctions; SubFunctions = {
                 Parent = Background,
                 BackgroundTransparency = 1,
                 Size = UDim2.new(1, 0, (isSetting and .2) or .3, 0),
-                Name = tostring(Entries)
+                Name = tostring(Entries),
+                ZIndex = ParentUI.ZIndex,
             });
 
             local EF_Desc = Library.Create("TextLabel", {
@@ -1765,6 +1795,7 @@ local SubFunctions; SubFunctions = {
                 Position = UDim2.new(1, 0, 0, 0),
                 Size = UDim2.new(1, 0, 1, 0),
                 Text = Contents or "",
+                ZIndex = ParentUI.ZIndex,
             }, { FontFace = "Font", TextColor3 = "Text" });
 
             Library:ApplyTextSize(EF_Desc, 16);
@@ -1781,6 +1812,7 @@ local SubFunctions; SubFunctions = {
                 Position = UDim2.new(0, 0, 0, 0),
                 Size = UDim2.new(.1, 0, 1, 0),
                 TextSize = 16,
+                ZIndex = ParentUI.ZIndex,
             }, { FontFace = "Font", TextColor3 = "Text" });
 
             local cc = Entries;
@@ -1870,14 +1902,14 @@ function Library:Notify(Message, Duration, Title)
     local Fake = Library.Create("Frame", {
         Parent = NotiUI,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 50),
+        Size = UDim2.new(1, 0, 0, 20),
         AutomaticSize = Enum.AutomaticSize.Y,
     });
 
     local NotiBack = Library.Create("Frame", {
         Parent = Fake,
         Position = UDim2.new(2, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 50),
+        Size = UDim2.new(1, 0, 0, 20),
         AutomaticSize = Enum.AutomaticSize.Y,
     }, { BackgroundColor3 = "Background" });
 
