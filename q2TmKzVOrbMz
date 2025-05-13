@@ -245,7 +245,7 @@ do -- Hidden
         if not File then return; end;
 
         local Paths = Library.Paths;
-        local Folder, Secondary = Paths["Folder"], "\\External";
+        local Folder, Secondary = Paths["Folder"], "\\External\\";
         FileService:CreateFolder(Folder);
         Folder = ("\\" .. Folder .. Secondary); FileService:CreateFolder(Folder);
 
@@ -257,7 +257,7 @@ do -- Hidden
         if not File then return; end;
 
         local Paths = Library.Paths;
-        local Folder, Secondary = Paths["Folder"], "\\External";
+        local Folder, Secondary = Paths["Folder"], "\\External\\";
         FileService:CreateFolder(Folder);
         Folder = ("\\" .. Folder .. Secondary); FileService:CreateFolder(Folder);
 
