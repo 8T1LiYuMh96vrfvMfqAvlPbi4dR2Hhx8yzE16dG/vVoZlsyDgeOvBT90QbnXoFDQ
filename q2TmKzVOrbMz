@@ -1691,7 +1691,12 @@ local SubFunctions; SubFunctions = {
 
         local Listing = false;
         Click.MouseButton1Up:Connect(function()
+            if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
+                return;
+            end;
+
             Listing = not Listing;
+
             if Listing then
                 Show();
             else
