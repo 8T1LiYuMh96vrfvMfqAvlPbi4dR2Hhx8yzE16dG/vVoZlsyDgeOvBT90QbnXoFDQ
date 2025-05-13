@@ -1952,7 +1952,7 @@ function Library:Notify(Message, Duration, Title)
     Library.Create("TextLabel", {
         Parent = Description,
         BackgroundTransparency = 1,
-        Size = UDim2.new(.9, 0, 0, 50),
+        Size = UDim2.new(.9, 0, 0, 20),
         AutomaticSize = Enum.AutomaticSize.Y,
         TextSize = 12,
         RichText = true,
