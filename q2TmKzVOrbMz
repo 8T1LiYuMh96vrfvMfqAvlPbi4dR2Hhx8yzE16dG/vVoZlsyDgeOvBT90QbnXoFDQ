@@ -2079,7 +2079,7 @@ local MinSize, MaxSize = UDim2.new(0, 750, 0, 50), UDim2.new(0, 750, 0, 500);
 function Library:CreateWindow(WINFO)
     local Window = WINFO or {};
     Window.Title = Window.Title or "Window";
-    Window.Icon = nil;
+    Window.Icon = Window.Icon or nil;
     -- Window.Icon = { Image, Size } ; ImageID, UDim2 | Having a image will replace the title
 
     local Background = Library.Create("Frame", {
