@@ -1054,7 +1054,7 @@ local SubFunctions; SubFunctions = {
 
         Library:ApplyTextSize(Title, (isSetting and 12) or 16);
         Library.Create("UIPadding", {
-            Parent = Title,
+            Parent = Background,
             PaddingLeft = UDim.new(0, 7),
             PaddingRight = UDim.new(0, 7),
         });
