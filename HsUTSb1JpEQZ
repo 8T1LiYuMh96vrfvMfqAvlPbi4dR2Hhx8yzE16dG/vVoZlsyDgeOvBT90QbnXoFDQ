@@ -233,7 +233,7 @@ Setup["Tween"] = function(self)
 
     self:Basics();
 
-    function Manager:Create(pos, speed, nofall, extra, delayY)
+    function Manager:Create(pos, speed, nofall, extra, delayY, tpDis)
         if (typeof(pos) ~= "CFrame") or (not hrp) then
             if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end; return;
         end;
@@ -262,7 +262,7 @@ Setup["Tween"] = function(self)
             Storage["No Fall INS"].Parent = hrp;
         end;
 
-        if distance <= speed / 5 then
+        if (tpDis and distance <= tpDis) or (distance <= speed / 5) then
             isClose = true;
             hrp.CFrame = pos;
         end;
