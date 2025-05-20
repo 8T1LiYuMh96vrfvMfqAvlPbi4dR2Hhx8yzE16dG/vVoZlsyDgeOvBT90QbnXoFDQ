@@ -634,7 +634,7 @@ local SubFunctions; SubFunctions = {
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
-            
+
             InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
@@ -803,7 +803,7 @@ local SubFunctions; SubFunctions = {
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
-            
+
             InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
@@ -990,7 +990,7 @@ local SubFunctions; SubFunctions = {
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
-            
+
             InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
@@ -1178,7 +1178,7 @@ local SubFunctions; SubFunctions = {
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
-            
+
             InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
@@ -1635,12 +1635,12 @@ local SubFunctions; SubFunctions = {
         nself.Load = nself.SetValue;
         nself:Fire();
         Update();
-        
+
         local SubUI;
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
-            
+
             InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
@@ -1759,7 +1759,7 @@ local SubFunctions; SubFunctions = {
         local function Update()
             local keys = {}
             for k in pairs(nself.Logs) do
-              table.insert(keys, k);
+                table.insert(keys, k);
             end;
 
             table.sort(keys);
@@ -1783,7 +1783,7 @@ local SubFunctions; SubFunctions = {
 
         local Entries = 1;
         function nself:AddEntry(Contents)
-            local eINFO = { };
+            local eINFO = {};
 
             local EF = Library.Create("Frame", {
                 Parent = Background,
@@ -1845,7 +1845,7 @@ local SubFunctions; SubFunctions = {
                     local l1, l2 = string.lower(Contents), string.lower(Entry);
 
                     if l1 == l2 then
-                        v[1]:Destroy();    
+                        v[1]:Destroy();
                     end;
                 end;
             end;
@@ -2070,6 +2070,12 @@ function Library:CreateSubWindow(INFO)
     Settings.Visibility = function(nv)
         Background.Visible = nv
     end;
+
+    Settings.Destroy = function(...)
+        Background:Destroy();
+        Settings = {};
+    end;
+
 
     setmetatable(Settings, { __index = SubFunctions })
     return Settings;
