@@ -1691,6 +1691,7 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
+        local lastC = tick();
         local function Show()
             Subframe.ZIndex = ParentUI.ZIndex + 10;
             Circle.ZIndex = ParentUI.ZIndex + 10;
@@ -1731,10 +1732,13 @@ local SubFunctions; SubFunctions = {
 
             Listing = not Listing;
 
-            if Listing then
-                Show();
-            else
-                Hide();
+            if lastC < tick() - .5 then
+                lastC = tick();
+                if Listing then
+                    Show();
+                else
+                    Hide();
+                end;
             end;
         end);
 
@@ -1747,7 +1751,10 @@ local SubFunctions; SubFunctions = {
 
         Connections[4] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
             if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
-                Hide();
+                if lastC < tick() - .5 then
+                    lastC = tick();
+                    Hide();
+                end;
             end;
         end, true, true)
 
