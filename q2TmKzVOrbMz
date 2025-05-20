@@ -1822,7 +1822,7 @@ local SubFunctions; SubFunctions = {
 
             local cc = Entries;
             local SubUI;
-            function nself:AssignSub(Sub)
+            function eINFO:AssignSub(Sub)
                 local SettingsUI = Sub.BackUI;
                 SubUI = Sub;
 
@@ -1847,6 +1847,7 @@ local SubFunctions; SubFunctions = {
             Entries = Entries + 1;
 
             Update();
+
             if not isSetting then
                 Section:AddContent(Background, FullContents());
             end;
@@ -1877,7 +1878,7 @@ local SubFunctions; SubFunctions = {
             end;
 
             Update();
-            
+
             if not isSetting then
                 Section:AddContent(Background, FullContents());
             end;
