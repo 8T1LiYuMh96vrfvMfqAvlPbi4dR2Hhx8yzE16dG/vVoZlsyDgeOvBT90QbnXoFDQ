@@ -631,11 +631,12 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local SubUI;
+        local Connections = {}
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
 
-            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+            Connections[6] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
@@ -644,33 +645,38 @@ local SubFunctions; SubFunctions = {
         -- Mouse Actions
         local Click = Library:ApplyClick(Background);
 
-        Click.MouseEnter:Connect(function()
+        Connections[1] = Click.MouseEnter:Connect(function()
             Library:Register(Background, { BackgroundColor3 = "Background" }, true);
             Library:Register(Stroke, { Color = "Hover" }, true);
         end);
 
-        Click.MouseLeave:Connect(function()
+        Connections[2] = Click.MouseLeave:Connect(function()
             Library:Register(Background, { BackgroundColor3 = "Background2" }, true);
             Library:Register(Stroke, { Color = "Accent1" }, true);
         end);
 
-        Click.MouseButton1Down:Connect(function()
+        Connections[3] = Click.MouseButton1Down:Connect(function()
             Library:Register(Background, { BackgroundColor3 = "Background" }, true);
             Library:Register(Stroke, { Color = "Selected" }, true);
         end);
 
-        Click.MouseButton1Up:Connect(function()
+        Connections[4] = Click.MouseButton1Up:Connect(function()
             nself:Fire();
             Library:Register(Background, { BackgroundColor3 = "Background" }, true);
             Library:Register(Stroke, { Color = "Hover" }, true);
         end);
 
-        Click.MouseButton2Up:Connect(function()
+        Connections[5] = Click.MouseButton2Up:Connect(function()
             if SubUI then
                 SubUI.Visibility(true);
                 SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
             end;
         end);
+
+        self.Destroy = function()
+            for _, v in pairs(Connections) do v:Disconnect(); end;
+            self.Destroy();
+        end;
 
         return nself;
     end,
@@ -800,11 +806,12 @@ local SubFunctions; SubFunctions = {
         end;
 
         local SubUI;
+        local Connections = {};
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
 
-            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+            Connections[3] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
@@ -818,13 +825,19 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local Click = Library:ApplyClick(Background);
-        Click.MouseButton1Up:Connect(Build(nself.Switch, nself));
-        Click.MouseButton2Up:Connect(function()
+
+        Connections[1] = Click.MouseButton1Up:Connect(Build(nself.Switch, nself));
+        Connections[2] = Click.MouseButton2Up:Connect(function()
             if SubUI then
                 SubUI.Visibility(true);
                 SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
             end;
         end);
+
+        self.Destroy = function()
+            for _, v in pairs(Connections) do v:Disconnect(); end;
+            self.Destroy();
+        end;
 
         return nself;
     end,
@@ -987,11 +1000,12 @@ local SubFunctions; SubFunctions = {
         end;
 
         local SubUI;
+        local Connections = {};
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
 
-            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+            Connections[3] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
@@ -1003,13 +1017,19 @@ local SubFunctions; SubFunctions = {
         nself:SetKey(nself.Default);
 
         local Click = Library:ApplyClick(Background);
-        Click.MouseButton1Up:Connect(nself.Start);
-        Click.MouseButton2Up:Connect(function()
+
+        Connections[1] = Click.MouseButton1Up:Connect(nself.Start);
+        Connections[2] = Click.MouseButton2Up:Connect(function()
             if SubUI then
                 SubUI.Visibility(true);
                 SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
             end;
         end);
+
+        self.Destroy = function()
+            for _, v in pairs(Connections) do v:Disconnect(); end;
+            self.Destroy();
+        end;
 
         return nself;
     end,
@@ -1110,8 +1130,6 @@ local SubFunctions; SubFunctions = {
         Library:ApplyCorner(SliderCircle, 10);
         Library:ApplyRatio(SliderCircle, 1, "Height", true);
 
-        local Click = Library:ApplyClick(Slider_Back);
-        Click.ZIndex = ParentUI.ZIndex + 1;
         local isSliding = false;
 
         local function Update()
@@ -1175,11 +1193,12 @@ local SubFunctions; SubFunctions = {
         end;
 
         local SubUI;
+        local Connections = {};
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
 
-            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+            Connections[4] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
@@ -1194,14 +1213,23 @@ local SubFunctions; SubFunctions = {
             nself:SetValue(BoxVal);
         end);
 
-        Click.MouseButton1Down:Connect(Start);
-        Click.MouseButton2Up:Connect(function()
+        local Click = Library:ApplyClick(Slider_Back);
+        Click.ZIndex = ParentUI.ZIndex + 1;
+
+        Connections[1] = Click.MouseButton1Down:Connect(Start);
+        Connections[2] = Click.MouseButton2Up:Connect(function()
             if SubUI then
                 SubUI.Visibility(true);
                 SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
             end;
         end);
-        InputService:Bind("MouseButton1", End, true, true);
+
+        Connections[3] = InputService:Bind("MouseButton1", End, true, true);
+
+        self.Destroy = function()
+            for _, v in pairs(Connections) do v:Disconnect(); end;
+            self.Destroy();
+        end;
 
         return nself;
     end,
@@ -1336,7 +1364,9 @@ local SubFunctions; SubFunctions = {
         nself:Fire();
         Update();
 
-        ValueBox.Focused:Connect(function()
+        local Connections = {};
+
+        Connections[1] = ValueBox.Focused:Connect(function()
             local Info = TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
 
             TweenService:Create(Title, TweenInfo.new(.1), { TextTransparency = 1 }):Play();
@@ -1344,7 +1374,7 @@ local SubFunctions; SubFunctions = {
             TweenService:Create(Subframe, Info, { Size = UDim2.new(1, 0, .75, 0) }):Play();
         end);
 
-        ValueBox.FocusLost:Connect(function()
+        Connections[2] = ValueBox.FocusLost:Connect(function()
             local Info = TweenInfo.new(.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut);
 
             TweenService:Create(Title, TweenInfo.new(.2), { TextTransparency = 0 }):Play();
@@ -1637,19 +1667,19 @@ local SubFunctions; SubFunctions = {
         Update();
 
         local SubUI;
+        local Connections = {};
         function nself:AssignSub(Sub)
             local SettingsUI = Sub.BackUI;
             SubUI = Sub;
 
-            InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+            Connections[5] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
         end;
 
         local Click = Library:ApplyClick(Background);
-
-        SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        Connections[1] = SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
             for Contents, Objects in pairs(Options) do
                 local l1, l2 = string.lower(SearchBox.Text), string.lower(Contents);
 
@@ -1690,7 +1720,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         local Listing = false;
-        Click.MouseButton1Up:Connect(function()
+        Connections[2] = Click.MouseButton1Up:Connect(function()
             if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
                 return;
             end;
@@ -1704,18 +1734,23 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        Click.MouseButton2Up:Connect(function()
+        Connections[3] = Click.MouseButton2Up:Connect(function()
             if SubUI then
                 SubUI.Visibility(true);
                 SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
             end;
         end);
 
-        InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+        Connections[4] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
             if not MouseInBounds(Subframe.AbsolutePosition, Subframe.AbsoluteSize) then
                 Hide();
             end;
         end, true, true)
+
+        self.Destroy = function()
+            for _, v in pairs(Connections) do v:Disconnect(); end;
+            self.Destroy();
+        end;
 
         return nself;
     end,
@@ -1821,13 +1856,15 @@ local SubFunctions; SubFunctions = {
                 ZIndex = ParentUI.ZIndex,
             }, { FontFace = "Font", TextColor3 = "Text" });
 
+
+            local Connections = {};
             local cc = Entries;
             local SubUI;
             function eINFO:AssignSub(Sub)
                 local SettingsUI = Sub.BackUI;
                 SubUI = Sub;
 
-                InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+                Connections[2] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
                     local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
                     Sub.Visibility((n and SettingsUI.Visible) or false)
                 end, false, true);
@@ -1841,6 +1878,7 @@ local SubFunctions; SubFunctions = {
                     SubUI:Destroy();
                 end;
 
+                for _, v in pairs(Connections) do v:Disconnect(); end;
                 Update();
             end;
 
@@ -1854,7 +1892,7 @@ local SubFunctions; SubFunctions = {
             end;
 
             local Click = Library:ApplyClick(EF);
-            Click.MouseButton2Up:Connect(function()
+            Connections[1] = Click.MouseButton2Up:Connect(function()
                 if SubUI then
                     SubUI.Visibility(true);
                     SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
@@ -2072,7 +2110,7 @@ function Library:CreateSubWindow(INFO)
     Settings.BackUI = Background;
     Settings.UI = Library.Create("ScrollingFrame", {
         Parent = Background,
-        Size = Size - ((Full and UDim2.new(0, 0, 0, 25)) or UDim2.new(0,0,0,0)),
+        Size = Size - ((Full and UDim2.new(0, 0, 0, 25)) or UDim2.new(0, 0, 0, 0)),
         Position = UDim2.new(0, 0, 1, 0),
         AnchorPoint = Vector2.new(0, 1),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
