@@ -1821,9 +1821,25 @@ local SubFunctions; SubFunctions = {
             }, { FontFace = "Font", TextColor3 = "Text" });
 
             local cc = Entries;
+            local SubUI;
+            function nself:AssignSub(Sub)
+                local SettingsUI = Sub.BackUI;
+                SubUI = Sub;
+
+                InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+                    local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                    Sub.Visibility((n and SettingsUI.Visible) or false)
+                end, false, true);
+            end;
+
             eINFO.Destroy = function(self)
                 EF:Destroy();
                 nself.Logs[cc] = nil;
+
+                if SubUI then
+                    SubUI:Destroy();
+                end;
+
                 Update();
             end;
 
@@ -1832,6 +1848,14 @@ local SubFunctions; SubFunctions = {
 
             Update();
             Section:AddContent(Background, FullContents());
+
+            local Click = Library:ApplyClick(EF);
+            Click.MouseButton2Up:Connect(function()
+                if SubUI then
+                    SubUI.Visibility(true);
+                    SubUI.Move(UDim2.new(0, Mouse.X, 0, Mouse.Y));
+                end;
+            end);
 
             return eINFO;
         end;
