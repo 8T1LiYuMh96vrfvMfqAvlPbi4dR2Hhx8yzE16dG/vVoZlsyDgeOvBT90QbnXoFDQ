@@ -1111,7 +1111,7 @@ local SubFunctions; SubFunctions = {
         Library:ApplyRatio(SliderCircle, 1, "Height", true);
 
         local Click = Library:ApplyClick(Slider_Back);
-        Click.ZIndex = 2;
+        Click.ZIndex = ParentUI.ZIndex + 1;
         local isSliding = false;
 
         local function Update()
@@ -1420,7 +1420,7 @@ local SubFunctions; SubFunctions = {
             AnchorPoint = Vector2.new(1, 0),
             Position = UDim2.new(1, 0, 0, 0),
             Size = UDim2.new(.4, 0, 1, 0),
-            ZIndex = ParentUI.ZIndex,
+            ZIndex = ParentUI.ZIndex + 1,
         }, { BackgroundColor3 = "Background2" });
 
         Library:ApplyCorner(Subframe, 6);
@@ -1586,7 +1586,7 @@ local SubFunctions; SubFunctions = {
                 Parent = ItemHolder,
                 Size = UDim2.new(1, 0, 0, 20),
                 BackgroundTransparency = 1,
-                ZIndex = 11
+                ZIndex = ParentUI.ZIndex + 11
             });
 
             Library:ApplyCorner(OptionFrame, 4);
@@ -1595,13 +1595,13 @@ local SubFunctions; SubFunctions = {
                 BackgroundTransparency = 1,
                 Size = UDim2.new(1, 0, 1, 0),
                 Text = Option,
-                ZIndex = 11
+                ZIndex = ParentUI.ZIndex + 11
             }, { FontFace = "Font", TextColor3 = "Text" }), 10);
 
             Options[Option] = { OptionFrame, Library:ApplyStroke(OptionFrame, "Accent1", 1, "Round") };
 
             local OptionClick = Library:ApplyClick(OptionFrame);
-            OptionClick.ZIndex = 12;
+            OptionClick.ZIndex = ParentUI.ZIndex + 12;
             OptionClick.MouseButton1Up:Connect(function()
                 ToggleOption(Option);
             end);
@@ -1658,10 +1658,10 @@ local SubFunctions; SubFunctions = {
         end);
 
         local function Show()
-            Subframe.ZIndex = 10;
-            Circle.ZIndex = 10;
-            ValueLabel.ZIndex = 10;
-            ItemHolder.ZIndex = 10;
+            Subframe.ZIndex = ParentUI.ZIndex + 10;
+            Circle.ZIndex = ParentUI.ZIndex + 10;
+            ValueLabel.ZIndex = ParentUI.ZIndex + 10;
+            ItemHolder.ZIndex = ParentUI.ZIndex + 10;
 
             SearchBox.Visible = true;
             ValueLabel.Visible = false;
@@ -1674,10 +1674,10 @@ local SubFunctions; SubFunctions = {
         end;
 
         local function Hide()
-            Subframe.ZIndex = 1;
-            Circle.ZIndex = 1;
-            ValueLabel.ZIndex = 1;
-            ItemHolder.ZIndex = 1;
+            Subframe.ZIndex = ParentUI.ZIndex;
+            Circle.ZIndex = ParentUI.ZIndex;
+            ValueLabel.ZIndex = ParentUI.ZIndex;
+            ItemHolder.ZIndex = ParentUI.ZIndex;
 
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
