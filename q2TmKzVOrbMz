@@ -1847,7 +1847,9 @@ local SubFunctions; SubFunctions = {
             Entries = Entries + 1;
 
             Update();
-            Section:AddContent(Background, FullContents());
+            if not isSetting then
+                Section:AddContent(Background, FullContents());
+            end;
 
             local Click = Library:ApplyClick(EF);
             Click.MouseButton2Up:Connect(function()
@@ -1875,7 +1877,10 @@ local SubFunctions; SubFunctions = {
             end;
 
             Update();
-            Section:AddContent(Background, FullContents());
+            
+            if not isSetting then
+                Section:AddContent(Background, FullContents());
+            end;
         end;
 
         function nself:Clear()
