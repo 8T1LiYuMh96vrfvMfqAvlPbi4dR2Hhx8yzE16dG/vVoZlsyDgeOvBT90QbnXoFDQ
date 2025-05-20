@@ -673,9 +673,10 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
+        local oldDestroy = self.Destroy;
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            self.Destroy();
+            oldDestroy();
         end;
 
         return nself;
@@ -834,9 +835,10 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
+        local oldDestroy = self.Destroy;
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            self.Destroy();
+            oldDestroy();
         end;
 
         return nself;
@@ -1026,9 +1028,10 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
+        local oldDestroy = self.Destroy;
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            self.Destroy();
+            oldDestroy();
         end;
 
         return nself;
@@ -1226,9 +1229,10 @@ local SubFunctions; SubFunctions = {
 
         Connections[3] = InputService:Bind("MouseButton1", End, true, true);
 
+        local oldDestroy = self.Destroy;
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            self.Destroy();
+            oldDestroy();
         end;
 
         return nself;
@@ -1747,9 +1751,10 @@ local SubFunctions; SubFunctions = {
             end;
         end, true, true)
 
+        local oldDestroy = self.Destroy;
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            self.Destroy();
+            oldDestroy();
         end;
 
         return nself;
