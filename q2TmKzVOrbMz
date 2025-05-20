@@ -1468,7 +1468,7 @@ local SubFunctions; SubFunctions = {
         local Visuals = Library.Create("Frame", {
             Parent = Subframe,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 30),
+            Size = UDim2.new(1, 0, 1, 0),
             ZIndex = ParentUI.ZIndex,
         });
 
@@ -1489,6 +1489,7 @@ local SubFunctions; SubFunctions = {
             TextSize = 11,
             Text = "None",
             TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
