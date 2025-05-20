@@ -2068,10 +2068,11 @@ function Library:CreateSubWindow(INFO)
     Library:ApplyTextSize(Label, 16);
     Library:ApplyStroke(Background, "Accent1", 1, "Round");
 
+    local Full = (not Draggable and not INFO.Title)
     Settings.BackUI = Background;
     Settings.UI = Library.Create("ScrollingFrame", {
         Parent = Background,
-        Size = Size - UDim2.new(0, 0, 0, 25),
+        Size = Size - ((Full and UDim2.new(0, 0, 0, 25)) or UDim2.new(0,0,0,0)),
         Position = UDim2.new(0, 0, 1, 0),
         AnchorPoint = Vector2.new(0, 1),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
