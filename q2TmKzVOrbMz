@@ -1,4 +1,4 @@
--- UI Remake
+-- UI Remake n
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -1489,7 +1489,6 @@ local SubFunctions; SubFunctions = {
             TextSize = 11,
             Text = "None",
             TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextXAlignment.Left,
             ClipsDescendants = true,
             ZIndex = ParentUI.ZIndex,
         }, { FontFace = "Font", TextColor3 = "Text" });
