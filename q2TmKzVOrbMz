@@ -1,4 +1,4 @@
--- UI Remake n
+-- UI Remake
 
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG";
 local Setup = loadstring(game:HttpGet(Repo .. "/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ"))();
@@ -2115,7 +2115,7 @@ function Library:CreateSubWindow(INFO)
     Settings.BackUI = Background;
     Settings.UI = Library.Create("ScrollingFrame", {
         Parent = Background,
-        Size = Size - ((Full and UDim2.new(0, 0, 0, 25)) or UDim2.new(0, 0, 0, 0)),
+        Size = Size - ((not Full and UDim2.new(0, 0, 0, 25)) or UDim2.new(0, 0, 0, 0)),
         Position = UDim2.new(0, 0, 1, 0),
         AnchorPoint = Vector2.new(0, 1),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
