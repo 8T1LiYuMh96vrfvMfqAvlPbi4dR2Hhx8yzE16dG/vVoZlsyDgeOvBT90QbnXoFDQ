@@ -1801,6 +1801,7 @@ local SubFunctions; SubFunctions = {
                 Size = UDim2.new(1, 0, 1, 0),
                 Text = Contents or "",
                 ZIndex = ParentUI.ZIndex,
+                TextXAlignment = Enum.TextXAlignment.Left
             }, { FontFace = "Font", TextColor3 = "Text" });
 
             Library:ApplyTextSize(EF_Desc, 16);
