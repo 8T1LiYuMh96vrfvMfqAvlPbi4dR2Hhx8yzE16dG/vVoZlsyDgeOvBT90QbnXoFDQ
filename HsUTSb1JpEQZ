@@ -289,7 +289,7 @@ Setup["Tween"] = function(self)
 end;
 
 Setup["VirtualInputManager"] = function(self)
-    local Manager, VIM = {}, game:GetService("VirtualInputManager");
+    local Manager, VIM = {}, Instance.new("VirtualInputManager");
     if Called["VirtualInputManager"] then return Called["VirtualInputManager"]; end;
     Called["VirtualInputManager"] = Manager;
 
