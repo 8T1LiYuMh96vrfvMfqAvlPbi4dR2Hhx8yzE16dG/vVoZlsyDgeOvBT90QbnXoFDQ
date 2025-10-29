@@ -44,8 +44,8 @@ Setup["ClientController"] = function(self)
     self:Basics();
 
     function Manager:Reset()
-        if replicatedsignal then
-            replicatedsignal(Client.Kill);
+        if replicatesignal then
+            replicatesignal(Client.Kill);
         elseif Humanoid then
             Humanoid:ChangeState(Enum.HumanoidStateType.Dead);
         elseif Character then
