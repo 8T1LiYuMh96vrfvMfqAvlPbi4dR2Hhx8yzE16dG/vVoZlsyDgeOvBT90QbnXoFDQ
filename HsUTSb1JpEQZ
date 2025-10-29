@@ -44,8 +44,32 @@ Setup["ClientController"] = function(self)
     self:Basics();
 
     function Manager:Reset()
-        if char then
-            char:BreakJoints();
+        if replicatedsignal then
+            replicatedsignal(Client.Kill);
+        elseif Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Dead);
+        elseif Character then
+            Character:BreakJoints();
+        end;
+    end;
+
+    local Start, Duration = os.clock(), 0;
+    function Manager:NoFall()
+        Duration = Duration + 1;
+
+        if Duration == 1 then
+            Start = os.clock();
+            local NoFall = Instance.new("BodyVelocity");
+            NoFall.MaxForce = vector.create(math.huge, math.huge, math.huge);
+            NoFall.Velocity = vector.zero;
+            NoFall.Parent = HRP;
+
+            while Character and Character.Parent and os.clock() < Start+Duration do
+                task.wait();
+            end;
+
+            Duration = 0;
+            NoFall:Destroy();
         end;
     end;
 
