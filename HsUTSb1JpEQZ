@@ -58,7 +58,7 @@ Setup["ClientController"] = function(self)
         task.spawn(function()
             Duration = Duration + .05;
     
-            if Duration == 1 then
+            if Duration == .05 then
                 Start = os.clock();
                 local NoFall = Instance.new("BodyVelocity");
                 NoFall.MaxForce = vector.create(math.huge, math.huge, math.huge);
