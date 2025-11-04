@@ -591,8 +591,15 @@ local SectionMT = {
             end
             
             if Key then
-                Old = InputService:Bind(Key, Data.Callback)
+                Old = InputService:Bind(Key, function()
+                    Keybind.Fire()
+                end)
             end
+        end
+        
+        -- Initialize keybind if default is set
+        if Data.Default then
+            Keybind.SetValue(Data.Default)
         end
         
         local Doing = false
@@ -2093,4 +2100,7 @@ function Library:CreateWindow(Name)
     return Window
 end
 
+-- ============================================================================
+-- RETURN LIBRARY
+-- ============================================================================
 return Library
