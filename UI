@@ -41,6 +41,48 @@ local Library = {
 }
 
 do
+	function Library:MakeDraggable(v1, v2)
+        if not v1 then return; end;
+        local dragging;
+        local dragInput;
+        local dragStart;
+        local startPos;
+
+        v2 = v2 or v1;
+
+        local function Update(input)
+            local delta = input.Position - dragStart
+            v2.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y);
+        end;
+
+        v1.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true;
+                dragStart = input.Position;
+                startPos = v2.Position;
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false;
+                    end;
+                end);
+            end;
+        end);
+
+        v1.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input;
+            end;
+        end);
+
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                Update(input);
+            end;
+        end);
+    end;
+	
     function Library:Register(Obj, Properties, Tween)
         if not Obj or not Properties then
             return
@@ -1534,6 +1576,7 @@ function Library:CreateWindow(Name)
         'Frame',
         { Parent = Background, Size = UDim2.new(1, 0, 0.1, 0) }
     )
+
     Library:Create(
         'UICorner',
         { Parent = Topbar, CornerRadius = UDim.new(0, 8) }
@@ -1551,7 +1594,9 @@ function Library:CreateWindow(Name)
         ),
         { BackgroundColor3 = 'Accent1' }
     )
-    Library:Register(Topbar, { BackgroundColor3 = 'Foreground' })
+    Library:Register(Topbar, { BackgroundColor3 = 'Foreground' });
+	Library:MageDraggable(Topbar, Background);
+
     local Icon = Library:Create(
         'ImageLabel',
         {
