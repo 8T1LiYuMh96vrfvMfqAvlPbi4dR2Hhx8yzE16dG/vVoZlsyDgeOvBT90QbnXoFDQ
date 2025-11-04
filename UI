@@ -1595,7 +1595,7 @@ function Library:CreateWindow(Name)
         { BackgroundColor3 = 'Accent1' }
     )
     Library:Register(Topbar, { BackgroundColor3 = 'Foreground' });
-	Library:MageDraggable(Topbar, Background);
+	Library:MakeDraggable(Topbar, Background);
 
     local Icon = Library:Create(
         'ImageLabel',
