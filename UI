@@ -258,6 +258,46 @@ local SubWindowMT -- For sub-windows
 -- ============================================================================
 local SectionMT = {
     
+    CreateLabel = function(self, Data)
+        Data = Data or {}
+        def(Data, 'Text', 'Button')
+        
+        local baseZ = self.Holder.ZIndex
+        local Label = {}
+        
+        -- Background
+        local Background = Library:Create('Frame', {
+            Parent = self.Holder,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 25),
+            ZIndex = baseZ,
+        })
+
+        -- Text Label
+        local Text = Library:Create('TextLabel', {
+            Parent = Background,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            TextSize = 15,
+            Text = Data.Text,
+            ZIndex = baseZ,
+        })
+        
+        Library:Create('UIPadding', {
+            Parent = Text,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7)
+        })
+        
+        Library:Register(Text, { FontFace = 'Font', TextColor3 = 'Text' })
+        
+        function Button.SetText(t)
+            Text.Text = t
+        end
+        
+        return Label
+    end,
+
     --- Create a Button
     CreateButton = function(self, Data)
         Data = Data or {}
