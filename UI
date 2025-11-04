@@ -813,6 +813,7 @@ local mt = {
 mt2 = {
 	CreateSubWindow = function(self, Data)
 		local Data = Data or { };
+		def(Data, "Text", "")
 		def(Data, "Snap", true);
 		def(Data, "Draggable", false);
 		def(Data, "Position", UDim2.fromScale(.5, .5));
@@ -827,7 +828,7 @@ mt2 = {
 		Library:Create("Frame", { Parent=SectionHolder, BackgroundTransparency=1, Size=UDim2.new(1,0,0,2), LayoutOrder=999999 });
 		Library:Register(SectionHolder, { BackgroundColor3="Foreground2" });
 		
-		local SectionTitle = Library:Create("TextLabel", { Parent=SectionHolder, Text="Main", BackgroundTransparency=1, Size=UDim2.new(0,0,0,25), TextSize=20, AutomaticSize=Enum.AutomaticSize.X, TextXAlignment=Enum.TextXAlignment.Left, LayoutOrder=-999999 });
+		local SectionTitle = Library:Create("TextLabel", { Parent=SectionHolder, Data.Text, BackgroundTransparency=1, Size=UDim2.new(0,0,0,25), TextSize=20, AutomaticSize=Enum.AutomaticSize.X, TextXAlignment=Enum.TextXAlignment.Left, LayoutOrder=-999999 });
 		Library:Register(SectionTitle, { FontFace="Font", TextColor3="Subtext" });
 		Library:Register(Library:Create("Frame", { Parent=SectionTitle, Size=UDim2.new(1,10,0,1), Position=UDim2.new(0,0,1,0), AnchorPoint=Vector2.new(0,1) }), { BackgroundColor3="Subtext" });
 		
@@ -847,7 +848,7 @@ mt2 = {
 		end;
 
 		function SubWindow.Toggle()
-			if SectionHolder.Visible then SubWindow.Hide(); return;
+			if SectionHolder.Visible then SubWindow.Hide(); return; end;
 			SubWindow.Show();
 			
 			SectionHolder.Visible = false;
