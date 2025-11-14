@@ -291,7 +291,7 @@ local SectionMT = {
         
         Library:Register(Text, { FontFace = 'Font', TextColor3 = 'Text' })
         
-        function Button.SetText(t)
+        function Label.SetText(t)
             Text.Text = t
         end
         
