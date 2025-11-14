@@ -56,9 +56,9 @@ Setup["ClientController"] = function(self)
     local Start, Duration = os.clock(), 0;
     function Manager:NoFall()
         task.spawn(function()
-            Duration = Duration + .05;
+            Duration = Duration + .01;
     
-            if Duration == .05 then
+            if Duration == .01 then
                 Start = os.clock();
                 local NoFall = Instance.new("BodyVelocity");
                 NoFall.MaxForce = vector.create(math.huge, math.huge, math.huge);
@@ -259,7 +259,7 @@ Setup["Tween"] = function(self)
 
     self:Basics();
 
-    function Manager:Create(pos, speed, nofall, extra, delayY, tpDis)
+    function Manager:Create(pos, speed, extra, delayY, tpDis)
         if (typeof(pos) ~= "CFrame") or (not hrp) then
             if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end; return;
         end;
@@ -276,17 +276,6 @@ Setup["Tween"] = function(self)
 
         local speed = speed or 5;
         local distance = (hrp.Position - vec3).magnitude;
-
-        if nofall then
-            if Storage["No Fall INS"] then
-                Storage["No Fall INS"]:Destroy();
-            end;
-
-            Storage["No Fall INS"] = Instance.new('BodyVelocity');
-            Storage["No Fall INS"].MaxForce = Vector3.new(math.huge, math.huge, math.huge);
-            Storage["No Fall INS"].Velocity = Vector3.new(0, 0, 0);
-            Storage["No Fall INS"].Parent = hrp;
-        end;
 
         if (tpDis and distance <= tpDis) or (distance <= speed / 5) then
             isClose = true;
