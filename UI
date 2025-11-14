@@ -1351,7 +1351,7 @@ local SectionMT = {
             Slider.Value = math.clamp(Slider.Value, Min, Max)
             
             TweenService:Create(Inside, TweenInfo.new(0.01, Enum.EasingStyle.Quad), {
-                Size = UDim2.new(Slider.Value / Max, 0, 1, 0)
+                Size = UDim2.new(Slider.Value / Max-Min, 0, 1, 0)
             }):Play()
             
             Selected.Text = tostring(Slider.Value)
@@ -2048,12 +2048,17 @@ function Library:CreateWindow(Name)
         table.insert(Library.Created.Tabs, Tab)
         
         -- Create Section Method
-        function Tab:CreateSection(Name2)
+        function Tab:CreateSection(sData)
+            local sData = sData or { Title="Section", Fill="Left" };
+            def(sData, "Title", "Section");
+            def(sData, "Fill", "Left");
+
             local Section = {}
-            
+            local Areas = { Left=Left, Right=Right };
+
             -- Section Container
             local SectionHolder = Library:Create('Frame', {
-                Parent = Left,
+                Parent = Areas[sData.Fill],
                 Size = UDim2.new(1, 0, 0, 0),
                 AutomaticSize = Enum.AutomaticSize.Y,
             })
@@ -2089,7 +2094,7 @@ function Library:CreateWindow(Name)
             -- Section Title
             local SectionTitle = Library:Create('TextLabel', {
                 Parent = SectionHolder,
-                Text = Name2 or '',
+                Text = sData.Title or "",
                 BackgroundTransparency = 1,
                 Size = UDim2.new(0, 0, 0, 25),
                 TextSize = 20,
