@@ -53,24 +53,23 @@ Setup["ClientController"] = function(self)
         end;
     end;
 
-    local Start, Duration = os.clock(), 0;
+    local Start, Last;
     function Manager:NoFall()
         task.spawn(function()
-            Duration = Duration + .01;
-    
-            if Duration == .01 then
+            Last = os.clock();
+            if not Start then
                 Start = os.clock();
                 local NoFall = Instance.new("BodyVelocity");
                 NoFall.MaxForce = vector.create(math.huge, math.huge, math.huge);
                 NoFall.Velocity = vector.zero;
                 NoFall.Parent = HRP;
     
-                while Character and Character.Parent and os.clock() <= Start+Duration do
+                while Character and Character.Parent and os.clock()-Last<=1 do
                     task.wait();
                 end;
     
-                Duration = 0;
                 NoFall:Destroy();
+                Start=nil;
             end;
         end);
     end;
