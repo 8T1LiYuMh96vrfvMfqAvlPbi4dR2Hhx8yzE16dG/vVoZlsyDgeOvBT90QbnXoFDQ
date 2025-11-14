@@ -2000,7 +2000,21 @@ function Library:CreateWindow(Name)
             Size = UDim2.new(1, 0, 0, 50),
             LayoutOrder = 999999,
         })
+
+        Library:Create('UIListLayout', {
+            Parent=Left,
+            HorizontalAlignment=Enum.HorizontalAlignment.Center,
+            FillDirection=Enum.FillDirection.Vertical,
+            Padding=UDim.new(0, 12)
+        })
         
+        Library:Create('UIListLayout', {
+            Parent=Right,
+            HorizontalAlignment=Enum.HorizontalAlignment.Center,
+            FillDirection=Enum.FillDirection.Vertical,
+            Padding=UDim.new(0, 12)
+        })
+
         -- Tab State Management
         local Clicked = false
         
@@ -2043,6 +2057,8 @@ function Library:CreateWindow(Name)
         -- Auto-focus first tab
         if #Library.Created.Tabs == 0 then
             Tab:Focus()
+        else
+            Tab:Unfocus()
         end
         
         table.insert(Library.Created.Tabs, Tab)
