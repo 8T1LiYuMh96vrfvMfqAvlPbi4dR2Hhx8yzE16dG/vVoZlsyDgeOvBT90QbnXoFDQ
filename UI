@@ -1350,7 +1350,7 @@ local SectionMT = {
             Slider.Value = math.clamp(Slider.Value, Min, Max)
             
             TweenService:Create(Inside, TweenInfo.new(0.01, Enum.EasingStyle.Quad), {
-                Size = UDim2.new(Slider.Value-Min / (Max-Min), 0, 1, 0)
+                Size = UDim2.new((Slider.Value - Min) / (Max-Min), 0, 1, 0)
             }):Play()
             
             Selected.Text = tostring(Slider.Value)
