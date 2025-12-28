@@ -508,7 +508,6 @@ local SectionMT = {
         -- Interaction
         local Clicker = Library.Clicker(Background, baseZ)
         
-        Clicker.MouseLeave:Connect(Update)
         Clicker.MouseButton1Click:Connect(Toggle.Toggle)
         Clicker.MouseButton1Down:Connect(function()
             Library:Register(Ball, { BackgroundColor3 = 'Subtext' }, true)
