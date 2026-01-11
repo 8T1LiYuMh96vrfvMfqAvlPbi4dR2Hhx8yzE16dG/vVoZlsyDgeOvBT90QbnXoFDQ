@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded5")
+
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -341,7 +341,7 @@ Setup["Tween"] = function(self)
                     )
 
                     if Under then
-                        HRP.Position = Under.Position + Vector3.new(0, 1, 0)
+                        HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, 1, 0));
                     end
                 end
             end
