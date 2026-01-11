@@ -256,7 +256,7 @@ Setup["Tween"] = function(self)
     if Called["Tween"] then return Called["Tween"]; end;
     Called["Tween"] = Manager;
 
-    local Controller = Setup["ClientController"]();
+    local Controller = Setup:ClientController();
     self:Basics();
 
     function Manager:Create(Data)
