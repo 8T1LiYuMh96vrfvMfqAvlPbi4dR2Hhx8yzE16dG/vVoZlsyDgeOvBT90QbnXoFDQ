@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded76")
+print("Loaded4")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -276,7 +276,7 @@ Setup["Tween"] = function(self)
         if not Target then return; end;
 
         local Speed = Data.Speed or {24, 24}; -- or {X, Y} 
-        if typeof(Speed) ~= "table" then
+        if typeof(Speed) ~= "table" t   hen
             Speed = {Speed, Speed};
         end;
 
@@ -315,7 +315,7 @@ Setup["Tween"] = function(self)
                 end
             end
 
-            if Surf then
+            if Surf and xDis > baseXSpeed then
                 local Params = RaycastParams.new()
                 Params.FilterDescendantsInstances = { Character }
                 Params.FilterType = Enum.RaycastFilterType.Blacklist
@@ -333,7 +333,7 @@ Setup["Tween"] = function(self)
                     local Top = Part.Position.Y + Part.Size.Y / 2
                     Temporary = Vector3.new(p2.X, Top, p2.Z) - xDir * 2
 
-                elseif xDis > baseXSpeed then
+                else
                     local Under = workspace:Raycast(
                         p1,
                         Vector3.new(0, -100, 0),
@@ -341,7 +341,7 @@ Setup["Tween"] = function(self)
                     )
 
                     if Under then
-                        HRP.Position = Under.Position + Vector3.new(0, 2, 0)
+                        HRP.Position = Under.Position + Vector3.new(0, 1, 0)
                     end
                 end
             end
