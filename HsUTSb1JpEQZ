@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded4")
+print("Loaded67")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -306,7 +306,7 @@ Setup["Tween"] = function(self)
             local yDir = yDis > 0 and yDiff.Unit or Vector3.zero
 
             -- Snap to target if close enough
-            if xDis <= stepXSpeed*10 and yDis <= stepYSpeed*10 then
+            if xDis <= math.max(stepXSpeed, 1) and yDis <= math.max(stepYSpeed, 1) then
                 HRP.Position = p2
 
                 if p2 == Target then
@@ -325,7 +325,7 @@ Setup["Tween"] = function(self)
 
                 -- Use BASE speed for lookahead
                 local Infront = workspace:Raycast(
-                    p1,
+                    p1 - HRP.Size.Y/2,
                     xDir * math.max(baseXSpeed, 2),
                     Params
                 )
@@ -334,7 +334,7 @@ Setup["Tween"] = function(self)
                     local Part = Infront.Instance
                     local Top = Part.Position.Y + Part.Size.Y / 2
                     local TopDis = (math.abs(Top) - math.abs(p1.Y))
-                    if TopDis < stepYSpeed*10 then
+                    if TopDis < math.max(stepYSpeed, 1) then
                         HRP.CFrame = CFrame.new(p2.X, Top, p2.Z);
                     else
                         Temporary = Vector3.new(p2.X, Top, p2.Z) - xDir * 4;
