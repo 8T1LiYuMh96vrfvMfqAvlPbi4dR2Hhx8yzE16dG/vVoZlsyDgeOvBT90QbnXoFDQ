@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded4")
+print("Loaded5")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -276,7 +276,7 @@ Setup["Tween"] = function(self)
         if not Target then return; end;
 
         local Speed = Data.Speed or {24, 24}; -- or {X, Y} 
-        if typeof(Speed) ~= "table" t   hen
+        if typeof(Speed) ~= "table" then
             Speed = {Speed, Speed};
         end;
 
