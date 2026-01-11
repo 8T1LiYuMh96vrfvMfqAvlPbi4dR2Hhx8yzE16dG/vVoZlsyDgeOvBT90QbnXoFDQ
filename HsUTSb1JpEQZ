@@ -262,13 +262,14 @@ Setup["Tween"] = function(self)
     function Manager:Create(Data)
         if not Data then return; end;
         if Storage["Active"] then
-            local Active = Storage["Active"].Data;
+            local Active = Storage["Active"];
             local isClose = Active.isClose();
             if Data["Extra"] then
                 Data.Extra(isClose);
             end;
 
-            if Active.Position == Data.Position then
+            local OldData = Active.Data;
+            if OldData.Position == OldData.Position then
                 Active.ChangeSpeed(Data.Speed);
                 return isClose;
             else
