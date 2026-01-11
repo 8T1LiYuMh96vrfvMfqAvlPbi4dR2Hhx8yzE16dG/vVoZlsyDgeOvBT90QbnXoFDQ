@@ -307,7 +307,7 @@ Setup["Tween"] = function(self)
 
             -- Snap to target if close enough
             if xDis <= math.max(stepXSpeed, 1) and yDis <= math.max(stepYSpeed, 1) then
-                HRP.Position = p2
+                HRP.CFrame = CFrame.new(p2)
 
                 if p2 == Target then
                     Storage["Active"]:Cancel()
@@ -325,7 +325,7 @@ Setup["Tween"] = function(self)
 
                 -- Use BASE speed for lookahead
                 local Infront = workspace:Raycast(
-                    p1 - vector.create(0, HRP.Size.Y/2, 0),
+                    p1,
                     xDir * math.max(baseXSpeed, 2),
                     Params
                 )
