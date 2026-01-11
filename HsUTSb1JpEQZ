@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded67")
+print("Loaded76")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -324,7 +324,7 @@ Setup["Tween"] = function(self)
                 -- Use BASE speed for lookahead
                 local Infront = workspace:Raycast(
                     p1,
-                    xDir * math.max(baseXSpeed * 100, 2),
+                    xDir * math.max(baseXSpeed, 2),
                     Params
                 )
 
@@ -333,7 +333,7 @@ Setup["Tween"] = function(self)
                     local Top = Part.Position.Y + Part.Size.Y / 2
                     Temporary = Vector3.new(p2.X, Top, p2.Z) - xDir * 2
 
-                elseif xDis > baseXSpeed * 100 then
+                elseif xDis > baseXSpeed then
                     local Under = workspace:Raycast(
                         p1,
                         Vector3.new(0, -100, 0),
