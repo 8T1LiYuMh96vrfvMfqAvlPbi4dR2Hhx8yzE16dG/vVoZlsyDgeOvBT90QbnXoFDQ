@@ -262,10 +262,15 @@ Setup["Tween"] = function(self)
     function Manager:Create(Data)
         if not Data then return; end;
         if Storage["Active"] then
+            local isClose = Active.isClose();
+            if Data["Extra"] then
+                Data.Extra(isClose);
+            end;
+            
             local Active = Storage["Active"].Data;
             if Active.Position == Data.Position then
                 Active.ChangeSpeed(Data.Speed);
-                return Active.isClose();
+                return isClose;
             else
                 Active:Cancel();
             end;
@@ -311,7 +316,11 @@ Setup["Tween"] = function(self)
 
                 if p2 == Target then
                     Storage["Active"]:Cancel()
-                    return
+                    if Data["Extra"] then
+                        Data.Extra(true);
+                    end;
+
+                    return true;
                 else
                     Temporary = nil
                 end
