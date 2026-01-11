@@ -1,5 +1,5 @@
 -- Functions
-print("loaded")
+print("loaded2")
 local Setup, Called = {}, {};
 
 Setup["Basics"] = function(self)
