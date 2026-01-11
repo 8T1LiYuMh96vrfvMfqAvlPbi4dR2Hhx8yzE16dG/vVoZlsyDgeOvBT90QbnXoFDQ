@@ -1,7 +1,7 @@
 -- Functions
-print("loaded2")
-local Setup, Called = {}, {};
 
+local Setup, Called = {}, {};
+print("Loaded3")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -290,6 +290,12 @@ Setup["Tween"] = function(self)
             xSpeed *= dt;
             ySpeed *= dt;
 
+            local xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z);
+            local yDiff = Vector3.new(0, p2.Y - p1.Y, 0);
+
+            local xDis = xDiff.Magnitude;
+            local yDis = yDiff.Magnitude;
+
             if xDis <= xSpeed and yDis <= ySpeed then
                 HRP.Position = p2;
                 if p2 == Target then
@@ -312,7 +318,7 @@ Setup["Tween"] = function(self)
                     local Part = Infront.Instance;
                     local Top = Part.Position.Y + Part.Size.Y / 2;
                     Temporary = Vector3.new(p2.X, Top, p2.Z) - Direction * 2;
-                else
+                elseif xDis > xSpeed then
                     local Under = workspace:Raycast(p1, Vector3.new(0, -100, 0), Params);
 
                     if Under then
@@ -322,11 +328,11 @@ Setup["Tween"] = function(self)
             end;
 
             p1 = HRP.Position;
-            local xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z);
-            local yDiff = Vector3.new(0, p2.Y - p1.Y, 0);
+            xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z);
+            yDiff = Vector3.new(0, p2.Y - p1.Y, 0);
 
-            local xDis = xDiff.Magnitude;
-            local yDis = yDiff.Magnitude;
+            xDis = xDiff.Magnitude;
+            yDis = yDiff.Magnitude;
 
             local xDir = xDis > 0 and xDiff.Unit or Vector3.zero;
             local yDir = yDis > 0 and yDiff.Unit or Vector3.zero;
