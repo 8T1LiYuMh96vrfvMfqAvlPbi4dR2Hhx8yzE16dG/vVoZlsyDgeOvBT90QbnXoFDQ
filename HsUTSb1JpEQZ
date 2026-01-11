@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded67")
+print("Loaded4")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -325,7 +325,7 @@ Setup["Tween"] = function(self)
 
                 -- Use BASE speed for lookahead
                 local Infront = workspace:Raycast(
-                    p1 - HRP.Size.Y/2,
+                    p1 - vector.create(0, HRP.Size.Y/2, 0),
                     xDir * math.max(baseXSpeed, 2),
                     Params
                 )
