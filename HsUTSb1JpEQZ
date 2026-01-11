@@ -317,7 +317,7 @@ Setup["Tween"] = function(self)
                 end
             end
 
-            if Surf and xDis > baseXSpeed then
+            if Surf and xDis > stepXSpeed then
                 local Params = RaycastParams.new()
                 Params.FilterDescendantsInstances = { Character }
                 Params.FilterType = Enum.RaycastFilterType.Blacklist
@@ -325,8 +325,8 @@ Setup["Tween"] = function(self)
 
                 -- Use BASE speed for lookahead
                 local Infront = workspace:Raycast(
-                    p1,
-                    xDir * math.max(baseXSpeed, 2),
+                    p1 - vector.create(0, HRP.Size/3, 0),
+                    xDir * math.max(stepXSpeed, 4),
                     Params
                 )
 
