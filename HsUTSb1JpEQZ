@@ -256,47 +256,130 @@ Setup["Tween"] = function(self)
     if Called["Tween"] then return Called["Tween"]; end;
     Called["Tween"] = Manager;
 
+    local Controller = Setup["ClientController"]();
     self:Basics();
 
-    function Manager:Create(pos, speed, extra, delayY, tpDis)
-        if (typeof(pos) ~= "CFrame") or (not hrp) then
-            if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end; return;
+    function Manager:Create(Data)
+        if not Data then return; end;
+        if Storage["Active"] then
+            local Active = Storage["Active"].Data;
+            if Active.Position == Data.Position then
+                Active.ChangeSpeed(Data.Speed);
+                return Active.isClose();
+            else
+                Active:Cancel();
+            end;
         end;
 
-        if (not char) or (not hrp) then return; end;
+                
+        local Target, Temporary = Data.Position, nil;
+        if not Target then return; end;
 
-        local isClose = false;
-        local cf, vec3 = pos, pos.Position;
-
-        if delayY then
-            cf = CFrame.new(pos.X, hrp.Position.Y, pos.Z);
-            vec3 = cf.Position;
+        local Speed = Data.Speed or {24, 24}; -- or {X, Y} 
+        if typeof(Speed) ~= "table" then
+            Speed = {Speed, Speed};
         end;
 
-        local speed = speed or 5;
-        local distance = (hrp.Position - vec3).magnitude;
+        local Surf = Data.Surf or false;
 
-        if (tpDis and distance <= tpDis) or (distance <= speed / 5) then
-            isClose = true;
-            hrp.CFrame = pos;
+        local function Move(dt)
+            local p1 = HRP.Position;
+            local p2 = Temporary or Target;
+
+            local xSpeed, ySpeed = table.unpack(Speed);
+            xSpeed *= dt;
+            ySpeed *= dt;
+
+            if xDis <= xSpeed and yDis <= ySpeed then
+                HRP.Position = p2;
+                if p2 == Target then
+                    Storage["Active"]:Cancel();
+                    return;
+                else
+                    Temporary = nil;
+                end; 
+            end;
+
+            if Surf then
+                local Params = RaycastParams.new();
+                Params.FilterDescendantsInstances = { Character };
+                Params.FilterType = Enum.RaycastFilterType.Blacklist;
+                Params.IgnoreWater = true;
+
+                local Infront = workspace:Raycast(p1, Direction * math.max((xSpeed * 100), 2), Params)
+
+                if Infront then
+                    local Part = Infront.Instance;
+                    local Top = Part.Position.Y + Part.Size.Y / 2;
+                    Temporary = Vector3.new(p2.X, Top, p2.Z) - Direction * 2;
+                else
+                    local Under = workspace:Raycast(p1, Vector3.new(0, -100, 0), Params);
+
+                    if Under then
+                        HRP.Position = Under.Position + Vector3.new(0, 2, 0);
+                    end;
+                end;
+            end;
+
+            p1 = HRP.Position;
+            local xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z);
+            local yDiff = Vector3.new(0, p2.Y - p1.Y, 0);
+
+            local xDis = xDiff.Magnitude;
+            local yDis = yDiff.Magnitude;
+
+            local xDir = xDis > 0 and xDiff.Unit or Vector3.zero;
+            local yDir = yDis > 0 and yDiff.Unit or Vector3.zero;
+
+            local Translation;
+            if Surf and xDis > math.max(xSpeed, 1) then
+                Translation = xDir * math.min(xSpeed, xDis);
+            else
+                Translation = xDir * math.min(xSpeed, xDis) + yDir * math.min(ySpeed, yDis);
+            end;
+
+            Controller:NoFall();
+            HRP.Position += Translation;
         end;
 
-        if typeof(extra) == "function" then
-            task.spawn(extra, isClose);
-        end;
+        Storage["Active"] = { 
+            Connection = RSV.Heartbeat:Connect(Move);
 
-        local Time = distance / speed;
-        Storage['CurrentTween'] = TweenService:Create(hrp,
-            TweenInfo.new(Time, Enum.EasingStyle.Linear), { CFrame = cf });
-        Storage['CurrentTween']:Play();
+            Cancel=function(self) 
+                self.Connection:Disconnect(); 
+                Storage["Active"]=nil 
+            end; 
 
+            ChangeSpeed=function(New)  
+                if not New then return; end;
 
-        return isClose;
+                Speed = New;
+                if typeof(Speed) ~= "table" then
+                    Speed = {Speed, Speed};
+                end;
+            end; 
+
+            isClose=function()
+                local p1 = HRP.Position;
+
+                local xSpeed, ySpeed = table.unpack(Speed);
+                local xDiff = Vector3.new(Target.X - p1.X, 0, Target.Z - p1.Z);
+                local yDiff = Vector3.new(0, Target.Y - p1.Y, 0);
+
+                local xDis = xDiff.Magnitude;
+                local yDis = yDiff.Magnitude;
+                
+                return xDis <= xSpeed/60 and yDis <= ySpeed/60;
+            end;
+        
+            Data=Data
+        };
+
+        return Storage["Active"].isClose();
     end;
 
-    function Manager:Cancel()
-        if Storage["No Fall INS"] then Storage["No Fall INS"]:Destroy(); end;
-        if Storage['CurrentTween'] then Storage['CurrentTween']:Pause(); end;
+    function Manager:GetActive()
+        return Storage["Active"];
     end;
 
     return Manager;
