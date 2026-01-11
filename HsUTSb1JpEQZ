@@ -1,7 +1,7 @@
 -- Functions
 
 local Setup, Called = {}, {};
-
+print("Loaded4")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -300,11 +300,13 @@ Setup["Tween"] = function(self)
             local xDis = xDiff.Magnitude
             local yDis = yDiff.Magnitude
 
-            local xDir = xDis > 0 and xDiff.Unit or Vector3.zero
+
+            local txDiff = Vector3.new(Target.X - p1.X, 0, Target.Z - p1.Z)
+            local xDir = txDiff.Magnitude > 0 and txDiff.Unit or Vector3.zero
             local yDir = yDis > 0 and yDiff.Unit or Vector3.zero
 
             -- Snap to target if close enough
-            if xDis <= stepXSpeed and yDis <= stepYSpeed then
+            if xDis <= stepXSpeed*10 and yDis <= stepYSpeed*10 then
                 HRP.Position = p2
 
                 if p2 == Target then
@@ -331,8 +333,12 @@ Setup["Tween"] = function(self)
                 if Infront then
                     local Part = Infront.Instance
                     local Top = Part.Position.Y + Part.Size.Y / 2
-                    Temporary = Vector3.new(p2.X, Top, p2.Z) - xDir * 2
-
+                    local TopDis = (math.abs(Top) - math.abs(p1.Y))
+                    if TopDis < stepYSpeed*10 then
+                        HRP.CFrame = CFrame.new(p2.X, Top, p2.Z);
+                    else
+                        Temporary = Vector3.new(p2.X, Top, p2.Z) - xDir * 4;
+                    end;
                 else
                     local Under = workspace:Raycast(
                         p1,
