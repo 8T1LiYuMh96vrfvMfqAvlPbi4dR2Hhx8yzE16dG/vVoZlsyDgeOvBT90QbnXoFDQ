@@ -279,8 +279,13 @@ Setup["Tween"] = function(self)
 
                 
         local Target, Temporary = Data.Position, nil;
+        local CFrame;
         if not Target then return; end;
-
+        if typeof(Target) == "CFrame" then
+            CFrame = Target;
+            Target = Target.Position;
+        end;
+        
         local Speed = Data.Speed or {24, 24}; -- or {X, Y} 
         if typeof(Speed) ~= "table" then
             Speed = {Speed, Speed};
@@ -315,9 +320,9 @@ Setup["Tween"] = function(self)
 
             -- Snap to target if close enough
             if xDis <= math.max(stepXSpeed, 1) and yDis <= math.max(stepYSpeed, 1) then
-                HRP.CFrame = CFrame.new(p2)
-
                 if p2 == Target then
+                    HRP.CFrame = CFrame or CFrame.new(p2);
+
                     Storage["Active"]:Cancel()
                     if Data["Extra"] then
                         Data.Extra(true);
@@ -325,6 +330,7 @@ Setup["Tween"] = function(self)
 
                     return true;
                 else
+                    HRP.CFrame = CFrame.new(p2)
                     Temporary = nil
                 end
             end
