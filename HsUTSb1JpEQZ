@@ -349,6 +349,7 @@ Setup["Tween"] = function(self)
                 local Params = RaycastParams.new()
                 Params.FilterDescendantsInstances = {Character}
                 Params.FilterType = Enum.RaycastFilterType.Blacklist
+                Params.RespectCanCollide = true
                 Params.IgnoreWater = true
 
                 local rayOrigin = p1 - Vector3.new(0, HRP.Size.Y / 2, 0)
