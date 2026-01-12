@@ -265,7 +265,7 @@ Setup["Tween"] = function(self)
         -- Always reuse active tween
         if Storage.Active then
             local Active = Storage.Active
-            Active.ChangeSpeed(Data.Speed)
+            Active:ChangeSpeed(Data.Speed)
 
             -- Update the target position for moving mobs
             Active.Data.Position = Data.Position
@@ -277,6 +277,7 @@ Setup["Tween"] = function(self)
             return isClose
         end
 
+        local Temporary = nil
         local function Move(dt)
             local Active = Storage.Active;
             local Data = (Active and Active.Data) or Data;
@@ -296,7 +297,6 @@ Setup["Tween"] = function(self)
             end
 
             local Surf = Data.Surf
-            local Temporary = nil
 
             local p1 = HRP.Position
             local p2 = Temporary or Target
@@ -402,14 +402,15 @@ Setup["Tween"] = function(self)
                 Storage.Active = nil
             end,
 
-            ChangeSpeed = function(New)
+            ChangeSpeed = function(self, New)
                 if not New then return end
-                Speed = typeof(New) == "table" and New or {New, New}
+                self.Data.Speed = typeof(New) == "table" and New or {New, New}
             end,
 
             isClose = function()
                 local p = HRP.Position
                 local t = Storage.Active.Data.Position
+                t = typeof(t) == "CFrame" and t.Position or t
                 local dx = Vector3.new(t.X - p.X, 0, t.Z - p.Z).Magnitude
                 local dy = math.abs(t.Y - p.Y)
                 return dx <= 0.5 and dy <= 0.5
