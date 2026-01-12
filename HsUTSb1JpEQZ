@@ -270,7 +270,7 @@ Setup["Tween"] = function(self)
             -- Update the target position for moving mobs
             Active.Data.Position = Data.Position
             Active.Data.Continue = Data.Continue
-            
+
             local isClose = Active.isClose();
             if Data.Extra then
                 Data.Extra(isClose)
@@ -302,6 +302,10 @@ Setup["Tween"] = function(self)
 
             local p1 = HRP.Position
             local p2 = Temporary or Target
+
+            if p2.Y < p1.Y then
+                Speed[2] = 9999999999;
+            end;
 
             local baseX, baseY = Speed[1], Speed[2]
             local stepX = baseX * dt
