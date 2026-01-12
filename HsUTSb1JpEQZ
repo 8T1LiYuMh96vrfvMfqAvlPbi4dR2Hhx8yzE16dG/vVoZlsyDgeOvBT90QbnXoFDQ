@@ -262,21 +262,21 @@ Setup["Tween"] = function(self)
     function Manager:Create(Data)
         if not Data or not Data.Position then return end
 
+        -- Always reuse active tween
         if Storage.Active then
             local Active = Storage.Active
-            local isClose = Active.isClose()
+            Active.ChangeSpeed(Data.Speed)
 
+            -- Update the target position for moving mobs
+            Active.Data.Position = Data.Position
+            local isClose = Active.isClose();
             if Data.Extra then
                 Data.Extra(isClose)
             end
 
-            if Active.Data.Position == Data.Position then
-                Active.ChangeSpeed(Data.Speed)
-                return isClose
-            else
-                Active:Cancel()
-            end
+            return isClose
         end
+
 
         local Target = Data.Position
         local CF
@@ -321,11 +321,12 @@ Setup["Tween"] = function(self)
                     if Data.Extra then
                         Data.Extra(true)
                     end
-                    return
+
+                    return true;
                 else
                     HRP.CFrame = CFrame.new(p2)
                     Temporary = nil
-                    return
+                    return true;
                 end
             end
 
@@ -402,8 +403,9 @@ Setup["Tween"] = function(self)
 
             isClose = function()
                 local p = HRP.Position
-                local dx = Vector3.new(Target.X - p.X, 0, Target.Z - p.Z).Magnitude
-                local dy = math.abs(Target.Y - p.Y)
+                local t = Storage.Active.Data.Position
+                local dx = Vector3.new(t.X - p.X, 0, t.Z - p.Z).Magnitude
+                local dy = math.abs(t.Y - p.Y)
                 return dx <= 0.5 and dy <= 0.5
             end,
 
