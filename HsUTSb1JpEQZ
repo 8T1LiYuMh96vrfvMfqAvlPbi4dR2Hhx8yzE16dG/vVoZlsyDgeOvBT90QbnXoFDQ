@@ -306,6 +306,8 @@ Setup["Tween"] = function(self)
             local xDis = xDiff.Magnitude
             local yDis = yDiff.Magnitude
 
+            stepXSpeed = math.min(stepXSpeed, xDis)
+            stepYSpeed = math.min(stepYSpeed, yDis)
 
             local txDiff = Vector3.new(Target.X - p1.X, 0, Target.Z - p1.Z)
             local xDir = txDiff.Magnitude > 0 and txDiff.Unit or Vector3.zero
