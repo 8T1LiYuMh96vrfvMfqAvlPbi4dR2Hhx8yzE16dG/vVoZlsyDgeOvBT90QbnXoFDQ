@@ -279,10 +279,10 @@ Setup["Tween"] = function(self)
 
                 
         local Target, Temporary = Data.Position, nil;
-        local CFrame;
+        local CF;
         if not Target then return; end;
         if typeof(Target) == "CFrame" then
-            CFrame = Target;
+            CF = Target;
             Target = Target.Position;
         end;
         
@@ -321,7 +321,7 @@ Setup["Tween"] = function(self)
             -- Snap to target if close enough
             if xDis <= math.max(stepXSpeed, 1) and yDis <= math.max(stepYSpeed, 1) then
                 if p2 == Target then
-                    HRP.CFrame = CFrame or CFrame.new(p2);
+                    HRP.CFrame = CF or CFrame.new(p2);
 
                     Storage["Active"]:Cancel()
                     if Data["Extra"] then
