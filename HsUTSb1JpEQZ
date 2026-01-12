@@ -260,184 +260,158 @@ Setup["Tween"] = function(self)
     self:Basics();
 
     function Manager:Create(Data)
-        task.spawn(function()
-            if not Data then return; end;
-            if Storage["Active"] then
-                local Active = Storage["Active"];
-                local isClose = Active.isClose();
-                if Data["Extra"] then
-                    Data.Extra(isClose);
-                end;
+        if not Data or not Data.Position then return end
 
-                local OldData = Active.Data;
-                if OldData.Position == OldData.Position then
-                    Active.ChangeSpeed(Data.Speed);
-                    return isClose;
-                else
-                    Active:Cancel();
-                end;
-            end;
+        if Storage.Active then
+            local Active = Storage.Active
+            local isClose = Active.isClose()
 
-                    
-            local Target, Temporary = Data.Position, nil;
-            local CF;
-            if not Target then return; end;
-            if typeof(Target) == "CFrame" then
-                CF = Target;
-                Target = Target.Position;
-            end;
-            
-            local Speed = Data.Speed or {24, 24}; -- or {X, Y} 
-            if typeof(Speed) ~= "table" then
-                Speed = {Speed, Speed};
-            end;
-
-            local Surf = Data.Surf or false;
-
-            local function Move(dt)
-                local p1 = HRP.Position
-                local p2 = Temporary or Target
-
-                -- Base speeds (studs/sec)
-                local baseXSpeed, baseYSpeed = table.unpack(Speed)
-
-                -- Per-frame movement speeds
-                local stepXSpeed = baseXSpeed * dt
-                local stepYSpeed = baseYSpeed * dt
-
-                -- Horizontal / vertical separation
-                local xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z)
-                local yDiff = Vector3.new(0, p2.Y - p1.Y, 0)
-
-                local xDis = xDiff.Magnitude
-                local yDis = yDiff.Magnitude
-
-                stepXSpeed = math.min(stepXSpeed, xDis)
-                stepYSpeed = math.min(stepYSpeed, yDis)
-
-                local txDiff = Vector3.new(Target.X - p1.X, 0, Target.Z - p1.Z)
-                local xDir = txDiff.Magnitude > 0 and txDiff.Unit or Vector3.zero
-                local yDir = yDis > 0 and yDiff.Unit or Vector3.zero
-
-                -- Snap to target if close enough
-                if xDis <= math.max(stepXSpeed, 1) and yDis <= math.max(stepYSpeed, 1) then
-                    if p2 == Target then
-                        HRP.CFrame = CF or CFrame.new(p2);
-
-                        Storage["Active"]:Cancel()
-                        if Data["Extra"] then
-                            Data.Extra(true);
-                        end;
-
-                        return true;
-                    else
-                        HRP.CFrame = CFrame.new(p2)
-                        Temporary = nil
-                    end
-                end
-
-                if Surf and xDis > stepXSpeed then
-                    local Params = RaycastParams.new()
-                    Params.FilterDescendantsInstances = { Character }
-                    Params.FilterType = Enum.RaycastFilterType.Blacklist
-                    Params.IgnoreWater = true
-
-                    -- Use BASE speed for lookahead
-                    local Infront = workspace:Raycast(
-                        p1 - vector.create(0, HRP.Size.Y/2, 0),
-                        xDir * math.max(stepXSpeed, 4),
-                        Params
-                    )
-
-                    if Infront then
-                        local Part = Infront.Instance
-                        local Top = Part.Position.Y + Part.Size.Y / 2
-                        local TopDis = (math.abs(Top) - math.abs(p1.Y))
-                        if TopDis < math.max(stepYSpeed, 1) then
-                            HRP.CFrame = CFrame.new(p1.X, Top+1, p1.Z);
-                        else
-                            Temporary = Vector3.new(Infront.Position.X, Top+1, Infront.Position.Z) - xDir * 2;
-                        end;
-                    else
-                        local Under = workspace:Raycast(
-                            p1,
-                            Vector3.new(0, -100, 0),
-                            Params
-                        )
-
-                        if Under then
-                            HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, 1, 0));
-                        end
-                    end
-                end
-
-                -- Recalculate after possible snapping
-                p1 = HRP.Position
-
-                xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z)
-                yDiff = Vector3.new(0, p2.Y - p1.Y, 0)
-
-                xDis = xDiff.Magnitude
-                yDis = yDiff.Magnitude
-
-                xDir = xDis > 0 and xDiff.Unit or Vector3.zero
-                yDir = yDis > 0 and yDiff.Unit or Vector3.zero
-
-                -- Final translation
-                local Translation
-
-                if Surf and xDis > math.max(stepXSpeed, 1) then
-                    -- Surfing: horizontal only
-                    Translation = xDir * math.min(stepXSpeed, xDis)
-                else
-                    Translation =
-                        xDir * math.min(stepXSpeed, xDis) +
-                        yDir * math.min(stepYSpeed, yDis)
-                end
-
-                Controller:NoFall()
-                HRP.CFrame += Translation
+            if Data.Extra then
+                Data.Extra(isClose)
             end
 
+            if Active.Data.Position == Data.Position then
+                Active.ChangeSpeed(Data.Speed)
+                return isClose
+            else
+                Active:Cancel()
+            end
+        end
 
-            Storage["Active"] = { 
-                Connection = RSV.Heartbeat:Connect(Move);
+        local Target = Data.Position
+        local CF
+        if typeof(Target) == "CFrame" then
+            CF = Target
+            Target = Target.Position
+        end
 
-                Cancel=function(self) 
-                    self.Connection:Disconnect(); 
-                    Storage["Active"]=nil 
-                end; 
+        local Speed = Data.Speed or {24, 24}
+        if typeof(Speed) ~= "table" then
+            Speed = {Speed, Speed}
+        end
 
-                ChangeSpeed=function(New)  
-                    if not New then return; end;
+        local Surf = Data.Surf
+        local Temporary = nil
 
-                    Speed = New;
-                    if typeof(Speed) ~= "table" then
-                        Speed = {Speed, Speed};
-                    end;
-                end; 
+        local function Move(dt)
+            local p1 = HRP.Position
+            local p2 = Temporary or Target
 
-                isClose=function()
-                    local p1 = HRP.Position;
+            local baseX, baseY = Speed[1], Speed[2]
+            local stepX = baseX * dt
+            local stepY = baseY * dt
 
-                    local xSpeed, ySpeed = table.unpack(Speed);
-                    local xDiff = Vector3.new(Target.X - p1.X, 0, Target.Z - p1.Z);
-                    local yDiff = Vector3.new(0, Target.Y - p1.Y, 0);
+            local xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z)
+            local yDiff = Vector3.new(0, p2.Y - p1.Y, 0)
 
-                    local xDis = xDiff.Magnitude;
-                    local yDis = yDiff.Magnitude;
-                    
-                    return xDis <= xSpeed/60 and yDis <= ySpeed/60;
-                end;
-            
-                Data=Data
-            };
-        end);
+            local xDis = xDiff.Magnitude
+            local yDis = math.abs(yDiff.Y)
 
-        if Storage["Active"] then
-            return Storage["Active"].isClose();
-        end;
-    end;
+            stepX = math.min(stepX, xDis)
+            stepY = math.min(stepY, yDis)
+
+            local xDir = xDis > 0 and xDiff.Unit or Vector3.zero
+            local yDir = yDis > 0 and yDiff.Unit or Vector3.zero
+
+            -- Arrival check
+            if xDis <= math.max(stepX, 1) and yDis <= math.max(stepY, 1) then
+                if p2 == Target then
+                    HRP.CFrame = CF or CFrame.new(Target)
+                    Storage.Active:Cancel()
+                    if Data.Extra then
+                        Data.Extra(true)
+                    end
+                    return
+                else
+                    HRP.CFrame = CFrame.new(p2)
+                    Temporary = nil
+                    return
+                end
+            end
+
+            -- Surf logic
+            if Surf and xDis > stepX then
+                local Params = RaycastParams.new()
+                Params.FilterDescendantsInstances = {Character}
+                Params.FilterType = Enum.RaycastFilterType.Blacklist
+                Params.IgnoreWater = true
+
+                local rayOrigin = p1 - Vector3.new(0, HRP.Size.Y / 2, 0)
+                local rayDir = xDir * math.max(stepX, 4)
+
+                local Hit = workspace:Raycast(rayOrigin, rayDir, Params)
+
+                if Hit then
+                    local Part = Hit.Instance
+                    local Top = Part.Position.Y + Part.Size.Y / 2
+                    local diff = Top - p1.Y
+
+                    if diff <= math.max(stepY, 1) then
+                        HRP.CFrame = CFrame.new(p1.X, Top + 1, p1.Z)
+                    else
+                        Temporary = Vector3.new(Hit.Position.X, Top + 1, Hit.Position.Z) - xDir * 2
+                    end
+                else
+                    local Under = workspace:Raycast(p1, Vector3.new(0, -100, 0), Params)
+                    if Under then
+                        HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, 1, 0))
+                    end
+                end
+            end
+
+            -- Recalculate after surf adjustments
+            p1 = HRP.Position
+            p2 = Temporary or Target
+
+            xDiff = Vector3.new(p2.X - p1.X, 0, p2.Z - p1.Z)
+            yDiff = Vector3.new(0, p2.Y - p1.Y, 0)
+
+            xDis = xDiff.Magnitude
+            yDis = math.abs(yDiff.Y)
+
+            xDir = xDis > 0 and xDiff.Unit or Vector3.zero
+            yDir = yDis > 0 and yDiff.Unit or Vector3.zero
+
+            local Translation
+            if Surf and xDis > math.max(stepX, 1) then
+                Translation = xDir * math.min(stepX, xDis)
+            else
+                Translation =
+                    xDir * math.min(stepX, xDis) +
+                    yDir * math.min(stepY, yDis)
+            end
+
+            Controller:NoFall()
+            HRP.CFrame += Translation
+        end
+
+        Storage.Active = {
+            Connection = RSV.Heartbeat:Connect(Move),
+
+            Cancel = function(self)
+                if self.Connection then
+                    self.Connection:Disconnect()
+                end
+                Storage.Active = nil
+            end,
+
+            ChangeSpeed = function(New)
+                if not New then return end
+                Speed = typeof(New) == "table" and New or {New, New}
+            end,
+
+            isClose = function()
+                local p = HRP.Position
+                local dx = Vector3.new(Target.X - p.X, 0, Target.Z - p.Z).Magnitude
+                local dy = math.abs(Target.Y - p.Y)
+                return dx <= 0.5 and dy <= 0.5
+            end,
+
+            Data = Data
+        }
+
+        return Storage.Active.isClose()
+    end
 
     function Manager:GetActive()
         return Storage["Active"];
