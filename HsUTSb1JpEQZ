@@ -426,6 +426,13 @@ Setup["Tween"] = function(self)
         return Storage["Active"];
     end;
 
+    function Manager:Cancel()
+        local Active = self:GetActive();
+        if Active then 
+            Active:Cancel();
+        end;
+    end;
+
     return Manager;
 end;
 
