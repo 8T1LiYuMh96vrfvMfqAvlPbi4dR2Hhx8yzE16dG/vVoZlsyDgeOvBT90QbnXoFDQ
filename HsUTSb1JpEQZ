@@ -321,6 +321,7 @@ Setup["Tween"] = function(self)
             if xDis <= math.max(stepX, 1) and yDis <= math.max(stepY, 1) then
                 if p2 == Target then
                     HRP.CFrame = CF;
+                    Controller:NoFall();
 
                     if Data.Extra then
                         Data.Extra(true)
@@ -328,8 +329,9 @@ Setup["Tween"] = function(self)
 
                     if not Data.Continue then
                         Storage.Active:Cancel()
-                        return;
                     end;
+
+                    return;
                 else
                     HRP.CFrame = CFrame.new(p2)
                     Temporary = nil
