@@ -277,23 +277,27 @@ Setup["Tween"] = function(self)
             return isClose
         end
 
-
-        local Target = Data.Position
-        local CF
-        if typeof(Target) == "CFrame" then
-            CF = Target
-            Target = Target.Position
-        end
-
-        local Speed = Data.Speed or {24, 24}
-        if typeof(Speed) ~= "table" then
-            Speed = {Speed, Speed}
-        end
-
-        local Surf = Data.Surf
-        local Temporary = nil
-
         local function Move(dt)
+            local Active = Storage.Active;
+            local Data = (Active and Active.Data) or Data;
+            
+            local Target = Data.Position
+            local CF
+            if typeof(Target) == "CFrame" then
+                CF = Target
+                Target = Target.Position
+            else
+                CF = CFrame.new(Target);
+            end
+
+            local Speed = Data.Speed or {24, 24}
+            if typeof(Speed) ~= "table" then
+                Speed = {Speed, Speed}
+            end
+
+            local Surf = Data.Surf
+            local Temporary = nil
+
             local p1 = HRP.Position
             local p2 = Temporary or Target
 
@@ -316,7 +320,7 @@ Setup["Tween"] = function(self)
             -- Arrival check
             if xDis <= math.max(stepX, 1) and yDis <= math.max(stepY, 1) then
                 if p2 == Target then
-                    HRP.CFrame = CF or CFrame.new(Target)
+                    HRP.CFrame = CF;
 
                     if Data.Extra then
                         Data.Extra(true)
