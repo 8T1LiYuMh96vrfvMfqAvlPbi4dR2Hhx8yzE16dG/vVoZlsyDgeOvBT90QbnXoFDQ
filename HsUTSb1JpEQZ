@@ -333,7 +333,7 @@ Setup["Tween"] = function(self)
                         Data.Extra(true)
                     end
 
-                    if not Data.Continue then
+                    if not Data.Continue and Storage.Active then
                         Storage.Active:Cancel()
                     end;
 
