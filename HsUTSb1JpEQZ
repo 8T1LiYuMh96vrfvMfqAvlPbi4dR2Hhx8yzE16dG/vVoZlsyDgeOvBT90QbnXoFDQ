@@ -269,6 +269,8 @@ Setup["Tween"] = function(self)
 
             -- Update the target position for moving mobs
             Active.Data.Position = Data.Position
+            Active.Data.Continue = Data.Continue
+            
             local isClose = Active.isClose();
             if Data.Extra then
                 Data.Extra(isClose)
