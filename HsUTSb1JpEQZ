@@ -721,14 +721,14 @@ Setup["Loop"] = function(self)
 
     local Storage = {};
     setmetatable(Manager, {
-        __call = function(Connection, Key, Value, Data)
+        __call = function(self, Connection, Key, Value, Data)
             local ct = Connections[Connection];
             if not ct then return warn("Invalid Loop Connection"); end;
 
             if Value then
-                self.List[Key] = Data;
+                ct.List[Key] = Data;
             else
-                self.List[Key] = nil;
+                ct.List[Key] = nil;
             end;
         end;
     });
