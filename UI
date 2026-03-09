@@ -1,4 +1,4 @@
--- UI LIBRARY, needs saving, and add a extension when hovering over tabs for text and search bar
+-- UI LIBRARY, needs search and color picker
 local Repo = 'https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG'
 local Setup = loadstring(
     game:HttpGet(Repo .. '/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ')
@@ -14,10 +14,12 @@ local Library = {
     Screen = nil,
     Maid = nil,
 
+    Flags = {},
     Cache = {},
     Created = { Tabs = {} },
-    Theme = 'Default',
     Focused = nil,
+
+    Theme = 'Default',
     Themes = {
         ['Default'] = {
             -- Background Colors
@@ -51,6 +53,12 @@ local Library = {
             Hovered = RGB(169, 51, 255),
         },
     },
+
+    Path = {
+        ["Folder"] = "Lunar",
+        ["SubFolder"] = nil,
+        ["File"] = game.GameId .. "_" .. Client.UserId;
+    }
 }
 
 -- Set default value for table
@@ -230,6 +238,49 @@ function Library.Clicker(Obj, ZIndex)
     })
 end
 
+function Library.Save()
+    local Path = Library.Path;
+    local Folder, SF, File = Path.Folder, Path.SubFolder, Path.File;
+    if (not Folder) or (not File) then return; end;
+
+    local Full = Folder;
+    FileService:CreateFolder(Folder);
+    if SF then
+        Full = Full .. "/" .. SF;
+        FileService:CreateFolder(Full);
+    end;
+
+    local Values = {};
+    for i, v in pairs(Library.Flags) do
+        Values[i] = v.Value;
+    end;
+    
+    local JSON = HttpService:JSONEncode(Values);
+    FileService:Write(Full .. "/" .. File .. ".json", JSON);
+end;
+
+function Library.Load()
+    local Path = Library.Path;
+    local Folder, SF, File = Path.Folder, Path.SubFolder, Path.File;
+    if (not Folder) or (not File) then return; end;
+
+    local Full = Folder;
+    if SF then
+        Full = Full .. "/" .. SF;
+    end;
+
+    local Contents = FileService:Read(Full .. "/" .. File .. ".json");
+    if not Contents then return; end;
+    local Decode = HttpService:JSONDecode(Contents);
+    for i, v in pairs(Decode) do
+        if Library.Flags[i] then
+            Library.Flags[i].SetValue(v);
+        else
+            Library.Flags[i] = v;
+        end;
+    end;
+end;
+
 
 -- Metatables
 local ComponentMT;
@@ -372,6 +423,13 @@ local SectionMT = {
         
         local baseZ = self.Holder.ZIndex
         local Toggle = { Value = Data.Default }
+        if Data.Flag then
+            if Library.Flags[Data.Flag] then
+                Data.Default = Library.Flags[Data.Flag];
+            end;
+
+            Library.Flags[Data.Flag] = Toggle;
+        end;
         
         -- Background
         local Background = Library:Create('Frame', {
@@ -471,7 +529,7 @@ local SectionMT = {
             Update()
         end
         
-        function Toggle.Set(v)
+        function Toggle.SetValue(v)
             Toggle.Value = v
             Update()
         end
@@ -510,6 +568,13 @@ local SectionMT = {
         
         local baseZ = self.Holder.ZIndex
         local Keybind = { Value = Data.Default }
+        if Data.Flag then
+            if Library.Flags[Data.Flag] then
+                Data.Default = Library.Flags[Data.Flag];
+            end;
+
+            Library.Flags[Data.Flag] = Keybind;
+        end;
         
         -- Background
         local Background = Library:Create('Frame', {
@@ -678,6 +743,13 @@ local SectionMT = {
         local baseZ = self.Holder.ZIndex
         local Dropdown = { Value = Data.Default, Choices = Data.Choices }
         local Created = {}
+
+        if Data.Flag then
+            if Library.Flags[Data.Flag] then
+                Data.Default = Library.Flags[Data.Flag];
+            end;
+            Library.Flags[Data.Flag] = Dropdown;
+        end;
         
         -- Background
         local Background = Library:Create('Frame', {
@@ -1051,6 +1123,13 @@ local SectionMT = {
         
         local baseZ = self.Holder.ZIndex
         local Input = { Value = Data.Default }
+        if Data.Flag then
+            if Library.Flags[Data.Flag] then
+                Data.Default = Library.Flags[Data.Flag];
+            end;
+
+            Library.Flags[Data.Flag] = Input;
+        end;
         
         -- Background
         local Background = Library:Create('Frame', {
@@ -1205,6 +1284,14 @@ local SectionMT = {
             Value = math.clamp(Data.Default, Min, Max),
             Limits = Data.Limits
         }
+
+        if Data.Flag then
+            if Library.Flags[Data.Flag] then
+                Data.Default = Library.Flags[Data.Flag];
+            end;
+
+            Library.Flags[Data.Flag] = Slider;
+        end;
         
         -- Background
         local Background = Library:Create('Frame', {
