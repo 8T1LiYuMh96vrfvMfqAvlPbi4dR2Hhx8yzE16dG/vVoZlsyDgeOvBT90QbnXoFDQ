@@ -1,0 +1,1267 @@
+-- NEW NEW GPO
+
+repeat task.wait(); until game and game.GetService and game:GetService("Players") and game:GetService("Players").LocalPlayer;
+
+-- Setup
+local Repo = 'https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/main/';
+local Library = loadstring(game:HttpGet(Repo .. 'UI'))();
+local Setup = loadstring(game:HttpGet(Repo .. 'HsUTSb1JpEQZ'))();
+loadstring(game:HttpGet(Repo .. 'AntiAdonis'))();
+
+local Tween = Setup:Tween();
+local Controller = Setup:ClientController();
+local Recorder = Setup:InputRecorder();
+Setup:Basics();
+
+do -- Anticheat
+    if getconnections then
+        for _, connection in pairs(getconnections(Client.Idled)) do
+            if connection['Disable'] then
+                connection['Disable'](connection);
+            elseif connection['Disconnect'] then
+                connection['Disconnect'](connection);
+            end;
+        end;
+
+        for _, conn in pairs(getconnections(game:GetService("ScriptContext").Error)) do
+            local Old = conn.Function;
+            game:GetService("ScriptContext").Error:Connect(function(message, trace, script)
+                if not script then print("[Error] " .. Message); return; end;
+                Old(message, trace, script);
+            end);
+
+            conn:Disable();
+        end;
+    else
+        Client:Kick('Unsupported executor [Missing getconnections]');
+        return;
+    end;
+
+    task.spawn(function()
+        repeat
+            task.wait();
+            _G.windowFocus = true;
+        until getgenv().ScriptEnded;
+    end);
+end;
+
+-- Main
+local Events = ReplicatedStorage:WaitForChild("Events");
+local Skill = Events:WaitForChild('Skill');
+
+local Fishing = ReplicatedStorage:WaitForChild('Fishing');
+local Remotes = Fishing:WaitForChild('Remotes');
+local FishingAction = Remotes:WaitForChild('Action');
+
+local UserData = ReplicatedStorage:WaitForChild('Stats' .. Client.Name);
+local Stats = UserData:WaitForChild('Stats');
+local Inventory = UserData:WaitForChild('Inventory'):WaitForChild('Inventory');
+
+local CombatRegister = Events:WaitForChild('CombatRegister');
+local PunchAnimation = ReplicatedStorage:WaitForChild('CombatAnimations'):WaitForChild('Melee'):WaitForChild('Punch1');
+
+local Env = workspace:WaitForChild('Env');
+local Effects = workspace:WaitForChild('Effects');
+local NPCs = workspace:WaitForChild('NPCs');
+local Characters = workspace:WaitForChild('PlayerCharacters');
+
+local LastAttack, Count = os.clock(), 0;
+
+local Hooks = {};
+local function AttemptHook(Instance, Method, ...)
+    local Hook = Hooks[Instance];
+    if Hook and Hook[1] == Method then
+        return Hook[2](...) or nil;
+    end;
+end;
+
+local function AddHook(Instance, Method, Response)
+    return pcall(function() Hooks[Instance] = {Method, Response} end);
+end;
+
+local Locations = {
+    WC_Entrance = vector.create(-7650, 49, 10317);
+    WC_Platform = vector.create(-13084, 8535, 10754);
+    WC_Mirror = vector.create(-7046, 52, 8705);
+    WC_RedMirror = vector.create(-13872, 10746, 14146);
+
+    Juzu = vector.create(1777, 36, -10692);
+    Umi = vector.create(12537, 6, 2762);
+};
+
+local Bypasses = {
+    Noclip = function()
+        task.spawn(function()
+            local CF = CFrame.new(HRP.Position-Vector3.new(0, 2.75, 0)) * CFrame.Angles(-math.pi/2, 0, 0);
+            while not Character:GetAttribute("ServerClimb") do
+                HRP.CFrame = CF;
+                RSV.Heartbeat:Wait();
+            end;
+        end);
+
+        task.spawn(function()
+            Events:WaitForChild("climb"):InvokeServer(true);
+            repeat task.wait(); until Character:GetAttribute("ServerClimb");
+            Events.climb:InvokeServer(false);
+            repeat task.wait(); until not Character:GetAttribute("ServerClimb");
+            Events:WaitForChild("takestam"):FireServer(.505, "dash");
+
+            if not ncHooked then
+                ncHooked = AddHook(Events.climb, "InvokeServer", function(toggle)
+                    if not toggle then
+                        task.defer(function()
+                            repeat task.wait(); until not Character:GetAttribute("ServerClimb");
+                            Events:WaitForChild("takestam"):FireServer(.505, "dash");
+                        end);
+
+                        return;
+                    end;
+                end);
+            end;
+        end);
+    end;
+
+    Fly = function(Value)
+        _Fly = Value or false;
+        while _Fly do
+            Events:WaitForChild("faceMouse"):FireServer();
+            task.wait(.01);
+            Events:WaitForChild("faceMouse"):FireServer();
+            task.wait(1);
+        end;
+    end;
+};
+
+local Actions; Actions = {
+    Fishing = {
+        Casted = 0;
+
+        getRod = function()
+            return Character:FindFirstChildOfClass("Tool");
+        end;
+
+        isUsable = function()
+            local Tool = Character:FindFirstChildOfClass("Tool");
+            return Tool and Tool:GetAttribute("isFishingRod");
+        end;
+
+        Cast = function(self)
+            if not self.isUsable() then return; end;
+            
+            if FishingAction:InvokeServer({Goal = Vector3.new(-6447.8383, -18.4431, -7614.8584),Action = 'Throw',Bait = useBait or 'Common Fish Bait'}) then
+                self.Casted = os.time();
+
+                FishingAction:InvokeServer({ Action = 'Landed' });
+                return true;
+            end;
+        end;
+
+        Reel = function(self)
+            if not self.isUsable() then return; end;
+            local delta = os.time() - self.Casted;
+            local Rod = self.getRod();
+            local Max = Rod:GetAttribute("FishWaitTime").Max + (math.random(55, 60)/10);
+
+            if delta >= Max then
+                local succ; repeat succ=FishingAction:InvokeServer({ Action = 'Reel' }); task.wait(); until succ;
+                FishingAction:InvokeServer({ Action = 'HookReturning' });
+                FishingAction:InvokeServer({ Action = 'Cancel' });
+
+                return true;
+            end;
+        end;
+
+        Full = function(self, Loop)
+            if not self.isUsable() then return; end;
+            if self:Cast() then
+                while self.isUsable() and task.wait() do
+                    if self:Reel() then
+                        break;
+                    end;
+                end;
+
+                if Loop then
+                    self:Full(Loop);
+                end;
+            end;
+        end;
+    };
+
+    Abilities = { 
+        Settings={};
+        Current={};
+
+        Hold=function(self, Args)
+            if not Args then return; end;
+
+            local Name = Args[1];
+            self.Current[Name]=self.Current[Name] or {};
+            local Creation = Skill:InvokeServer(unpack(Args));
+            if Creation then
+                table.insert(self.Current[Name], Creation);
+            end;
+
+            return Creation;
+        end;
+
+        Release=function(self, Name, Args)
+            if (not Name) or (not Args) then return; end;
+            
+            local function Fire(v)
+                if v:IsA('RemoteFunction') then
+                    v:InvokeServer(unpack(Args));
+                elseif v:IsA('RemoteEvent') then
+                    v:FireServer(unpack(Args));
+                end;
+            end;
+
+            local Current = self.Current[Name] or {};
+            for _, R in pairs(Current) do
+                if (not R) or (not R.Parent) then continue; end;
+
+                if typeof(R) == "table" then
+                    for _, v in pairs(R) do Fire(v); end;
+                else
+                    Fire(R);
+                end;
+            end;
+        end;
+    };
+
+    Misc = {
+        GetInv=function()
+            local Raw = Inventory.Value;
+            return HttpService:JSONDecode(Raw) or {};
+        end;
+
+        GetSpeed=function()
+            local Speed = 47;
+            local Bypass = Character:GetAttribute("SpeedBypass");
+            if Bypass then
+                Speed=Speed+Bypass;
+            end;
+
+            return {Speed, math.max(95, Speed)};
+        end;
+
+        GetDist=function(p1, p2)
+            local function Check(p)
+                if typeof(p) == "Vector3" then return p; 
+                elseif typeof(p) == "CFrame" then return p.Position;
+                elseif typeof(p) == "Instance" and p:IsA("BasePart") then return p.Position;
+                else return p; end;
+            end;
+
+            p1, p2 = Check(p1), Check(p2);
+            return (p1 - p2).Magnitude;
+        end;
+
+        Combine=function(t1,t2) 
+            local nt = table.clone(t1);
+            for _, v in pairs(t2) do
+                table.insert(nt, v);
+            end;
+            return nt;
+        end;
+
+        GetNearest=function(t, checkvisible)
+            if typeof(t) == "Instance" then t=t:GetChildren(); end;
+            if typeof(t) ~= "table" then t=nil; end;
+            
+            local t=t or NPCs:GetChildren();
+            local Closest, Dist = nil, math.huge
+            for _, v in pairs(t) do
+                if typeof(v) == "Vector3" then
+                    local nDist = (HRP.Position - v).Magnitude;
+
+                    if nDist < Dist then
+                        Closest = v;
+                        Dist = nDist;
+                    end;
+                else
+                    local tHumanoid = v:FindFirstChildOfClass('Humanoid');
+                    local tHRP = v:FindFirstChild('HumanoidRootPart');
+                    if v:IsA("Model") and tHumanoid then
+                        if v~=Character and tHRP and HRP and not v:FindFirstChildOfClass("ForceField") then
+                            if checkvisible and not Actions.Misc.isVisible(tHRP) then continue; end;
+
+                            local nDist = (HRP.Position - tHRP.Position).Magnitude;
+
+                            if nDist < Dist then
+                                Closest = v;
+                                Dist = nDist;
+                            end;
+                        end;
+                    elseif v:IsA("Part") then
+                        local nDist = (HRP.Position - v.Position).Magnitude;
+
+                        if nDist < Dist then
+                            Closest = v;
+                            Dist = nDist;
+                        end;
+                    end;
+                end;
+            end;
+
+            return Closest;
+        end;
+
+        WithName=function(name, t)
+            if typeof(t) == "Instance" then t=t:GetChildren(); end;
+            if typeof(t) ~= "table" then t=nil; end;
+            
+            local t=t or NPCs:GetChildren();
+            local Group = { };
+            for i, v in pairs(t) do
+                if v.Name:match(name) then
+                    table.insert(Group, v);
+                end;
+            end;
+
+            return Group;
+        end;
+
+        getnil=function(name, ty, parent)
+            local parent = parent or game;
+            for _, v in pairs(parent:GetDescendants()) do
+                if (not name or v.Name == name) and (not ty or v:IsA(ty)) then
+                    return v;
+                end;
+            end;
+        end;
+
+        GetTarget=function(Part)
+            local Target;
+
+            if typeof(_Target) == "string" then
+                Target = Actions.Misc.getnil(_Target, "Model");
+            elseif typeof(_Target) == "Instance" then
+                if _Target:IsA("Player") then Target = _Target.Character; 
+                elseif _Target:IsA("Model") then Target = _Target end;
+            else
+                Target = Actions.Misc.GetNearest(_Target, true);
+            end;
+
+            if Part then 
+                local Found = Target:FindFirstChild(Part);
+                Target = Found or Target.PrimaryPart; 
+            end;
+
+            return Target;
+        end;
+
+        InRange=function(t, range, part)
+            if typeof(t) == "Instance" then t=t:GetChildren(); end;
+            if typeof(t) ~= "table" then t=nil; end;
+            
+            local range=range or 10;
+            local t=t or NPCs:GetChildren();
+            local Group = { };
+            for i, v in pairs(t) do
+                local tHumanoid = v:FindFirstChildOfClass('Humanoid');
+                local tHRP = v:FindFirstChild('HumanoidRootPart');
+
+                if v~=Character and tHumanoid and tHRP and HRP then
+                    local dist = (HRP.Position - tHRP.Position).Magnitude;
+
+                    if dist < range then
+                        if part then
+                            local found = v:FindFirstChild(part);
+                            if found then table.insert(Group, found); end;
+                        else
+                            table.insert(Group, v);
+                        end;
+                    end;
+                end;
+            end;
+
+            return Group;
+        end;
+
+        isVisible = function(target)
+            local targetPosition;
+            if typeof(target) == "Vector3" then
+                targetPosition = target;
+            elseif target:IsA("Model") then
+                targetPosition = target:FindFirstChild("HumanoidRootPart") or target.PrimaryPart or target:GetPivot().Position;
+            elseif target:IsA("BasePart") then
+                targetPosition = target.Position;
+            else
+                return nil;
+            end;
+
+            local direction = targetPosition - HRP.Position;
+
+            local params = RaycastParams.new();
+            params.FilterType = Enum.RaycastFilterType.Blacklist;
+            params.FilterDescendantsInstances = { Character };
+            params.IgnoreWater = true;
+
+            local result = workspace:Raycast(HRP.Position, direction, params);
+            return result;
+        end;
+
+        Convert = function(self, obj, origin)
+            local Settings = Actions.Abilities.Settings;
+            local Origin=origin or Settings["Origin"] or HRP;
+
+            local New = {};
+            if typeof(obj)=="table" then
+                for i, v in pairs(obj) do
+                    New[i]=self:Convert(v);
+                end;
+            else
+                if typeof(obj) == 'CFrame' then
+                    return Origin.CFrame;
+                elseif typeof(obj) == 'Vector3' then
+                    return Origin.Position;
+                elseif typeof(obj) == 'Instance' then
+                    local Nearest = Actions.Misc.GetNearest((Settings["Target"] and Settings["Target"]:GetChildren()) or nil);
+                    local Target = Nearest;
+                    if obj:IsA("Part") then
+                        Target=Nearest:FindFirstChild("HumanoidRootPart") or Nearest.PrimaryPart;
+                    end;
+
+                    return Target;
+                else
+                    return obj;
+                end;
+            end;
+
+            return New;
+        end;
+    };
+
+    Bypass = {
+        CDs = { Dash=1, Concasser=1, Geppo=.5, ['Ice Bike']=1, ['Ice Skate']=.5 }; -- Delay between uses
+        Active = {};
+
+        -- Speed Bypasses
+        Dash = function()
+            Events:WaitForChild("takestam"):FireServer(.5, "dash");
+        end;
+
+        Concasser = function(isClose)
+            if isClose then return; end;
+            if not Character.Parent or not HRP then return; end;
+            local Abilities = Actions.Abilities;
+            local Created = Abilities:Hold({"Concasser", { char=Character,g=vector.create(0,-200,0),nt=0,v0=vector.create(-3, 100, 2),t=1,x0=HRP.Position,en2=vector.create(-3000, -14, -6863) }});
+            if Created then 
+                Abilities:Release("Concasser", {{ cf=HRP.CFrame, cf2=HRP.CFrame }});
+            end;
+        end;
+
+        Geppo = function()
+            if not Character.Parent or not HRP then return; end;
+            local Abilities = Actions.Abilities;
+            Abilities:Hold({"Sky Walk", { char=Character, cf=HRP.CFrame }});
+        end;
+
+        ['Ice Bike'] = function()
+            if not Character.Parent or not HRP then return; end;
+            local Abilities = Actions.Abilities;
+            Abilities:Hold({"Ice Bike", {['cf']=HRP.CFrame}});
+        end;
+
+        ['Ice Skate'] = function()
+            if not Character.Parent or not HRP then return; end;
+
+            local Hie = Character:FindFirstChild("Hie-Hie") or Backpack:FindFirstChild("Hie-Hie");
+            if not Character:GetAttribute("HieE") and Backpack:FindFirstChild("Hie-Hie") then
+                Humanoid:EquipTool(Hie);
+                Character:SetAttribute("HieE", true);
+            end;
+
+            if Hie then Skate = Hie:FindFirstChild("skate"); end;
+            task.spawn(function()
+                for i=1, 100 do
+                    Skate:FireServer(true);
+                    Skate:FireServer(false);
+                end;
+            end);
+        end;
+
+        -- _Init, Call or wont do anything
+        Process = function(self, ...)
+            if activeBypass then
+                for _, v in pairs(activeBypass) do
+                    local Last = self.Active[v] or 0;
+                    local delta = os.clock() - Last;
+                    local cooldown = self.CDs[v] or 0;
+
+                    if delta >= cooldown then
+                        self[v](...);
+                        self.Active[v]=os.clock();
+                    end;
+                end;
+            end;
+        end;
+    };
+
+    Combat = {
+        Attack=function(Target)
+            local Tool = Character:FindFirstChildOfClass('Tool')
+            if not Tool then
+                return
+            end
+
+            if Tool:GetAttribute('Category') ~= "Weapons" then
+                return
+            end
+
+            local now = os.clock()
+
+            if now - LastAttack < 0.3 then
+                return
+            end
+
+            if now - LastAttack > 1.5 then
+                Count = 0
+            elseif Count >= 5 then
+                return
+            end
+
+            LastAttack = now
+            Count = Count + 1
+
+            CombatRegister:InvokeServer({
+                'swingsfx',
+                AttackType or "Sword",
+                Count,
+                'Ground',
+                false,
+                PunchAnimation,
+                2,
+                2,
+            })
+
+            CombatRegister:InvokeServer({
+                'damage',
+                Target,
+                AttackType or "Sword",
+                { Count, 'Ground', AttackType or "Sword" },
+                true,
+                HRP.CFrame,
+                aircombo = 'Ground',
+            })
+        end;
+    };
+
+    Gun = {
+        Gun = "Rifle",
+        canShoot = true,
+        reloading = false,
+
+        Fire = function(self)
+            if not self.canShoot then return; end;
+            local Target = Actions.Misc.GetTarget("Head");
+
+            if not Target then return; end;
+            Events:WaitForChild("CIcklcon"):FireServer("fire", {Start=HRP.CFrame, Gun=self.Gun, joe="true", Position=Target.Position});
+            self.canShoot = false;
+        end;
+
+        Reload = function(self)
+            if (self.canShoot) or (self.reloading) then return; end;
+            self.reloading = true;
+            
+            if Events:WaitForChild("CIcklcon"):WaitForChild("gunFunctions"):InvokeServer("reload", {Gun=self.Gun}) then
+                self.canShoot = true;
+            end;
+
+            self.reloading = false;
+        end;
+
+        Do = function(self)
+            self:Reload(); self:Fire();
+        end;
+    }
+};
+
+local function ProcessBypass(...)
+    Actions.Bypass:Process(...);
+end;
+
+local Loops = {};
+local function Loop(key, value, func, d)
+    if Loops[key] then 
+        if not value then Loops[key]=nil; end;
+        return; 
+    end;
+
+    Loops[key]=value;
+    if not d then
+        while Loops[key] do 
+            func();
+            RSV.Heartbeat:Wait();
+        end;
+    else
+        while Loops[key] do 
+            func();
+            task.wait(d)
+        end;
+    end;
+end;
+
+local Abilities = Actions.Abilities;
+local function HollowImpale()
+    local inRange = Actions.Misc.InRange(NPCs);
+    if #inRange > 0 then
+        local Created = Abilities:Hold({"Hollow Impale"});
+        if Created then 
+            Abilities:Release("Hollow Impale", {"sfx"});
+            for _, Closest in pairs(inRange) do
+                local tHRP = Closest:FindFirstChild("HumanoidRootPart");
+                if not tHRP then return; end;
+
+                for i=1, hollowAmount or 5000 do task.spawn(function() Abilities:Release("Hollow Impale", { { cf=tHRP.CFrame, Target=Closest } }) end) end;
+            end;
+        end;
+    end;
+end;
+
+-- UI
+local Window = Library:CreateWindow('Lunar - GPO')
+local Tabs = {
+    Main = Window:CreateTab(),
+    Character = Window:CreateTab(),
+    Settings = Window:CreateTab()
+};
+
+local Sections = {
+    Main = Tabs.Main:CreateSection({Title='Main'}),
+    MainSettings = Tabs.Main:CreateSection({Title='Settings', Fill="Right"}),
+
+    Character = Tabs.Character:CreateSection({Title='Main'}),
+
+    Settings = Tabs.Settings:CreateSection({Title='Main'}),
+    Debug = Tabs.Settings:CreateSection({Title="Debug", Fill="Right"})
+};
+
+-- Fishman
+local FishmanCave = vector.create(1794, -97, -12327);
+local SnipePos = CFrame.new(7863, -2095, -17112, 0, 8.12710077e-09, 0, 2.14740457e-08, 1, -5.6087849e-08, -0.480640203, 5.95057266e-08, 0.876917899);
+local FishmanQuest = CFrame.new(7732, -2176, -17223);
+
+
+local AFToggle; AFToggle = Sections.Main:CreateToggle({Text="Auto Fishman", Callback=function(Value)
+    if not Value then Tween:Cancel(); else
+    end;
+    
+    Loop("AutoFishman", Value, function() 
+        task.spawn(function()
+            if Backpack:FindFirstChild("Rifle") then
+                Humanoid:EquipTool(Backpack:FindFirstChild("Rifle"));
+            elseif not Character:FindFirstChild("Rifle") then
+                print("No Rifle!!")
+                AFToggle.Set(false);
+                return;
+            end;
+
+            local GetDist = Actions.Misc.GetDist;
+            if Stats:WaitForChild('Level').Value >= 190 and GetDist(HRP, FishmanQuest) < 500 then
+                if UserData:WaitForChild('Quest'):WaitForChild('CurrentQuest').Value == 'None' then
+                    if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=FishmanQuest, Extra=ProcessBypass}) then
+                        Events:WaitForChild('Quest'):InvokeServer({'takequest', 'Help becky'});
+                    end;
+
+                    return;
+                end;
+            end;
+
+            local d1, d2 = GetDist(HRP.Position, FishmanCave), GetDist(HRP.Position, SnipePos.Position);
+            local Closer = (d1 < d2 and CFrame.new(FishmanCave)) or SnipePos;
+
+            if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Closer, Extra=ProcessBypass}) and Closer==SnipePos then
+                Actions.Gun:Do();
+            end;
+        end);
+    end);
+end});
+
+local AutoStat = Sections.Main:CreateToggle({
+    Text = 'Auto Gun Stat',
+    Callback = function(Value)
+        Loop("AutoGunStat", Value, function()
+            local Points = Stats:WaitForChild('SkillPoints').Value
+            if Points > 0 then
+                pcall(function()
+                    PlayerGui:WaitForChild('Statistics'):WaitForChild('Main').TopOptions.Base.Input.Text = Points;
+                    firesignal(PlayerGui:WaitForChild('Statistics'):WaitForChild('Main').Stats.GunMastery.Add.MouseButton1Click)
+                end);
+            end;
+        end, 0);
+    end,
+})
+
+Sections.Main:CreateToggle({Text="Auto Whole Cake", Callback=function(v) autoWC=v; end});
+Sections.Main:CreateToggle({Text="Kill Others During Downtime", Callback=function(v) dodt=v; end});
+
+Sections.MainSettings:CreateToggle({Text="No VFX", Callback=function(v) noEffects=v; end});
+Sections.MainSettings:CreateKeybind({Text="Halberd 1S", Default="G", Callback=HollowImpale}):CreateSubWindow():CreateSlider({Text="Amount", Default=1000, Limits={1, 10000}, Callback=function(v) hollowAmount=v; end});
+Sections.MainSettings:CreateDropdown({Text="Speed Bypasses", Multi=true, Choices=(function() local indexes = {}; for i,v in pairs(Actions.Bypass) do if typeof(v)=="function" and i~="Process" then table.insert(indexes, i); end; end; return indexes end)(), Callback=function(Values)
+    activeBypass=Values;
+end}):CreateSubWindow():CreateToggle({Text="Use Constantly?", Callback=function(Value) Loop("ConstantSpeed", Value, ProcessBypass) end});
+
+
+local NoclipB = Sections.Character:CreateButton({Text="Noclip Bypass", Callback=Bypasses.Noclip});
+local FlyB = Sections.Character:CreateToggle({Text="Fly Bypass", Callback=Bypasses.Fly});
+
+local NoclipToggle = Sections.Character:CreateToggle({Text="Toggle Noclip", Callback=function(Value)
+    Loop("Noclip", Value, function()
+        task.spawn(function()
+            for _, part in pairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false;
+                end;
+            end;
+        end);
+    end);
+end});
+
+Sections.Settings:CreateKeybind({Text="Toggle UI", Default="RightControl", Callback=Window.Visibility});
+
+-- Collectors
+local OrbOrder = {};
+local LastOrb, OrbDone = os.time(), false;
+workspace.Terrain.ChildAdded:Connect(function(p)
+    task.wait(.1)
+    if p:FindFirstChild("Start") then
+        OrbDone = false;
+        OrbOrder = {};
+    elseif p:FindFirstChild("Ping") then
+        local Current = os.time();
+        LastOrb = Current;
+        task.delay(4, function()
+            if LastOrb == Current then
+                OrbDone = true;
+            end;
+        end);
+        
+        task.wait(2);
+        local WC = Env:FindFirstChild("WholeCakeDungeon");
+        if not WC then return; end;
+        local Rooms = WC:FindFirstChild("WholeCake");
+        if not Rooms then return; end;
+        local R3 = Rooms:WaitForChild("3");
+        local Orb = R3.Interactables.CenterTree.Orbs.Orb.Orb;
+
+        table.insert(OrbOrder, tostring(Orb.BrickColor));
+    end;
+end);
+
+task.spawn(function() -- WCD Cake
+    local Connections = {};
+
+    local Message = "";
+    local Recent;
+
+    local Cakes = { "Strawberry", "Chocolate", "Caramel", "Macha", "Cookies n Cream" };
+
+    while not getgenv().ESTOP do
+        task.wait();
+
+        local UI = PlayerGui:FindFirstChild("WholeCakeDialogue");
+        if UI and not Connections[1] then
+            local TextBox = UI.Main.Character.Textbox.TextFrame;
+            local function ProcessLine(Line)
+                local CC = Line.ChildAdded:Connect(function(c)
+                    local Text = c.TextLabel.Text;
+                    Message = Message .. Text;
+                    
+                    local Stamp = os.clock();
+                    Recent = Stamp;
+                    task.delay(.25, function()
+                        if Recent == Stamp then
+                            -- Finished Dialogue
+                            WC_CurrentCake = nil;
+
+                            for _, v in pairs(Cakes) do
+                                if Message:match(v) then
+                                    WC_CurrentCake = v;
+                                    break;
+                                end;
+                            end;
+
+                            Message = "";
+                        end;
+                    end);
+                end);
+
+                table.insert(Connections, CC);
+                task.wait(.25);
+                Line.AncestryChanged:Once(function()
+                    table.remove(Connections, table.find(Connections, CC));
+                    CC:Disconnect();
+                end);
+            end;
+
+            for i, v in pairs(TextBox:GetChildren()) do
+                if v.Name == "Line" then
+                    ProcessLine(v);
+                end;
+            end;
+
+            Connections[1] = TextBox.ChildAdded:Connect(ProcessLine);
+
+            UI.AncestryChanged:Once(function()
+                for i, v in pairs(Connections) do
+                    table.remove(Connections, i);
+                    v:Disconnect();
+                end;
+            end);
+        end;
+    end;
+end);
+
+task.spawn(function() -- Downtime
+    if not Downtime then
+        Downtime = 0;
+    end;
+
+    local MIN = 60
+    local HOUR = 3600
+
+    local ROGER_INTERVAL = 90 * MIN
+    local MIHAWK_INTERVAL = 2 * HOUR
+    local JUZ0_DELAY = 15 * MIN
+
+    local BossState = {
+        Juzo = {
+            scheduled = false,
+            spawned = false,
+            seeking = false,
+            nextSpawn = 0,
+            island = Locations.Juzo
+        },
+        Roger = {
+            scheduled = false,
+            spawned = false,
+            seeking = false,
+            lastWindow = -1,
+            island = Locations.Umi
+        },
+        Mihawk = {
+            scheduled = false,
+            spawned = false,
+            seeking = false,
+            lastWindow = -1,
+            island = Locations.Umi
+        }
+    }
+
+    local BossQueue = {}
+
+    local function InWindow(t, interval)
+        return (t % interval) < 2
+    end
+
+    local function GetWindowIndex(t, interval)
+        return math.floor(t / interval)
+    end
+
+    local function BossExists(name)
+        return #Actions.Misc.WithName(name) > 0
+    end
+
+    local function EnqueueBoss(name)
+        if table.find(BossQueue, name) then return end
+        BossState[name].scheduled = true
+        BossState[name].seeking = true
+        BossState[name].spawned = false
+        table.insert(BossQueue, name)
+    end
+
+    local function OnBossDeath(name)
+        BossState[name].scheduled = false
+        BossState[name].spawned = false
+        BossState[name].seeking = false
+        if name == "Juzo" then
+            BossState.Juzo.nextSpawn = os.time() + JUZ0_DELAY
+        end
+    end
+
+    while not getgenv().ESTOP do
+        RunService.Heartbeat:Wait()
+        local now = os.time()
+
+        if not BossState.Juzo.scheduled and now >= BossState.Juzo.nextSpawn then
+            if BossExists("Juzo") then
+                BossState.Juzo.scheduled = true
+                BossState.Juzo.spawned = true
+            else
+                EnqueueBoss("Juzo")
+            end
+        end
+
+        do
+            local w = GetWindowIndex(now, ROGER_INTERVAL)
+            if w ~= BossState.Roger.lastWindow and InWindow(now, ROGER_INTERVAL) then
+                BossState.Roger.lastWindow = w
+                if BossExists("Roger") then
+                    BossState.Roger.scheduled = true
+                    BossState.Roger.spawned = true
+                else
+                    EnqueueBoss("Roger")
+                end
+            end
+        end
+
+        do
+            local w = GetWindowIndex(now, MIHAWK_INTERVAL)
+            if w ~= BossState.Mihawk.lastWindow and InWindow(now, MIHAWK_INTERVAL) then
+                BossState.Mihawk.lastWindow = w
+                if BossExists("Mihawk") then
+                    BossState.Mihawk.scheduled = true
+                    BossState.Mihawk.spawned = true
+                else
+                    EnqueueBoss("Mihawk")
+                end
+            end
+        end
+
+        local currentBoss = BossQueue[1]
+        if currentBoss and dodt and os.time() >= Downtime then
+            local state = BossState[currentBoss]
+            local Nearby = Actions.Misc.WithName(currentBoss)
+
+            if #Nearby > 0 then
+                state.spawned = true
+                state.seeking = false
+                local boss = Nearby[1]
+                local tHRP = boss:FindFirstChild("HumanoidRootPart")
+                if tHRP then
+                    Tween:Create({Speed = Actions.Misc.GetSpeed(),Position = CFrame.lookAt(tHRP.Position + vector.create(0, tHRP.Size.Y + 6, 0),tHRP.Position ),Extra = ProcessBypass,Continue = true})
+                    Actions.Combat.Attack(Actions.Misc.InRange(nil, 20, "HumanoidRootPart"))
+                end
+            elseif state.seeking then
+                if Tween:Create({Speed = Actions.Misc.GetSpeed(),Position = state.island,Extra = ProcessBypass}) then
+                    task.wait(3)
+                end
+            elseif state.spawned then
+                table.remove(BossQueue, 1)
+                OnBossDeath(currentBoss)
+            end
+        end
+    end
+end)
+
+-- Extras
+task.spawn(function() -- Whole Cake
+    local Step = 1;
+    local BookStep = 0;
+
+    local WC, Rooms;
+    local function GetExit()
+        if Rooms then 
+            local CurrentRoom = Rooms:FindFirstChild(tostring(Step));
+            if not CurrentRoom then return; end;
+
+            local Doors = CurrentRoom:FindFirstChild("Door") or CurrentRoom:FindFirstChild("Doors");
+            if not Doors then return; end;
+
+            local Exit = Doors:FindFirstChild("Exit");
+            if not Exit then return; end;
+
+            local Neon = Exit:FindFirstChild("DoorNeon");
+            if not Neon then return; end;
+
+            return Exit, Neon.Color ~= Color3.new(0,0,0);
+        end;
+    end;
+
+    local function DoCache()
+        WC = Env:FindFirstChild("WholeCakeDungeon");
+        if WC then 
+            Rooms = WC:FindFirstChild("WholeCake");
+        end;
+    end;
+
+    local Steps = {
+        [1] = function()
+            local R1 = Rooms:FindFirstChild("1");
+            if not R1 then
+                if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Locations.WC_Entrance, Extra=ProcessBypass}) then
+                    local WCI = workspace.Islands:FindFirstChild("Whole Cake Island") 
+                    if not WCI then return; end;
+
+                    local WCM = WCI:FindFirstChild("WholeCakeIsland");
+                    if WCM then
+                        local Important = WCM.Important:FindFirstChild("CakeChateau");
+                        if Important and Important:FindFirstChild("Door") and Important.Door.low:FindFirstChild("Plane") then
+                            firetouchinterest(Important.Door.low.Plane, HRP, 0); firetouchinterest(Important.Door.low.Plane, HRP, 1);
+                        end;
+                    end;
+                end;
+                lastR1 = false;
+            else
+                if not lastR1 then
+                    lastR1=true;
+                    Tween:Cancel();
+                end;
+
+                local Cakes = R1:FindFirstChild("Cakes");
+
+                if WC_CurrentCake then
+                    local CakesOf = Actions.Misc.WithName(WC_CurrentCake, Cakes);
+                    table.sort(CakesOf, function(a, b)
+                        return a.PrimaryPart.Size.X > b.PrimaryPart.Size.X
+                    end);
+
+                    for _, Cake in next,(CakesOf) do
+                        local pp = Cake:FindFirstChildOfClass("ProximityPrompt");
+                        if not pp then continue; end;
+
+                        repeat task.wait(); until Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Cake:GetPivot().Position, Extra=ProcessBypass});
+                        task.wait(.25);
+                        fireproximityprompt(pp);
+                        task.wait(.25);
+                        repeat task.wait(); until Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Locations.WC_Platform, Extra=ProcessBypass});
+                        task.wait(.25);
+                        fireproximityprompt(pp);
+                        task.wait(.5);
+                    end;
+                end;
+            end;
+        end;
+
+        [2] = function()
+            local R2 = Rooms:WaitForChild("2");
+            local CurrentRoom = R2:FindFirstChild("Room" .. tostring(BookStep));
+            if (not CurrentRoom) or (BookStep > 5) then Step+=1 return; end;
+
+            local Hints = CurrentRoom.Hint;
+            local Interactables = CurrentRoom.Interactables;
+            local Exit = Interactables:FindFirstChild("Exit");
+            task.wait(1);
+
+
+            if Exit then
+                local Part = Exit.Part;
+
+                if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Part.Position, Extra=ProcessBypass}) then
+                    task.wait(1);
+                    repeat task.wait(); firetouchinterest(Part, HRP, 0); firetouchinterest(Part, HRP, 1); until Actions.Misc.GetDist(Part.Position, HRP.Position) > 25;
+                end;
+
+                Step+=1;
+                BookStep=0;
+                return;
+            end;
+            
+            local Doors = {};
+            for _, v in pairs(Interactables:GetChildren()) do
+                Doors[tostring(v:GetAttribute("Color"))] = v;
+            end;
+            
+            for _, v in pairs(Hints:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    local Book = Doors[tostring(v.Color)];
+                    if Book then
+                        Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Book:GetPivot().Position, Extra=ProcessBypass});
+                        
+                        local ti = Book:FindFirstChild("Part");
+                        if not ti then continue; end;
+
+                        BookStep+=1;
+                        repeat task.wait(); firetouchinterest(ti, HRP, 0); firetouchinterest(ti, HRP, 1); until Actions.Misc.GetDist(Book:GetPivot().Position, HRP.Position) > 25;
+                        task.wait(.25);
+
+                        break;
+                    end;
+                end;
+            end;   
+        end;
+
+        [3] = function()
+            local R3 = Rooms:WaitForChild("3");
+            local Flowers = R3.Interactables.Minigame["Small Flowers"];
+
+            local Colors = {
+                ["orange"] = Flowers.Yellow;
+                ["blue"] = Flowers.Blue;
+                ["pink"] = Flowers.Pink;
+                ["red"] = Flowers.Red;
+            };
+
+            if OrbDone then
+                OrbDone = false;
+                for _, c in next,(OrbOrder) do
+                    local Flower;
+                    for i, v in pairs(Colors) do
+                        if string.lower(c):match(i) then
+                            Flower=v;
+                            break;
+                        end;
+                    end;
+
+                    repeat RSV.Heartbeat:Wait(); until Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Flower:GetPivot().Position, Extra=ProcessBypass});
+                    task.wait(.25);
+                    fireproximityprompt(Flower.Part:FindFirstChildOfClass("ProximityPrompt"));
+                    task.wait(1);
+                end;
+            end;
+        end;
+
+        [4] = function()
+            local Nearby = Actions.Misc.InRange(nil, 200);
+            if #Nearby > 0 then
+                local Closest = Actions.Misc.GetNearest(Nearby);
+                if not Closest then return; end;
+                local tHRP = Closest:FindFirstChild("HumanoidRootPart");
+
+                if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=CFrame.lookAt(tHRP.Position-vector.create(0, tHRP.Size.Y+6, 0), tHRP.Position), Extra=ProcessBypass, Continue=true}) then
+                    if Closest.Name == "Juice Empress" then
+                        HollowImpale();
+                    else
+                        task.spawn(function()
+                            Actions.Combat.Attack(Actions.Misc.InRange(nil, 20, "HumanoidRootPart"));
+                        end);
+                    end;
+                end;
+            end;
+        end;
+
+        [5] = function()
+            local Nearby = Actions.Misc.WithName("Big Mama");
+            if #Nearby > 0 and Nearby[1]:FindFirstChild("HumanoidRootPart") then
+                BM_Spawned = true;
+
+                local Closest = Nearby[1]; -- Big Mom
+                local tHRP = Closest:FindFirstChild("HumanoidRootPart");
+
+                if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=CFrame.lookAt(tHRP.Position+vector.create(0, 6, 0), tHRP.Position), Extra=ProcessBypass, Continue=true}) then
+                    HollowImpale();
+                end;
+            elseif BM_Spawned then
+                BM_Spawned = false;
+                Step += 1;
+                Tween:Cancel();
+                task.wait(8);
+            end;
+        end;
+
+        [6] = function()
+            local Nearby = Actions.Misc.WithName("Mochi Emperor");
+
+            if #Nearby > 0 and Nearby[1]:FindFirstChild("HumanoidRootPart") then
+                Kata_Spawned = true;
+
+                local Closest = Nearby[1]; -- Kata
+                local tHRP = Closest:FindFirstChild("HumanoidRootPart");
+
+                if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=CFrame.lookAt(tHRP.Position+vector.create(0, 6, 0), tHRP.Position), Extra=ProcessBypass, Continue=true}) then
+                    HollowImpale();
+                end;
+            elseif Kata_Spawned then
+                Kata_Spawned = false;
+                Step = 1;
+
+                Downtime = os.time() + 301;
+
+                Tween:Cancel();
+            else
+                local Mirrors = {};
+                local WCI = workspace.Islands:FindFirstChild("Whole Cake Island") 
+                if not WCI then return; end;
+                
+                local MR = WCI:FindFirstChild("Mirror Room");
+                if MR then
+                    local MS = MR:FindFirstChild("Mirrors");
+                    if MS then
+                        local MW = MS:FindFirstChild("MirrorWorld")
+                        if MW and MW:FindFirstChild("TPBrick") then 
+                            table.insert(Mirrors, MW.TPBrick);
+                        end;
+                    end;
+                end;
+
+                local WCM = WCI:FindFirstChild("WholeCakeIsland");
+                if WCM then
+                    local Important = WCM.Important:FindFirstChild("WholeCake");
+                    if Important and Important:FindFirstChild("MirrorTPEnter") then
+                        table.insert(Mirrors, Important.MirrorTPEnter);
+                    end;
+                end;
+
+                local Mirror = Actions.Misc.GetNearest(Mirrors);
+                if Mirror then
+                    if Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Mirror.Position, Extra=ProcessBypass}) then
+                        firetouchinterest(Mirror, HRP, 0); firetouchinterest(Mirror, HRP, 1);
+                        task.wait(3);
+                    end;
+                else
+                    Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Locations.WC_Mirror, Extra=ProcessBypass});
+                    task.wait(1);
+                end;
+            end;
+        end;
+    }
+
+    local LastCache = 0;
+    while not getgenv().ESTOP do
+        RSV.Heartbeat:Wait();
+        if os.clock()-LastCache > 1 then
+            DoCache();
+            LastCache=os.clock();
+        end;
+
+        if autoWC and ((not dodt) or (Downtime and os.time() > Downtime)) then
+            if Rooms then 
+                local Exit, CanExit = GetExit();
+                if CanExit then
+                    if Step == 4 then -- Big Mom
+                        Tween:Cancel();
+                        task.wait(12);
+                    end;
+
+                    repeat task.wait(); until Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Exit:GetPivot().Position - vector.create(0, 16, 0), Extra=ProcessBypass});
+                    repeat task.wait(); until Actions.Misc.GetDist(HRP.Position, Exit:GetPivot().Position - vector.create(0, 16, 0)) > 150;
+
+                    task.wait(2);
+                    Step += 1;
+                end;
+
+                local CurrentStep = Steps[Step];
+                if CurrentStep then CurrentStep(); end;
+            elseif Step == 1 then
+                Tween:Create({Speed=Actions.Misc.GetSpeed(), Position=Locations.WC_Entrance, Extra=ProcessBypass});
+                local WCI = workspace.Islands:FindFirstChild("Whole Cake Island") 
+                if not WCI then continue; end;
+
+                local WCM = WCI:FindFirstChild("WholeCakeIsland");
+                if WCM then
+                    local Important = WCM.Important:FindFirstChild("CakeChateau");
+                    if Important and Important:FindFirstChild("Door") and Important.Door.low:FindFirstChild("Plane") then
+                        firetouchinterest(Important.Door.low.Plane, HRP, 0); firetouchinterest(Important.Door.low.Plane, HRP, 1);
+                    end;
+                end;
+            end;
+        end;
+    end;
+end);
+
+local IgnoreEffects = {"Soul", "Present", "ChristmasGift"};
+local Starting = Effects:GetChildren();       
+Effects.ChildAdded:Connect(function(Obj) 
+    if not noEffects then return; end;
+    if table.find(IgnoreEffects, Obj.Name) then return; end;
+
+    Obj:Destroy();
+    for _, v in pairs(workspace.Effects:GetChildren()) do
+        if not table.find(Starting, v) and not table.find(IgnoreEffects, v.Name) then
+            v:Destroy();
+        end;
+    end;
+end);
+
+local old;
+old = hookmetamethod(game, "__namecall", function(self, ...)
+    if not checkcaller() then
+        local Response = AttemptHook(self, getnamecallmethod(), ...); -- 0 = Return, 
+        if Response == 0 then return; end;
+    end;
+
+    return old(self, ...);
+end);
+
