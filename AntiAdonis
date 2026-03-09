@@ -6,56 +6,61 @@ local State = {
 
 local function Scan()
     for _, obj in getgc(true) do
-        if typeof(obj) == "table" then
-            local det = rawget(obj, "Detected")
-            local kil = rawget(obj, "Kill")
+        if typeof(obj) == 'table' then
+            local det = rawget(obj, 'Detected')
+            local kil = rawget(obj, 'Kill')
 
-            if typeof(det) == "function" and not State.Detected then
+            -- Match exact Adonis structure
+            if typeof(det) == 'function' and not State.Detected then
                 State.Detected = det
             end
-
-            if rawget(obj, "Variables")
-            and rawget(obj, "Process")
-            and typeof(kil) == "function"
-            and not State.Kill then
+            if
+                rawget(obj, 'Variables')
+                and rawget(obj, 'Process')
+                and typeof(kil) == 'function'
+                and not State.Kill
+            then
                 State.Kill = kil
             end
         end
     end
 end
 
-repeat
-    Scan()
-    task.wait(0.5)
-until State.Detected and State.Kill
+local function Check()
+    if State.Detected then
+        hookfunction(
+            State.Detected,
+            newcclosure(function(Action, Info, NoCrash)
+                if State.DEBUG then
+                    warn(
+                        '[Adonis] Detected blocked:',
+                        Action or 'nil',
+                        Info or 'nil'
+                    )
+                end
+                return true -- All checks pass
+            end)
+        )
+        print('[Anti-Adonis] Detected hooked')
+    end
 
-print("[Anti-Adonis] Adonis found, hooking...")
-
-if State.Detected then
-    hookfunction(
-        State.Detected,
-        newcclosure(function(Action, Info, NoCrash)
-            if State.DEBUG then
-                warn("[Adonis] Detected blocked:", Action or "nil", Info or "nil")
-            end
-            return true
-        end)
-    )
-    print("[Anti-Adonis] Detected hooked")
+    if State.Kill then
+        hookfunction(
+            State.Kill,
+            newcclosure(function(Info)
+                if State.DEBUG then
+                    warn('[Adonis] Kill blocked:', Info or 'nil')
+                end
+                -- Do nothing
+            end)
+        )
+        getgenv().NoAdonis = true
+        print('[Anti-Adonis] Kill hooked')
+        return true
+    end
 end
 
-if State.Kill then
-    hookfunction(
-        State.Kill,
-        newcclosure(function(Info)
-            if State.DEBUG then
-                warn("[Adonis] Kill blocked:", Info or "nil")
-            end
-        end)
-    )
-    getgenv().NoAdonis = true
-    print("[Anti-Adonis] Kill hooked")
-end
+repeat Scan(); task.wait(); until Check();
 
 setthreadidentity(7)
-print("[Anti-Adonis] LOADED – REMOTE SPY SAFE")
+print('[Anti-Adonis] LOADED – REMOTE SPY SAFE')
