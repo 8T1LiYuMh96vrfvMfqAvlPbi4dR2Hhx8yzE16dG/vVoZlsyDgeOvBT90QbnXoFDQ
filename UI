@@ -1,10 +1,4 @@
--- ============================================================================
--- UI LIBRARY - Refactored and Organized
--- ============================================================================
-
--- ============================================================================
--- DEPENDENCIES & SETUP
--- ============================================================================
+-- UI LIBRARY
 local Repo = 'https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG'
 local Setup = loadstring(
     game:HttpGet(Repo .. '/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ')
@@ -16,11 +10,10 @@ Setup:Basics()
 
 local RGB = Color3.fromRGB
 
--- ============================================================================
--- LIBRARY INITIALIZATION
--- ============================================================================
 local Library = {
     Screen = nil,
+    Maid = nil,
+
     Cache = {},
     Created = { Tabs = {} },
     Theme = 'Default',
@@ -59,10 +52,6 @@ local Library = {
     },
 }
 
--- ============================================================================
--- UTILITY FUNCTIONS
--- ============================================================================
-
 -- Set default value for table
 local function def(t, s, v)
     t[s] = t[s] or v
@@ -90,11 +79,6 @@ end
 -- Empty callback function
 local EmptyF = function(...) end
 
--- ============================================================================
--- LIBRARY CORE FUNCTIONS
--- ============================================================================
-
---- Make an element draggable
 function Library:MakeDraggable(dragHandle, target)
     if not dragHandle then return end
     
@@ -214,7 +198,6 @@ end
 
 RunService.Heartbeat:Connect(UpdateColors)
 
---- Create a new instance with properties
 function Library:Create(Class, Properties, Reg)
     local _Instance = Class
     if type(Class) == 'string' then
@@ -236,7 +219,6 @@ function Library:Create(Class, Properties, Reg)
     return _Instance
 end
 
---- Create a clicker button (invisible overlay)
 function Library.Clicker(Obj, ZIndex)
     return Library:Create('TextButton', {
         Parent = Obj,
@@ -247,15 +229,11 @@ function Library.Clicker(Obj, ZIndex)
     })
 end
 
--- ============================================================================
--- COMPONENT METATABLES (Forward Declarations)
--- ============================================================================
-local ComponentMT -- For components (Button, Toggle, etc.)
-local SubWindowMT -- For sub-windows
 
--- ============================================================================
--- SECTION/TAB COMPONENT METHODS
--- ============================================================================
+-- Metatables
+local ComponentMT;
+local SubWindowMT;
+
 local SectionMT = {
     
     CreateLabel = function(self, Data)
@@ -1515,9 +1493,6 @@ local SectionMT = {
     end,
 }
 
--- ============================================================================
--- SUB-WINDOW METATABLE
--- ============================================================================
 SubWindowMT = {
     --- Create a Sub-Window
     CreateSubWindow = function(self, Data)
@@ -1642,13 +1617,9 @@ SubWindowMT = {
     end,
 }
 
--- Assign ComponentMT for use in sections
 ComponentMT = SubWindowMT
 
--- ============================================================================
--- MAIN WINDOW CREATION
--- ============================================================================
-
+-- MAIN WINDOW
 function Library:CreateWindow(Name)
     local Window = {}
     
@@ -1930,10 +1901,18 @@ function Library:CreateWindow(Name)
         ScreenGUI.Enabled = Value or not ScreenGUI.Enabled
     end
     
+    function Window.Exit()
+        ScreenGUI:Destroy();
+        if Library.Maid then
+            Library.Maid:DoCleaning();
+        end;
+    end
+
     -- Button Interactions
     local CloseButton = Library.Clicker(CloseHolder)
     local MiniButton = Library.Clicker(MiniHolder)
     
+    CloseButton.MouseButton1Click:Connect(Window.Exit)
     MiniButton.MouseButton1Click:Connect(Window.Visibility)
     
     -- Create Tab Method
@@ -2162,7 +2141,4 @@ function Library:CreateWindow(Name)
     return Window
 end
 
--- ============================================================================
--- RETURN LIBRARY
--- ============================================================================
 return Library
