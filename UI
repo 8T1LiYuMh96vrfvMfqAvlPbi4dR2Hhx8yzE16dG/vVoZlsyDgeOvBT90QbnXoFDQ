@@ -1,4 +1,4 @@
--- UI LIBRARY
+-- UI LIBRARY, needs saving, and add a extension when hovering over tabs for text and search bar
 local Repo = 'https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG'
 local Setup = loadstring(
     game:HttpGet(Repo .. '/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ')
@@ -40,6 +40,7 @@ local Library = {
                 Enum.FontWeight.SemiBold,
                 Enum.FontStyle.Italic
             ),
+
             Font = Font.new(
                 'rbxasset://fonts/families/Nunito.json',
                 Enum.FontWeight.SemiBold
@@ -1609,7 +1610,12 @@ SubWindowMT = {
         
         -- Right-click on parent to show
         if self.Clicker then
+            if CurrentSub ~= SubWindow then
+                CurrentSub.Hide();
+            end;
+
             self.Clicker.MouseButton2Click:Connect(SubWindow.Show)
+            CurrentSub = SubWindow;
         end
         
         setmetatable(SubWindow, { __index = SectionMT })
@@ -1839,14 +1845,57 @@ function Library:CreateWindow(Name)
     )
     
     Library:Register(Sidebar, { BackgroundColor3 = 'Foreground' })
+
+    local SidebarTexts = Library:Create('Frame', {
+        Parent = Sidebar,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 0, 1, 0),
+        Position = UDim2.new(1, 0, 0, 0),
+        AnchorPoint = Vector2.new(1, 0),
+        ZIndex = 6,
+        Visible = false
+    })
+
+    Library:Register(SidebarTexts, { BackgroundColor3 = 'Foreground' })
+    Library:Create('UIListLayout', {
+        Parent = SidebarTexts,
+        Padding = UDim.new(0, 5),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        HorizontalAlignment = Enum.HorizontalAlignment.Left,
+    })
+    
+    Library:Create('UIPadding', {
+        Parent = SidebarTexts,
+        PaddingBottom = UDim.new(0, 10),
+        PaddingTop = UDim.new(0, 10),
+        PaddingLeft = UDim.new(0, 10),
+    })
+
+    Mouse.Move:Connect(function()
+        if MouseInBounds(Sidebar.AbsolutePosition, Sidebar.AbsoluteSize) then
+            -- Mouse Hovering Sidebar
+            SidebarTexts.Visible = true;
+            TweenService:Create(SidebarTexts, TweenInfo.new(0.01, Enum.EasingStyle.Quad), {
+                Size = UDim2.new(3, 0, 1, 0)
+            }):Play()
+        else
+            -- Not
+            local Tween = TweenService:Create(SidebarTexts, TweenInfo.new(0.01, Enum.EasingStyle.Quad), {
+                Size = UDim2.new(0, 0, 1, 0)
+            });
+            Tween:Play();
+            Tween.Completed:Once(function()
+                SidebarTexts.Visible = false;
+            end);
+        end;
+    end);
     
     -- Sidebar Icons Container
     local SidebarIcons = Library:Create('Frame', {
         Parent = Sidebar,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.new(0, 0, 1, 0),
-        AnchorPoint = Vector2.new(0, 1),
+        Size = UDim2.new(1, 0, 1, -50),
+        Position = UDim2.new(0, 0, 0, 0)
     })
     
     Library:Create('UIListLayout', {
@@ -1861,6 +1910,23 @@ function Library:CreateWindow(Name)
         PaddingBottom = UDim.new(0, 10),
         PaddingTop = UDim.new(0, 10),
     })
+
+    local SearchIcon = Library:Create("ImageLabel" {
+        Parent = Sidebar,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 0),
+        Position = UDim2.new(.5,0,1,0),
+        AnchorPoint = Vector2.new(.5, 1),
+        Image = "rbxassetid://2804603863"
+    })
+
+    Library:Register(SearchIcon, { ImageColor3 = 'Icon' })
+    Library:Create('UIAspectRatioConstraint', {
+        Parent = SearchIcon,
+        AspectRatio = 1,
+        AspectType = Enum.AspectType.ScaleWithParentSize,
+    })
+
     
     -- Main Content Area
     local Main = Library:Create('Frame', {
@@ -1916,9 +1982,22 @@ function Library:CreateWindow(Name)
     MiniButton.MouseButton1Click:Connect(Window.Visibility)
     
     -- Create Tab Method
-    function Window:CreateTab(ID)
+    function Window:CreateTab(TText, ID)
         local Tab = {}
         
+        -- Tab Text 
+        local TabText = Library:Create("TextLabel",{
+            Parent = SidebarTexts,
+            AutomaticSize = Enum.AutomaticSize.X,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Text = TText or "Tab",
+            TextSize = 14,
+            Size = UDim2.new(0, 0, .125, 0),
+            ZIndex = 7
+        });
+
+        Library:Register(TabText, { TextColor3 = 'Text', FontFace="Font" })
+
         -- Tab Icon
         local TabIcon = Library:Create('ImageLabel', {
             Parent = SidebarIcons,
