@@ -126,11 +126,11 @@ Setup["ClientController"] = function(self)
                 end;
 
                 local function on()
-                    Loop("Heartbeat", "INFJUMP", true, {jump, .025})
+                    Loop("Heartbeat", "INFJUMP", true, jump)
                 end;
 
                 local function off()
-                    Loop("Heartbeat", "INFJUMP", false, {jump, .025})
+                    Loop("Heartbeat", "INFJUMP", false, jump)
                 end;
 
                 self.IJX = Recorder:Bind("Space", on);
