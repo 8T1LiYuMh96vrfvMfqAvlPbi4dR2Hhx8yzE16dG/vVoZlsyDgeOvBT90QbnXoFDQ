@@ -98,10 +98,10 @@ Setup["ClientController"] = function(self)
             end;
 
             if Toggle then
-                self.TWX = rsv.RenderStepped:Connect(function()
+                self.TWX = rsv.Heartbeat:Connect(function(dt)
                     if hum.MoveDirection.Magnitude > 0 then
                         walkspeed = walkspeed or 1;
-                        char:TranslateBy(hum.MoveDirection * walkspeed)
+                        char:TranslateBy(hum.MoveDirection * walkspeed * dt)
                     end;
                 end);
             end;
