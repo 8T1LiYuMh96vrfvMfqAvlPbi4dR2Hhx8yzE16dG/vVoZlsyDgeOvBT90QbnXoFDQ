@@ -56,8 +56,9 @@ local function Check()
             end)
         )
         print('[Anti-Adonis] Kill hooked')
-        return true
     end
+
+    return NoAdonis;
 end
 
 repeat Scan(); task.wait(); until Check();
