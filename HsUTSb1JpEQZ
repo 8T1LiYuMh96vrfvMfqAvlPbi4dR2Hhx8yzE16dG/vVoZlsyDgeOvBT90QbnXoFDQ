@@ -687,9 +687,9 @@ Setup["Loop"] = function(self)
                 for _, v in pairs(Connections.Heartbeat.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
-                        if dt >= t then f(); end;
+                        if dt >= t then f(dt); end;
                     else
-                        v();
+                        v(dt);
                     end;
                 end;
             end);
@@ -701,9 +701,9 @@ Setup["Loop"] = function(self)
                 for _, v in pairs(Connections.RenderStepped.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
-                        if dt >= t then f(); end;
+                        if dt >= t then f(dt); end;
                     else
-                        v();
+                        v(dt);
                     end;
                 end;
             end);
