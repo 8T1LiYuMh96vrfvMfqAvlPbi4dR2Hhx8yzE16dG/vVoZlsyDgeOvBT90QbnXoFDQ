@@ -143,7 +143,7 @@ Setup["ClientController"] = function(self)
                 end;
 
                 self.IJX = Recorder:Bind("Space", on);
-                self.IJX = Recorder:Bind("Space", off, true);
+                self.IJX2 = Recorder:Bind("Space", off, true);
             end;
         end,
     };
@@ -687,7 +687,7 @@ Setup["Loop"] = function(self)
     local Manager = {};
     if Called["Loop"] then return Called["Loop"]; end;
     Called["Loop"] = Manager;
-    Setup:Basic();
+    Setup:Basics();
     
     local Connections = {
         Heartbeat = {
