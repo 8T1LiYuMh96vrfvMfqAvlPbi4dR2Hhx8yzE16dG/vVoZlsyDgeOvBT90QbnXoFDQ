@@ -40,6 +40,7 @@ Setup["ClientController"] = function(self)
     if Called["ClientController"] then return Called["ClientController"]; end;
     Called["ClientController"] = Manager;
 
+    local Loop = self:Loop();
     self:Basics();
 
     function Manager:Reset()
@@ -93,18 +94,12 @@ Setup["ClientController"] = function(self)
         end,
 
         TW = function(self, Toggle)
-            if self.TWX then
-                self.TWX:Disconnect();
-            end;
-
-            if Toggle then
-                self.TWX = rsv.Heartbeat:Connect(function(dt)
-                    if hum.MoveDirection.Magnitude > 0 then
-                        walkspeed = walkspeed or 1;
-                        char:TranslateBy(hum.MoveDirection * walkspeed * dt)
-                    end;
-                end);
-            end;
+            Loop("Heartbeat", "TPWALK", Toggle, function(dt)
+                if hum.MoveDirection.Magnitude > 0 then
+                    walkspeed = walkspeed or 1;
+                    char:TranslateBy(hum.MoveDirection * walkspeed * dt)
+                end;
+            end)
         end,
 
         -- Jump
@@ -119,6 +114,7 @@ Setup["ClientController"] = function(self)
             if self.IJX then
                 self.IJX:Disconnect();
                 self.IJX2:Disconnect();
+                Loop("Heartbeat", "INFJUMP", false, {jump, .025})
             end;
 
             if Toggle then
@@ -130,16 +126,11 @@ Setup["ClientController"] = function(self)
                 end;
 
                 local function on()
-                    Pressing = true;
-
-                    while Pressing do
-                        jump();
-                        task.wait(.1);
-                    end;
+                    Loop("Heartbeat", "INFJUMP", true, {jump, .025})
                 end;
 
                 local function off()
-                    Pressing = false;
+                    Loop("Heartbeat", "INFJUMP", false, {jump, .025})
                 end;
 
                 self.IJX = Recorder:Bind("Space", on);
