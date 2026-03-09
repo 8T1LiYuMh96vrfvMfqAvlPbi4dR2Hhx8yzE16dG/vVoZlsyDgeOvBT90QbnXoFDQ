@@ -689,11 +689,11 @@ Setup["Loop"] = function(self)
     Called["Loop"] = Manager;
     Setup:Basics();
     
-    local Connections = {
+    local Connections; Connections = {
         Heartbeat = {
             List = {};
             _Connection = RSV.Heartbeat:Connect(function(dt)
-                for _, v in pairs(List) do
+                for _, v in pairs(Connections.Heartbeat.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
                         if dt >= t then f(); end;
@@ -707,7 +707,7 @@ Setup["Loop"] = function(self)
         RenderStepped = {
             List = {};
             _Connection = RSV.RenderStepped:Connect(function(dt)
-                for _, v in pairs(List) do
+                for _, v in pairs(Connections.RenderStepped.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
                         if dt >= t then f(); end;
