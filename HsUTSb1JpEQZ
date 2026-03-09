@@ -1,7 +1,6 @@
 -- Functions
 
 local Setup, Called = {}, {};
-print("Loaded4")
 Setup["Basics"] = function(self)
     if Called["Basics"] then return; end;
     Called["Basics"] = true; 
@@ -613,6 +612,133 @@ Setup["InputRecorder"] = function(self)
             end;
         end;
     end);
+
+    return Manager;
+end;
+
+Setup["Hooking"] = function(self)
+    local Manager = {};
+    if Called["Hooking"] then return Called["Hooking"]; end;
+    Called["Hooking"] = Manager;
+
+    local Hooks = {};
+    local function AttemptHook(Instance, Method, ...)
+        local Hook = Hooks[Instance];
+        if Hook and Hook[1] == Method then
+            return Hook[2](...) or nil;
+        end;
+    end;
+
+    function Manager.Add(Instance, Method, Response)
+        return pcall(function() Hooks[Instance] = {Method, Response} end);
+    end;
+
+    function Manager.Remove(Instance)
+        return pcall(function() Hooks[Instance] = nil; end);
+    end;
+
+    local old;
+    old = hookmetamethod(game, "__namecall", function(self, ...)
+        if not checkcaller() then
+            local Response = AttemptHook(self, getnamecallmethod(), ...); -- 0 = Return, 
+            if Response == 0 then return; end;
+        end;
+
+        return old(self, ...);
+    end);
+
+    return Manager;
+end;
+
+Setup["Maid"] = function(self)
+    local Manager = {};
+    if Called["Maid"] then return Called["Maid"]; end;
+    Called["Maid"] = Manager;
+
+    function Manager.new()
+        local Maid = {
+            Tasks = {};
+        }
+        function Maid:GiveTask(task)
+            table.insert(self.Tasks, task);
+        end;
+
+        function Maid:DoCleaning()
+            for _, task in ipairs(self.Tasks) do
+                if typeof(task) == "RBXScriptConnection" then
+                    task:Disconnect();
+                elseif typeof(task) == "Instance" then
+                    task:Destroy();
+                elseif type(task) == "function" then
+                    task();
+                end;
+            end;
+
+            table.clear(self.Tasks);
+        end;
+        
+        return Maid;
+    end;
+
+    return Manager;
+end;
+
+Setup["Loop"] = function(self)
+    local Manager = {};
+    if Called["Loop"] then return Called["Loop"]; end;
+    Called["Loop"] = Manager;
+    Setup:Basic();
+    
+    local Connections = {
+        Heartbeat = {
+            List = {};
+            _Connection = RSV.Heartbeat:Connect(function(dt)
+                for _, v in pairs(List) do
+                    if typeof(v) == "table" then
+                        local f, t = table.unpack(v);
+                        if dt >= t then f(); end;
+                    else
+                        v();
+                    end;
+                end;
+            end);
+        };
+
+        RenderStepped = {
+            List = {};
+            _Connection = RSV.RenderStepped:Connect(function(dt)
+                for _, v in pairs(List) do
+                    if typeof(v) == "table" then
+                        local f, t = table.unpack(v);
+                        if dt >= t then f(); end;
+                    else
+                        v();
+                    end;
+                end;
+            end);
+        };
+    };
+
+    local Storage = {};
+    setmetatable(Manager, {
+        __call = function(Connection, Key, Value, Data)
+            local ct = Connections[Connection];
+            if not ct then return warn("Invalid Loop Connection"); end;
+
+            if Value then
+                self.List[Key] = Data;
+            else
+                self.List[Key] = nil;
+            end;
+        end;
+    });
+
+    function Manager.Kill()
+        for _, v in pairs(Connections) do 
+            v._Connection:Disconnect();
+            Called["Loop"] = nil;
+        end;
+    end;
 
     return Manager;
 end;
