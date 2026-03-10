@@ -349,6 +349,7 @@ Setup["Tween"] = function(self)
                 while Hit and (not Hit.Instance.CanCollide and not Hit.Instance:IsA("MeshPart")) do
                     table.insert(Params.FilterDescendantsInstances, Hit.Instance)
                     Hit = workspace:Raycast(rayOrigin, rayDir, Params)
+                    task.wait();
                 end
 
                 if Hit then
