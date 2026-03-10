@@ -368,6 +368,7 @@ Setup["Tween"] = function(self)
                     while Under and (not Under.Instance.CanCollide and not Under.Instance:IsA("MeshPart")) do
                         table.insert(Params2.FilterDescendantsInstances, Under.Instance)
                         Under = workspace:Raycast(p1 + vector.create(0, 10, 0), Vector3.new(0, -100, 0), Params2)
+                        RSV.Heartbeat:Wait()
                     end
 
                     if Under then
