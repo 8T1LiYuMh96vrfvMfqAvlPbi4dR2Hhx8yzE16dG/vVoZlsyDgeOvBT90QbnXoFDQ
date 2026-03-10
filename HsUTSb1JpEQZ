@@ -349,7 +349,7 @@ Setup["Tween"] = function(self)
 
                 if Hit then
                     local Part = Hit.Instance
-                    local Top = Hit.Position.Y + 0.05
+                    local Top = Hit.Position.Y
                     local diff = Top - p1.Y
 
                     if diff <= math.max(stepY, 1) then
