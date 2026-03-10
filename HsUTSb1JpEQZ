@@ -342,11 +342,6 @@ Setup["Tween"] = function(self)
                 Params.RespectCanCollide = true
                 Params.IgnoreWater = true
 
-                local Params2 = RaycastParams.new()
-                Params2.FilterDescendantsInstances = {Character}
-                Params2.FilterType = Enum.RaycastFilterType.Blacklist
-                Params2.IgnoreWater = true
-
                 local rayOrigin = p1 - Vector3.new(0, HRP.Size.Y / 2, 0)
                 local rayDir = xDir * math.max(stepX, 4)
 
@@ -363,7 +358,7 @@ Setup["Tween"] = function(self)
                         Temporary = Vector3.new(Hit.Position.X, Top + 1, Hit.Position.Z) - xDir * 2
                     end
                 else
-                    local Under = workspace:Raycast(p1 + vector.create(0, 10, 0), Vector3.new(0, -100, 0), Params2)
+                    local Under = workspace:Raycast(p1 + vector.create(0, 10, 0), Vector3.new(0, -100, 0), Params)
 
                     if Under then
                         HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, 1, 0))
