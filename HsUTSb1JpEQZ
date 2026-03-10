@@ -621,11 +621,16 @@ Setup["Hooking"] = function(self)
     end;
 
     function Manager.Add(Instance, Method, Response)
+        if Hooks[Instance] then return; end;
         return pcall(function() Hooks[Instance] = {Method, Response} end);
     end;
 
     function Manager.Remove(Instance)
         return pcall(function() Hooks[Instance] = nil; end);
+    end;
+
+    function Manager.Exists(Instance)
+        return Hooks[Instance] ~= nil;
     end;
 
     local old;
