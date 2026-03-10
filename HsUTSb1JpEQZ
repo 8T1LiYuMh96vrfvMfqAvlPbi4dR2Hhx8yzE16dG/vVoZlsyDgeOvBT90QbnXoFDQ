@@ -339,7 +339,6 @@ Setup["Tween"] = function(self)
                 local Params = RaycastParams.new()
                 Params.FilterDescendantsInstances = {Character}
                 Params.FilterType = Enum.RaycastFilterType.Blacklist
-                Params.RespectCanCollide = true
                 Params.IgnoreWater = true
 
                 local rayOrigin = p1 - Vector3.new(0, HRP.Size.Y / 2, 0)
@@ -347,9 +346,14 @@ Setup["Tween"] = function(self)
 
                 local Hit = workspace:Raycast(rayOrigin, rayDir, Params)
 
+                while Hit and (not Hit.Instance.CanCollide and not Hit.Instance:IsA("MeshPart")) do
+                    table.insert(Params.FilterDescendantsInstances, Hit.Instance)
+                    Hit = workspace:Raycast(rayOrigin, rayDir, Params)
+                end
+
                 if Hit then
                     local Part = Hit.Instance
-                    local Top = Part.Position.Y + Part.Size.Y / 2
+                    local Top = Hit.Position.Y + 0.05
                     local diff = Top - p1.Y
 
                     if diff <= math.max(stepY, 1) then
