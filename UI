@@ -1,4 +1,4 @@
--- UI LIBRARY, needs search and color picker
+-- UI LIBRARY, needs saving, and add a extension when hovering over tabs for text and search bar
 local Repo = 'https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG'
 local Setup = loadstring(
     game:HttpGet(Repo .. '/vVoZlsyDgeOvBT90QbnXoFDQ/main/HsUTSb1JpEQZ')
@@ -280,7 +280,6 @@ function Library.Load()
         end;
     end;
 end;
-
 
 -- Metatables
 local ComponentMT;
@@ -1256,6 +1255,8 @@ local SectionMT = {
             Input.Value = v
             Input.Fire()
         end
+
+        Input.SetValue(Data.Default);
         
         if not self.isSub then
             local Clicker = Library.Clicker(Background, baseZ)
