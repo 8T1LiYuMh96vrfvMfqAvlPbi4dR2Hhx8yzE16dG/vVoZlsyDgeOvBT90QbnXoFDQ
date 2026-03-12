@@ -350,11 +350,6 @@ Setup["Tween"] = function(self)
                 if Hit then
                     local Part = Hit.Instance
                     local Top = Hit.Position.Y
-                    if Data.Floor then
-                        if p1.Y > Data.Floor then
-                            Top = math.max(Top, Data.Floor);
-                        end;
-                    end;
                     
                     local diff = Top - p1.Y
 
@@ -365,9 +360,16 @@ Setup["Tween"] = function(self)
                     end
                 else
                     local Under = workspace:Raycast(p1 + vector.create(0, 10, 0), Vector3.new(0, -100, 0), Params)
+                    local Above = 2;
+
+                    if Data.Floor then
+                        if p1.Y > Data.Floor then
+                            Above += math.max(0, Data.Floor - Under.Position.Y);
+                        end;
+                    end;
 
                     if Under then
-                        HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, 1, 0))
+                        HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, Above, 0))
                     end
                 end
             end
