@@ -350,6 +350,12 @@ Setup["Tween"] = function(self)
                 if Hit then
                     local Part = Hit.Instance
                     local Top = Hit.Position.Y
+                    if Data.Floor then
+                        if p1.Y > Data.Floor then
+                            Top = math.max(Top, Data.Floor);
+                        end;
+                    end;
+                    
                     local diff = Top - p1.Y
 
                     if diff <= math.max(stepY, 1) then
