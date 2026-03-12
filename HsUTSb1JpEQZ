@@ -362,13 +362,12 @@ Setup["Tween"] = function(self)
                     local Under = workspace:Raycast(p1 + vector.create(0, 10, 0), Vector3.new(0, -100, 0), Params)
                     local Above = 2;
 
-                    if Data.Floor then
-                        if p1.Y > Data.Floor then
-                            Above += math.max(0, Data.Floor - Under.Position.Y);
-                        end;
-                    end;
-
                     if Under then
+                        if Data.Floor then
+                            if p1.Y > Data.Floor then
+                                Above += math.max(0, Data.Floor - Under.Position.Y);
+                            end;
+                        end;
                         HRP.CFrame = CFrame.new(Under.Position + Vector3.new(0, Above, 0))
                     end
                 end
