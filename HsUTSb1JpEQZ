@@ -480,7 +480,7 @@ Setup["VirtualInputManager"] = function(self)
 
             VIM:SendKeyEvent(true, EnumKey, false, game);
         elseif typeof(Key) == 'number' then
-            VIM:SendMouseButtonEvent(0, 0, mb, true, game);
+            VIM:SendMouseButtonEvent(0, 0, Key, true, game);
         end;
     end;
 
@@ -492,7 +492,7 @@ Setup["VirtualInputManager"] = function(self)
 
             VIM:SendKeyEvent(false, EnumKey, false, game);
         elseif typeof(Key) == 'number' then
-            VIM:SendMouseButtonEvent(0, 0, mb, false, game);
+            VIM:SendMouseButtonEvent(0, 0, Key, false, game);
         end;
     end;
 
