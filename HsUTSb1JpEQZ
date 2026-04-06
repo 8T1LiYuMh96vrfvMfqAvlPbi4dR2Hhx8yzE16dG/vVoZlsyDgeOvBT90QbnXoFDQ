@@ -463,12 +463,12 @@ Setup["VirtualInputManager"] = function(self)
     end;
 
     function Manager:Click(mb)
-        if typeof(MB) == 'number' then
+        if typeof(mb) == 'number' then
             mb = math.clamp(mb, 0, 2);
 
-            VIM:SendMouseButtonEvent(0, 0, mb, true, game);
+            VIM:SendMouseButtonEvent(0, 0, mb, true, game, 1);
             task.wait();
-            VIM:SendMouseButtonEvent(0, 0, mb, false, game);
+            VIM:SendMouseButtonEvent(0, 0, mb, false, game, 1);
         end;
     end;
 
@@ -480,7 +480,8 @@ Setup["VirtualInputManager"] = function(self)
 
             VIM:SendKeyEvent(true, EnumKey, false, game);
         elseif typeof(Key) == 'number' then
-            VIM:SendMouseButtonEvent(0, 0, Key, true, game);
+            local mb = math.clamp(Key, 0, 2);
+            VIM:SendMouseButtonEvent(0, 0, mb, true, game, 1);
         end;
     end;
 
@@ -492,7 +493,8 @@ Setup["VirtualInputManager"] = function(self)
 
             VIM:SendKeyEvent(false, EnumKey, false, game);
         elseif typeof(Key) == 'number' then
-            VIM:SendMouseButtonEvent(0, 0, Key, false, game);
+            local mb = math.clamp(Key, 0, 2);
+            VIM:SendMouseButtonEvent(0, 0, mb, false, game, 1);
         end;
     end;
 
