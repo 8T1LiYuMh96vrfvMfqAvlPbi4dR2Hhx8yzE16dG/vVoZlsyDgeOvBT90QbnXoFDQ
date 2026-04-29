@@ -420,7 +420,12 @@ Setup["Tween"] = function(self)
                 t = typeof(t) == "CFrame" and t.Position or t
                 local dx = Vector3.new(t.X - p.X, 0, t.Z - p.Z).Magnitude
                 local dy = math.abs(t.Y - p.Y)
-                return dx <= 0.5 and dy <= 0.5
+
+                local speed = self.Data.Speed;
+                local sX = speed[1];
+                local sY = speed[2];
+
+                return dx <= sX/100 and dy <= sY/100;
             end,
 
             Data = Data
