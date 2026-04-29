@@ -423,8 +423,8 @@ Setup["Tween"] = function(self)
 
                 local speed = Storage.Active.Data.Speed;
                 if speed then
-                    local sX = speed[1];
-                    local sY = speed[2];
+                    local sX = (typeof(speed)=="number" and speed) or speed[1];
+                    local sY = (typeof(speed)=="number" and speed) or speed[2];
 
                     return dx <= math.max(sX/100, 1) and dy <= math.max(sY/100, 1);
                 end;
