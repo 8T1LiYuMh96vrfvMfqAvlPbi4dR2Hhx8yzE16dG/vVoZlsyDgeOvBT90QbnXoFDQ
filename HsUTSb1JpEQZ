@@ -318,13 +318,14 @@ Setup["Tween"] = function(self)
                 if p2 == Target then
                     HRP.CFrame = CF;
                     Controller:NoFall();
+                    Active.isClose = true;
 
                     if Data.Extra then
                         Data.Extra(true)
                     end
 
-                    if not Data.Continue and Storage.Active then
-                        Storage.Active:Cancel()
+                    if not Data.Continue and Active then
+                        Active:Cancel()
                     end;
 
                     return;
@@ -414,22 +415,7 @@ Setup["Tween"] = function(self)
                 self.Data.Speed = typeof(New) == "table" and New or {New, New}
             end,
 
-            isClose = function()
-                local p = HRP.Position
-                local t = Storage.Active.Data.Position
-                t = typeof(t) == "CFrame" and t.Position or t
-                local dx = Vector3.new(t.X - p.X, 0, t.Z - p.Z).Magnitude
-                local dy = math.abs(t.Y - p.Y)
-
-                local speed = Storage.Active.Data.Speed;
-                if speed then
-                    local sX = (typeof(speed)=="number" and speed) or speed[1];
-                    local sY = (typeof(speed)=="number" and speed) or speed[2];
-
-                    return dx <= math.max(sX/100, 1) and dy <= math.max(sY/100, 1);
-                end;
-            end,
-
+            isClose = false;
             Data = Data
         }
 
@@ -709,11 +695,21 @@ Setup["Loop"] = function(self)
     local Connections; Connections = {
         Heartbeat = {
             List = {};
+            History = { };
+
             _Connection = RSV.Heartbeat:Connect(function(dt)
-                for _, v in pairs(Connections.Heartbeat.List) do
+                local Self = Connections.Heartbeat;
+                for i, v in pairs(Self.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
-                        if dt >= t then task.spawn(f, dt); end;
+
+                        local p = Self.History[i];
+                        if p then
+                            if os.time()-p < t then return; end;
+                        end;
+
+                        Self.History[i] = os.time();
+                        task.spawn(f, dt);
                     else
                         task.spawn(v, dt);
                     end;
@@ -723,11 +719,21 @@ Setup["Loop"] = function(self)
 
         RenderStepped = {
             List = {};
+            History = { };
+
             _Connection = RSV.RenderStepped:Connect(function(dt)
-                for _, v in pairs(Connections.RenderStepped.List) do
+                local Self = Connections.RenderStepped;
+                for _, v in pairs(Self.List) do
                     if typeof(v) == "table" then
                         local f, t = table.unpack(v);
-                        if dt >= t then task.spawn(f, dt); end;
+                        
+                        local p = Self.History[i];
+                        if p then
+                            if os.time()-p < t then return; end;
+                        end;
+
+                        Self.History[i] = os.time();
+                        task.spawn(f, dt);
                     else
                         task.spawn(v, dt);
                     end;
