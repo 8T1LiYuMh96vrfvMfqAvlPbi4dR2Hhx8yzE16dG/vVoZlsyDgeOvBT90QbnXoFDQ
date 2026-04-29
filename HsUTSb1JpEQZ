@@ -261,7 +261,7 @@ Setup["Tween"] = function(self)
             Active.Data.Position = Data.Position
             Active.Data.Continue = Data.Continue
 
-            local isClose = Active:isClose();
+            local isClose = Active.isClose();
             if Data.Extra then
                 Data.Extra(isClose)
             end
@@ -414,24 +414,26 @@ Setup["Tween"] = function(self)
                 self.Data.Speed = typeof(New) == "table" and New or {New, New}
             end,
 
-            isClose = function(self)
+            isClose = function()
                 local p = HRP.Position
                 local t = Storage.Active.Data.Position
                 t = typeof(t) == "CFrame" and t.Position or t
                 local dx = Vector3.new(t.X - p.X, 0, t.Z - p.Z).Magnitude
                 local dy = math.abs(t.Y - p.Y)
 
-                local speed = self.Data.Speed;
-                local sX = speed[1];
-                local sY = speed[2];
+                local speed = Storage.Active.Data.Speed;
+                if speed then
+                    local sX = speed[1];
+                    local sY = speed[2];
 
-                return dx <= math.max(sX/100, 1) and dy <= math.max(sY/100, 1);
+                    return dx <= math.max(sX/100, 1) and dy <= math.max(sY/100, 1);
+                end;
             end,
 
             Data = Data
         }
 
-        return Storage.Active:isClose()
+        return Storage.Active.isClose()
     end
 
     function Manager:GetActive()
