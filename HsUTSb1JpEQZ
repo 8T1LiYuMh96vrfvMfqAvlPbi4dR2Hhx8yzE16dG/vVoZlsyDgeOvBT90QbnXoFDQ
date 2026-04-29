@@ -425,7 +425,7 @@ Setup["Tween"] = function(self)
                 local sX = speed[1];
                 local sY = speed[2];
 
-                return dx <= sX/100 and dy <= sY/100;
+                return dx <= math.max(sX/100, 1) and dy <= math.max(sY/100, 1);
             end,
 
             Data = Data
