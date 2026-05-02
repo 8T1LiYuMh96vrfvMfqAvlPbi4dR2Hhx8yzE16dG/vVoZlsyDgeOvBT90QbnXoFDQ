@@ -1551,7 +1551,6 @@ local SectionMT = {
         Library:Register(Selected, {
             FontFace = 'Font',
             TextColor3 = 'Text',
-            PlaceholderColor3 = 'Subtext'
         })
         
         -- Prompt 
