@@ -2022,7 +2022,7 @@ function Library:CreateWindow(Name)
             BackgroundTransparency=1,
             Text = TText or "Tab",
             TextSize = 18,
-            Size = UDim2.new(1, 0, 1, 0),
+            Size = UDim2.new(1, 0, .05, 0),
         });
 
         Library:Register(TabText, { TextColor3 = 'Text', FontFace="Font" })
