@@ -1563,9 +1563,6 @@ local SectionMT = {
             Visible = false
         })
 
-
-        Library:Register(SectionHolder, {Background = 'Foreground2'})
-
         Library:Create('UICorner', {
             CornerRadius = UDim.new(0, 6),
             Parent = SectionHolder,
@@ -1603,7 +1600,7 @@ local SectionMT = {
             AutomaticSize = Enum.AutomaticSize.X,
             TextXAlignment = Enum.TextXAlignment.Left,
             LayoutOrder = -999999,
-            ZIndex = 4,
+            ZIndex = baseZ,
             Parent = SectionHolder,
         })
 
@@ -1628,7 +1625,7 @@ local SectionMT = {
             BackgroundColor3 = Color3.fromHSV(0, 1, 1),
             ClipsDescendants = true,
             LayoutOrder = 1,
-            ZIndex = 4,
+            ZIndex = baseZ,
             Parent = SectionHolder,
         })
 
@@ -1646,7 +1643,7 @@ local SectionMT = {
             Parent = Library:Create('Frame', {
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundColor3 = Color3.new(1, 1, 1),
-                ZIndex = 5,
+                ZIndex = baseZ+1,
                 Parent = container,
             }),
         })
@@ -1660,7 +1657,7 @@ local SectionMT = {
             Parent = Library:Create('Frame', {
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundColor3 = Color3.new(0, 0, 0),
-                ZIndex = 6,
+                ZIndex = baseZ+2,
                 Parent = container,
             }),
         })
@@ -1669,7 +1666,7 @@ local SectionMT = {
             Size = UDim2.new(0, 10, 0, 10),
             AnchorPoint = Vector2.new(0.5, 0.5),
             BackgroundColor3 = Color3.new(1, 1, 1),
-            ZIndex = 14,
+            ZIndex = baseZ+3,
             Parent = SectionHolder,
         })
 
@@ -1689,7 +1686,7 @@ local SectionMT = {
             Size = UDim2.new(1, 0, 0, 14),
             BackgroundTransparency = 1,
             LayoutOrder = 2,
-            ZIndex = 4,
+            ZIndex = baseZ,
             Parent = SectionHolder,
         })
 
@@ -1698,7 +1695,7 @@ local SectionMT = {
             Position = UDim2.new(0, 0, 0.5, 0),
             AnchorPoint = Vector2.new(0, 0.5),
             BackgroundColor3 = Color3.new(1, 1, 1),
-            ZIndex = 5,
+            ZIndex = baseZ+1,
             Parent = hueWrapper,
         })
 
@@ -1725,7 +1722,7 @@ local SectionMT = {
             AnchorPoint = Vector2.new(0.5, 0.5),
             Position = UDim2.new(0, 0, 0.5, 0),
             BackgroundColor3 = Color3.new(1, 1, 1),
-            ZIndex = 6,
+            ZIndex = baseZ+2,
             Parent = hueWrapper,
         })
 
@@ -1745,7 +1742,7 @@ local SectionMT = {
             Size = UDim2.new(1, 0, 0, 14),
             BackgroundTransparency = 1,
             LayoutOrder = 3,
-            ZIndex = 4,
+            ZIndex = baseZ,
             Parent = SectionHolder,
         })
 
@@ -1754,7 +1751,7 @@ local SectionMT = {
             Position = UDim2.new(0, 0, 0.5, 0),
             AnchorPoint = Vector2.new(0, 0.5),
             BackgroundColor3 = Color3.fromRGB(180, 180, 180),
-            ZIndex = 5,
+            ZIndex = baseZ+1,
             Parent = alphaWrapper,
         })
 
@@ -1766,7 +1763,7 @@ local SectionMT = {
         local alphaBg = Library:Create('Frame', {
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundColor3 = Color3.new(1, 1, 1),
-            ZIndex = 6,
+            ZIndex = baseZ+2,
             Parent = checkerFrame,
         })
 
@@ -1789,7 +1786,7 @@ local SectionMT = {
             AnchorPoint = Vector2.new(0.5, 0.5),
             Position = UDim2.new(1, 0, 0.5, 0),
             BackgroundColor3 = Color3.new(1, 1, 1),
-            ZIndex = 7,
+            ZIndex = baseZ+3,
             Parent = alphaWrapper,
         })
 
@@ -1809,7 +1806,7 @@ local SectionMT = {
             Size = UDim2.new(1, 0, 0, 24),
             BackgroundTransparency = 1,
             LayoutOrder = 4,
-            ZIndex = 4,
+            ZIndex = baseZ,
             Parent = SectionHolder,
         })
 
@@ -1825,7 +1822,7 @@ local SectionMT = {
             local wrap = Library:Create('Frame', {
                 Size = UDim2.new(0, 44, 0, 24),
                 LayoutOrder = order,
-                ZIndex = 5,
+                ZIndex = baseZ+1,
                 Parent = inputRow,
             })
             Library:Register(wrap, { BackgroundColor3 = 'Foreground' })
@@ -1835,7 +1832,7 @@ local SectionMT = {
                 Size = UDim2.new(0, 14, 1, 0),
                 Text = labelText,
                 TextSize = 10,
-                ZIndex = 6,
+                ZIndex = baseZ+2,
                 Parent = wrap,
             })
             Library:Register(lbl, { BackgroundColor3 = 'Accent1', FontFace = 'Font', TextColor3 = 'Text' })
@@ -1843,7 +1840,7 @@ local SectionMT = {
             Library:Create('Frame', {
                 Size = UDim2.new(0.5, 0, 1, 0),
                 Position = UDim2.new(0.5, 0, 0, 0),
-                ZIndex = 6,
+                ZIndex = baseZ+2,
                 Parent = lbl,
             })
             Library:Register(lbl:FindFirstChildOfClass('Frame'), { BackgroundColor3 = 'Accent1' })
@@ -1855,7 +1852,7 @@ local SectionMT = {
                 Text = defaultText,
                 TextSize = 10,
                 ClearTextOnFocus = false,
-                ZIndex = 6,
+                ZIndex = baseZ+2,
                 Parent = wrap,
             })
             Library:Register(box, { FontFace = 'Font', TextColor3 = 'Text' })
@@ -1873,7 +1870,7 @@ local SectionMT = {
             Size = UDim2.new(1, 0, 0, 16),
             BackgroundColor3 = Color3.fromHSV(0, 1, 1),
             LayoutOrder = 5,
-            ZIndex = 5,
+            ZIndex = baseZ+1,
             Parent = SectionHolder,
         })
 
