@@ -1556,10 +1556,10 @@ local SectionMT = {
         
         -- Prompt 
         local SectionHolder = Library:Create('Frame', {
-            Parent = Library.Screen;
-            Position = UDim2.new(.5,0,.5,0);
-            Size = UDim2.new(0, 200, 0, 0)
-            AutomaticSize = Enum.AutomaticSize.Y
+            Parent = Library.Screen,
+            Position = UDim2.new(.5,0,.5,0),
+            Size = UDim2.new(0, 200, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
             Visible = false
         })
 
