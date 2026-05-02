@@ -1732,14 +1732,14 @@ function Library:CreateWindow(Name)
     -- Main Background
     local Background = Library:Create('Frame', {
         Parent = ScreenGUI,
-        Size = UDim2.new(0.4, 0, 0, 0),
-        Position = UDim2.new(0.25, 0, 0.25, 0),
+        Size = UDim2.new(0.3125, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
     })
     
     Library:Create('UIAspectRatioConstraint', {
         Parent = Background,
-        AspectRatio = 1.618,
+        AspectRatio = 1.5,
         AspectType = Enum.AspectType.ScaleWithParentSize,
     })
     
@@ -1916,7 +1916,7 @@ function Library:CreateWindow(Name)
     -- Sidebar
     local Sidebar = Library:Create('Frame', {
         Parent = Background,
-        Size = UDim2.new(0.08, 0, 0.9, 0),
+        Size = UDim2.new(0.15, 0, 0.9, 0),
         Position = UDim2.new(0, 0, 1, 0),
         AnchorPoint = Vector2.new(0, 1),
     })
@@ -1937,57 +1937,9 @@ function Library:CreateWindow(Name)
     )
     
     Library:Register(Sidebar, { BackgroundColor3 = 'Foreground' })
-
-    local SidebarTexts = Library:Create('Frame', {
-        Parent = Sidebar,
-        Size = UDim2.new(0, 0, 1, -2),
-        Position = UDim2.new(1, -1, 1, 0),
-        AnchorPoint = Vector2.new(0, 1),
-        ZIndex = 6,
-        Visible = false
-    })
-
-    Library:Register(SidebarTexts, { BackgroundColor3 = 'Foreground' })
-    Library:Create('UIListLayout', {
-        Parent = SidebarTexts,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        HorizontalAlignment = Enum.HorizontalAlignment.Left,
-        Padding = UDim.new(0, 5)
-    })
-
-    Library:Create('UIPadding', {
-        Parent = SidebarTexts,
-        PaddingBottom = UDim.new(0, 10),
-        PaddingTop = UDim.new(0, 10),
-        PaddingLeft = UDim.new(0, 10)
-    })
-
-    Library:Create('UICorner', {
-        Parent = SidebarTexts,
-        CornerRadius = UDim.new(0, 8)
-    })
-
-    Mouse.Move:Connect(function()
-        if MouseInBounds(Sidebar.AbsolutePosition, Sidebar.AbsoluteSize) then
-            -- Mouse Hovering Sidebar
-            SidebarTexts.Visible = true;
-            TweenService:Create(SidebarTexts, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-                Size = UDim2.new(3, 0, 1, -2)
-            }):Play()
-        else
-            -- Not
-            local Tween = TweenService:Create(SidebarTexts, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-                Size = UDim2.new(0, 0, 1, -2)
-            });
-            Tween:Play();
-            Tween.Completed:Once(function()
-                SidebarTexts.Visible = false;
-            end);
-        end;
-    end);
     
-    -- Sidebar Icons Container
-    local SidebarIcons = Library:Create('Frame', {
+    -- Sidebar Container
+    local SidebarContainer = Library:Create('Frame', {
         Parent = Sidebar,
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 1, -50),
@@ -1995,34 +1947,17 @@ function Library:CreateWindow(Name)
     })
 
     Library:Create('UIPadding', {
-        Parent = SidebarIcons,
+        Parent = SidebarContainer,
         PaddingBottom = UDim.new(0, 10),
         PaddingTop = UDim.new(0, 10),
     })
     
     Library:Create('UIListLayout', {
-        Parent = SidebarIcons,
+        Parent = SidebarContainer,
         Padding = UDim.new(0, 5),
         SortOrder = Enum.SortOrder.LayoutOrder,
         HorizontalAlignment = Enum.HorizontalAlignment.Center,
     })
-
-    local SearchIcon = Library:Create("ImageLabel", {
-        Parent = Sidebar,
-        BackgroundTransparency = 1,
-        Size = UDim2.fromScale(.625, 0),
-        Position = UDim2.new(.5,0,1,-10),
-        AnchorPoint = Vector2.new(.5, 1),
-        Image = "rbxassetid://2804603863"
-    })
-
-    Library:Register(SearchIcon, { ImageColor3 = 'Icon' })
-    Library:Create('UIAspectRatioConstraint', {
-        Parent = SearchIcon,
-        AspectRatio = 1,
-        AspectType = Enum.AspectType.ScaleWithParentSize,
-    })
-
     
     -- Main Content Area
     local Main = Library:Create('Frame', {
@@ -2078,42 +2013,19 @@ function Library:CreateWindow(Name)
     MiniButton.MouseButton1Click:Connect(Window.Visibility)
     
     -- Create Tab Method
-    function Window:CreateTab(TText, ID)
+    function Window:CreateTab(TText)
         local Tab = {}
         
         -- Tab Text 
         local TabText = Library:Create("TextLabel",{
-            Parent = SidebarTexts,
+            Parent = SidebarContainer,
             BackgroundTransparency=1,
-            AutomaticSize = Enum.AutomaticSize.X,
-            TextXAlignment = Enum.TextXAlignment.Left,
             Text = TText or "Tab",
-            TextSize = 14,
-            Size = UDim2.new(0, 0, .1, 0),
-            ZIndex = 7
+            TextSize = 18,
+            Size = UDim2.new(0, 0, .05, 0),
         });
 
         Library:Register(TabText, { TextColor3 = 'Text', FontFace="Font" })
-
-        -- Tab Icon
-        local TabIcon = Library:Create('ImageLabel', {
-            Parent = SidebarIcons,
-            Size = UDim2.fromScale(0.625, 0),
-            BackgroundTransparency = 1,
-            Image = ID or 'rbxassetid://121832570097423',
-        })
-        
-        Library:Create('UIAspectRatioConstraint', {
-            Parent = TabIcon,
-            AspectRatio = 1,
-            AspectType = Enum.AspectType.ScaleWithParentSize,
-        })
-        
-        Library:Register(TabIcon, { ImageColor3 = 'Icon' })
-
-        Mouse.Move:Connect(function()
-            TabText.Size = UDim2.fromOffset(0, TabIcon.AbsoluteSize.Y);
-        end);
         
         -- Tab Content Holder
         local Holder = Library:Create('Frame', {
@@ -2181,14 +2093,14 @@ function Library:CreateWindow(Name)
         local function Update()
             local focused = Library.Focused == Tab
             if focused then
-                Library:Register(TabIcon, { ImageColor3 = 'Selected' })
+                Library:Register(TabText, { TextColor3 = 'Selected' })
                 return
             end
             
             if Clicked then
-                Library:Register(TabIcon, { ImageColor3 = 'Hovered' })
+                Library:Register(TabText, { TextColor3 = 'Hovered' })
             else
-                Library:Register(TabIcon, { ImageColor3 = 'Icon' })
+                Library:Register(TabText, { TextColor3 = 'Icon' })
             end
         end
         
@@ -2198,7 +2110,7 @@ function Library:CreateWindow(Name)
                 return
             end
             
-            Library:Register(TabIcon, { ImageColor3 = 'Subtext' })
+            Library:Register(TabText, { TextColor3 = 'Subtext' })
             Holder.Visible = true
             Library.Focused = Tab
             
@@ -2300,7 +2212,7 @@ function Library:CreateWindow(Name)
         end
         
         -- Tab Icon Interaction
-        local Clicker = Library.Clicker(TabIcon)
+        local Clicker = Library.Clicker(TabText)
         
         Clicker.MouseButton1Down:Connect(function()
             Clicked = true
@@ -2308,7 +2220,7 @@ function Library:CreateWindow(Name)
         end)
         
         InputService:Bind('MouseButton1', function()
-            if MouseInBounds(TabIcon.AbsolutePosition, TabIcon.AbsoluteSize) then
+            if MouseInBounds(TabText.AbsolutePosition, TabText.AbsoluteSize) then
                 Tab:Focus()
             end
             Clicked = false
