@@ -22,19 +22,19 @@ local Library = {
     Theme = 'Default',
     Themes = {
         ['Default'] = {
-            -- Background Colors
-            Background = RGB(20, 20, 20),
-            Foreground = RGB(25, 25, 25),
-            Foreground2 = RGB(30, 30, 30),
+            -- Background Colors (softer, layered dark)
+            Background = RGB(18, 18, 22),
+            Foreground = RGB(24, 24, 30),
+            Foreground2 = RGB(30, 30, 38),
             
-            -- Accent Colors
-            Accent1 = RGB(60, 60, 60),
-            Accent2 = RGB(140, 0, 255),
+            -- Accent Colors (muted purple, less neon harshness)
+            Accent1 = RGB(70, 70, 90),
+            Accent2 = RGB(165, 110, 255),
             
-            -- Text Colors
-            Text = RGB(255, 255, 255),
-            Subtext = RGB(175, 175, 175),
-            Icon = RGB(255, 255, 255),
+            -- Text Colors (slightly warmer, easier on eyes)
+            Text = RGB(235, 235, 240),
+            Subtext = RGB(160, 160, 175),
+            Icon = RGB(220, 220, 230),
             
             -- Fonts
             TitleFont = Font.new(
@@ -48,10 +48,10 @@ local Library = {
                 Enum.FontWeight.SemiBold
             ),
             
-            -- Tab Colors
-            Selected = RGB(140, 0, 255),
-            Hovered = RGB(169, 51, 255),
-        },
+            -- Tab Colors (more subtle interaction states)
+            Selected = RGB(165, 110, 255),
+            Hovered = RGB(120, 85, 200),
+        }
     },
 
     Path = {
@@ -1954,7 +1954,7 @@ function Library:CreateWindow(Name)
     
     Library:Create('UIListLayout', {
         Parent = SidebarContainer,
-        Padding = UDim.new(0, 5),
+        Padding = UDim.new(0, 8),
         SortOrder = Enum.SortOrder.LayoutOrder,
         HorizontalAlignment = Enum.HorizontalAlignment.Center,
     })
@@ -2021,7 +2021,8 @@ function Library:CreateWindow(Name)
             Parent = SidebarContainer,
             BackgroundTransparency=1,
             Text = TText or "Tab",
-            TextSize = 18,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextSize = 16,
             Size = UDim2.new(1, 0, .05, 0),
         });
 
