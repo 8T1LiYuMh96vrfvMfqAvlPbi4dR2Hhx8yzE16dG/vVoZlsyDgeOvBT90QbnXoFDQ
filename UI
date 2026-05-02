@@ -1472,7 +1472,15 @@ local SectionMT = {
     
     --- Create a ColorPicker (placeholder structure)
     CreateColorPicker = function(self, Data)
+        Data = Data or {}
+        def(Data, 'Text', 'Color')
+        def(Data, 'Default', RGB(255,255,255))
+        def(Data, 'Callback', EmptyF)
+        
         local baseZ = self.Holder.ZIndex
+        local Picker = {
+            Value = Data.Default,
+        }
         
         -- Background
         local Background = Library:Create('Frame', {
@@ -1531,7 +1539,7 @@ local SectionMT = {
         )
         
         -- Color Display
-        local Selected = Library:Create('TextBox', {
+        local Selected = Library:Create('TextLabel', {
             Parent = Holder,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
@@ -1546,11 +1554,342 @@ local SectionMT = {
             PlaceholderColor3 = 'Subtext'
         })
         
-        return {
-            Background = Background,
-            Holder = Holder,
-            Selected = Selected
-        }
+        -- Prompt 
+        local SectionHolder = Library:Create('Frame', {
+            Parent = Library.Screen;
+            Position = UDim2.new(.5,0,.5,0);
+            Size = UDim2.new(0, 200, 0, 0)
+            AutomaticSize = Enum.AutomaticSize.Y
+            Visible = false
+        })
+
+
+        Library:Register(SectionHolder, {Background = 'Foreground2'})
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6),
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UIPadding', {
+            PaddingBottom = UDim.new(0, 3),
+            PaddingLeft   = UDim.new(0, 7),
+            PaddingRight  = UDim.new(0, 7),
+            PaddingTop    = UDim.new(0, 3),
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UIListLayout', {
+            Padding = UDim.new(0, 8),
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = SectionHolder,
+        })
+
+        Library:Create('Frame', {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 2),
+            LayoutOrder = 999999,
+            Parent = SectionHolder,
+        })
+
+        Library:Register(SectionHolder, { BackgroundColor3 = 'Foreground2' })
+
+        -- Section Title
+        local SectionTitle = Library:Create('TextLabel', {
+            Text = Data.Title,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 0, 0, 25),
+            TextSize = 20,
+            AutomaticSize = Enum.AutomaticSize.X,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            LayoutOrder = -999999,
+            ZIndex = 4,
+            Parent = SectionHolder,
+        })
+
+        Library:Register(SectionTitle, {
+            FontFace = 'Font',
+            TextColor3 = 'Subtext',
+        })
+
+        Library:Register(
+            Library:Create('Frame', {
+                Size = UDim2.new(1, 10, 0, 1),
+                Position = UDim2.new(0, 0, 1, 0),
+                AnchorPoint = Vector2.new(0, 1),
+                Parent = SectionTitle,
+            }),
+            { BackgroundColor3 = 'Subtext' }
+        )
+
+        -- Color square
+        local container = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 176),
+            BackgroundColor3 = Color3.fromHSV(0, 1, 1),
+            ClipsDescendants = true,
+            LayoutOrder = 1,
+            ZIndex = 4,
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4),
+            Parent = container,
+        })
+
+        Library:Create('UIGradient', {
+            Rotation = 0,
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1),
+            }),
+            Parent = Library:Create('Frame', {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                ZIndex = 5,
+                Parent = container,
+            }),
+        })
+
+        Library:Create('UIGradient', {
+            Rotation = 90,
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0),
+            }),
+            Parent = Library:Create('Frame', {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundColor3 = Color3.new(0, 0, 0),
+                ZIndex = 6,
+                Parent = container,
+            }),
+        })
+
+        local squareCursor = Library:Create('Frame', {
+            Size = UDim2.new(0, 10, 0, 10),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = 14,
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = squareCursor,
+        })
+
+        Library:Create('UIStroke', {
+            Color = Color3.new(0, 0, 0),
+            Thickness = 1.5,
+            Parent = squareCursor,
+        })
+
+        -- Hue slider
+        local hueWrapper = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 14),
+            BackgroundTransparency = 1,
+            LayoutOrder = 2,
+            ZIndex = 4,
+            Parent = SectionHolder,
+        })
+
+        local sliderBg = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 10),
+            Position = UDim2.new(0, 0, 0.5, 0),
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = 5,
+            Parent = hueWrapper,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = sliderBg,
+        })
+
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0/6, Color3.fromHSV(0/6, 1, 1)),
+                ColorSequenceKeypoint.new(1/6, Color3.fromHSV(1/6, 1, 1)),
+                ColorSequenceKeypoint.new(2/6, Color3.fromHSV(2/6, 1, 1)),
+                ColorSequenceKeypoint.new(3/6, Color3.fromHSV(3/6, 1, 1)),
+                ColorSequenceKeypoint.new(4/6, Color3.fromHSV(4/6, 1, 1)),
+                ColorSequenceKeypoint.new(5/6, Color3.fromHSV(5/6, 1, 1)),
+                ColorSequenceKeypoint.new(1,   Color3.fromHSV(1,   1, 1)),
+            }),
+            Parent = sliderBg,
+        })
+
+        local hueThumb = Library:Create('Frame', {
+            Size = UDim2.new(0, 14, 0, 14),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0, 0, 0.5, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = 6,
+            Parent = hueWrapper,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = hueThumb,
+        })
+
+        Library:Create('UIStroke', {
+            Color = Color3.new(0, 0, 0),
+            Thickness = 1.5,
+            Parent = hueThumb,
+        })
+
+        -- Alpha slider
+        local alphaWrapper = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 14),
+            BackgroundTransparency = 1,
+            LayoutOrder = 3,
+            ZIndex = 4,
+            Parent = SectionHolder,
+        })
+
+        local checkerFrame = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 10),
+            Position = UDim2.new(0, 0, 0.5, 0),
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundColor3 = Color3.fromRGB(180, 180, 180),
+            ZIndex = 5,
+            Parent = alphaWrapper,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = checkerFrame,
+        })
+
+        local alphaBg = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = 6,
+            Parent = checkerFrame,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = alphaBg,
+        })
+
+        Library:Create('UIGradient', {
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0),
+            }),
+            Color = ColorSequence.new(Color3.fromHSV(0, 1, 1)),
+            Parent = alphaBg,
+        })
+
+        local alphaThumb = Library:Create('Frame', {
+            Size = UDim2.new(0, 14, 0, 14),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(1, 0, 0.5, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = 7,
+            Parent = alphaWrapper,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0),
+            Parent = alphaThumb,
+        })
+
+        Library:Create('UIStroke', {
+            Color = Color3.new(0, 0, 0),
+            Thickness = 1.5,
+            Parent = alphaThumb,
+        })
+
+        -- RGB + Alpha input row
+        local inputRow = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 24),
+            BackgroundTransparency = 1,
+            LayoutOrder = 4,
+            ZIndex = 4,
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UIListLayout', {
+            FillDirection = Enum.FillDirection.Horizontal,
+            Padding = UDim.new(0, 4),
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Parent = inputRow,
+        })
+
+        local function makeInput(labelText, defaultText, order)
+            local wrap = Library:Create('Frame', {
+                Size = UDim2.new(0, 44, 0, 24),
+                LayoutOrder = order,
+                ZIndex = 5,
+                Parent = inputRow,
+            })
+            Library:Register(wrap, { BackgroundColor3 = 'Foreground' })
+            Library:Create('UICorner', { CornerRadius = UDim.new(0, 4), Parent = wrap })
+
+            local lbl = Library:Create('TextLabel', {
+                Size = UDim2.new(0, 14, 1, 0),
+                Text = labelText,
+                TextSize = 10,
+                ZIndex = 6,
+                Parent = wrap,
+            })
+            Library:Register(lbl, { BackgroundColor3 = 'Accent1', FontFace = 'Font', TextColor3 = 'Text' })
+            Library:Create('UICorner', { CornerRadius = UDim.new(0, 4), Parent = lbl })
+            Library:Create('Frame', {
+                Size = UDim2.new(0.5, 0, 1, 0),
+                Position = UDim2.new(0.5, 0, 0, 0),
+                ZIndex = 6,
+                Parent = lbl,
+            })
+            Library:Register(lbl:FindFirstChildOfClass('Frame'), { BackgroundColor3 = 'Accent1' })
+
+            local box = Library:Create('TextBox', {
+                Size = UDim2.new(1, -14, 1, 0),
+                Position = UDim2.new(0, 14, 0, 0),
+                BackgroundTransparency = 1,
+                Text = defaultText,
+                TextSize = 10,
+                ClearTextOnFocus = false,
+                ZIndex = 6,
+                Parent = wrap,
+            })
+            Library:Register(box, { FontFace = 'Font', TextColor3 = 'Text' })
+
+            return box
+        end
+
+        local rBox = makeInput('R', '255', 1)
+        local gBox = makeInput('G', '255', 2)
+        local bBox = makeInput('B', '255', 3)
+        local aBox = makeInput('A', '1.00', 4)
+
+        -- Preview swatch
+        local swatch = Library:Create('Frame', {
+            Size = UDim2.new(1, 0, 0, 16),
+            BackgroundColor3 = Color3.fromHSV(0, 1, 1),
+            LayoutOrder = 5,
+            ZIndex = 5,
+            Parent = SectionHolder,
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4),
+            Parent = swatch,
+        })
+
+        Library:Create('Frame', {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 2),
+            LayoutOrder = 999999,
+            Parent = SectionHolder,
+        })
+
+        return Picker;
     end,
     
     --- Create a Spacer
@@ -1727,7 +2066,7 @@ function Library:CreateWindow(Name)
     local Background = Library:Create('Frame', {
         Parent = ScreenGUI,
         Size = UDim2.new(0.3125, 0, 0, 0),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Position = UDim2.new(0.25, 0, 0.25, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
     })
     
