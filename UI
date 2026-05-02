@@ -451,7 +451,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
@@ -596,7 +595,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
@@ -771,7 +769,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
@@ -1151,7 +1148,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
@@ -1315,7 +1311,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
@@ -1499,7 +1494,6 @@ local SectionMT = {
         
         Library:Create('UIPadding', {
             Parent = Text,
-            PaddingLeft = UDim.new(0, 3),
             PaddingRight = UDim.new(0, 3)
         })
         
