@@ -1963,7 +1963,7 @@ function Library:CreateWindow(Name)
     local Main = Library:Create('Frame', {
         Parent = Background,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0.92, 0, 0.9, 0),
+        Size = UDim2.new(0.85, 0, 0.9, 0),
         Position = UDim2.new(1, 0, 1, 0),
         AnchorPoint = Vector2.new(1, 1),
     })
@@ -2022,7 +2022,7 @@ function Library:CreateWindow(Name)
             BackgroundTransparency=1,
             Text = TText or "Tab",
             TextSize = 18,
-            Size = UDim2.new(0, 0, .05, 0),
+            Size = UDim2.new(1, 0, 1, 0),
         });
 
         Library:Register(TabText, { TextColor3 = 'Text', FontFace="Font" })
