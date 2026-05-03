@@ -252,6 +252,7 @@ function Library.Save()
 
     local Values = {};
     for i, v in pairs(Library.Flags) do
+        if not v then continue; end;
         Values[i] = v.Value;
     end;
     
@@ -1476,10 +1477,12 @@ local SectionMT = {
         def(Data, 'Text', 'Color')
         def(Data, 'Default', RGB(255,255,255))
         def(Data, 'Callback', EmptyF)
+        def(Data, 'Alpha', 1)
         
         local baseZ = self.Holder.ZIndex
         local Picker = {
             Value = Data.Default,
+            Alpha = Data.Alpha
         }
         
         -- Background
@@ -1495,6 +1498,7 @@ local SectionMT = {
             Parent = Background,
             BackgroundTransparency = 1,
             Size = UDim2.new(0.8, 0, 1, 0),
+            Text = Data.Text,
             TextSize = 15,
             TextXAlignment = Enum.TextXAlignment.Left,
             ZIndex = baseZ,
@@ -1557,9 +1561,8 @@ local SectionMT = {
         local SectionHolder = Library:Create('Frame', {
             Parent = Library.Screen,
             Position = UDim2.new(.5,0,.5,0),
-            Size = UDim2.new(0, 200, 0, 0),
+            Size = UDim2.new(0, 250, 0, 0),
             AutomaticSize = Enum.AutomaticSize.Y,
-            Visible = false
         })
 
         Library:Create('UICorner', {
@@ -1666,7 +1669,7 @@ local SectionMT = {
             AnchorPoint = Vector2.new(0.5, 0.5),
             BackgroundColor3 = Color3.new(1, 1, 1),
             ZIndex = baseZ+3,
-            Parent = SectionHolder,
+            Parent = container,
         })
 
         Library:Create('UICorner', {
@@ -1749,15 +1752,23 @@ local SectionMT = {
             Size = UDim2.new(1, 0, 0, 10),
             Position = UDim2.new(0, 0, 0.5, 0),
             AnchorPoint = Vector2.new(0, 0.5),
-            BackgroundColor3 = Color3.fromRGB(180, 180, 180),
-            ZIndex = baseZ+1,
+            BackgroundColor3 = Color3.fromRGB(200, 200, 200),
+            ZIndex = baseZ + 1,
             Parent = alphaWrapper,
         })
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(1, 0),
-            Parent = checkerFrame,
-        })
+        Library:Create('UICorner', { CornerRadius = UDim.new(1, 0), Parent = checkerFrame })
+
+        for i = 0, 19 do
+            Library:Create('Frame', {
+                Size = UDim2.new(0, 5, 0.5, 0),
+                Position = UDim2.new(0, i * 5, if i % 2 == 0 then 0 else 0.5, 0),
+                BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+                ZIndex = baseZ + 1,
+                BackgroundTransparency = .2,
+                Parent = checkerFrame,
+            })
+        end
 
         local alphaBg = Library:Create('Frame', {
             Size = UDim2.new(1, 0, 1, 0),
@@ -1771,12 +1782,11 @@ local SectionMT = {
             Parent = alphaBg,
         })
 
-        Library:Create('UIGradient', {
+        local alphaGrad = Library:Create('UIGradient', {
             Transparency = NumberSequence.new({
                 NumberSequenceKeypoint.new(0, 1),
                 NumberSequenceKeypoint.new(1, 0),
             }),
-            Color = ColorSequence.new(Color3.fromHSV(0, 1, 1)),
             Parent = alphaBg,
         })
 
@@ -1817,44 +1827,76 @@ local SectionMT = {
             Parent = inputRow,
         })
 
+        local assigned = {
+            function(v) Picker.Value = Color3.new(v/255, Picker.Value.G, Picker.Value.B) end; -- r
+            function(v) Picker.Value = Color3.new(Picker.Value.R, v/255, Picker.Value.B) end; -- g 
+            function(v) Picker.Value = Color3.new(Picker.Value.R, Picker.Value.G, v/255) end; -- b
+            function(v) Picker.Alpha = v/100 end;                                             -- a
+        }
+
+        local function iAssign(i, v)
+            assigned[i](v);
+        end;
+
+        local Update;
         local function makeInput(labelText, defaultText, order)
             local wrap = Library:Create('Frame', {
-                Size = UDim2.new(0, 44, 0, 24),
+                Size = UDim2.new(.25, -3, 0, 24),
                 LayoutOrder = order,
                 ZIndex = baseZ+1,
                 Parent = inputRow,
             })
+
             Library:Register(wrap, { BackgroundColor3 = 'Foreground' })
             Library:Create('UICorner', { CornerRadius = UDim.new(0, 4), Parent = wrap })
 
             local lbl = Library:Create('TextLabel', {
-                Size = UDim2.new(0, 14, 1, 0),
+                Size = UDim2.new(0, 20, 1, 0),
                 Text = labelText,
-                TextSize = 10,
+                TextSize = 16,
                 ZIndex = baseZ+2,
                 Parent = wrap,
             })
             Library:Register(lbl, { BackgroundColor3 = 'Accent1', FontFace = 'Font', TextColor3 = 'Text' })
             Library:Create('UICorner', { CornerRadius = UDim.new(0, 4), Parent = lbl })
-            Library:Create('Frame', {
-                Size = UDim2.new(0.5, 0, 1, 0),
-                Position = UDim2.new(0.5, 0, 0, 0),
-                ZIndex = baseZ+2,
-                Parent = lbl,
-            })
-            Library:Register(lbl:FindFirstChildOfClass('Frame'), { BackgroundColor3 = 'Accent1' })
 
             local box = Library:Create('TextBox', {
-                Size = UDim2.new(1, -14, 1, 0),
-                Position = UDim2.new(0, 14, 0, 0),
+                Size = UDim2.new(1, -20, 1, 0),
+                Position = UDim2.new(0, 20, 0, 0),
                 BackgroundTransparency = 1,
                 Text = defaultText,
-                TextSize = 10,
+                TextSize = 16,
                 ClearTextOnFocus = false,
                 ZIndex = baseZ+2,
                 Parent = wrap,
             })
+            
             Library:Register(box, { FontFace = 'Font', TextColor3 = 'Text' })
+            
+            local old = box.Text;
+            local recurse = false;
+            box:GetPropertyChangedSignal("Text"):Connect(function()
+                if recurse then recurse = false; return; end;
+
+                local new = box.Text;
+                local num = tonumber(new);
+
+                if (num == nil) or (num < 0 or num > tonumber(defaultText)) then
+                    box.Text = old;
+                    recurse = true;
+                    return;
+                end;
+
+                old = new;
+                iAssign(order, tonumber(new));
+                if not box.IsFocused then
+                    Update();
+                end
+            end);
+
+            box.FocusLost:Connect(function()
+                Update();
+            end);
 
             return box
         end
@@ -1862,7 +1904,7 @@ local SectionMT = {
         local rBox = makeInput('R', '255', 1)
         local gBox = makeInput('G', '255', 2)
         local bBox = makeInput('B', '255', 3)
-        local aBox = makeInput('A', '1.00', 4)
+        local aBox = makeInput('A', '100', 4)
 
         -- Preview swatch
         local swatch = Library:Create('Frame', {
@@ -1884,6 +1926,47 @@ local SectionMT = {
             LayoutOrder = 999999,
             Parent = SectionHolder,
         })
+
+        -- Update function
+        Update = function()
+            local h, s, v = Picker.Value:ToHSV()
+            local r, g, b = Picker.Value.R, Picker.Value.G, Picker.Value.B
+            local color = Color3.fromHSV(h, s, v)
+            local alpha = Picker.Alpha
+
+            squareCursor.Position = UDim2.new(s, 0, 1-v, 0)
+            squareCursor.BackgroundColor3 = color
+
+            hueThumb.Position = UDim2.new(h, 0, 0.5, 0)
+            container.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+
+            alphaThumb.Position = UDim2.new(alpha, 0, 0.5, 0)
+            alphaGrad.Color = ColorSequence.new(color)
+
+            swatch.BackgroundColor3 = color
+            swatch.BackgroundTransparency = 1 - alpha
+
+            rBox.Text = tostring(math.round(r*255))
+            gBox.Text = tostring(math.round(g*255))
+            bBox.Text = tostring(math.round(b*255))
+            aBox.Text = tostring(math.round(alpha*100))
+        end
+
+        Update();
+        
+        -- Methods
+        function Picker.SetValue(v)
+            Picker.Value = v -- RGB
+            Update()
+        end
+        
+        function Picker.Fire()
+            Data.Callback(Picker.Value)
+        end
+        
+        function Picker.SetText(t)
+            Text.Text = t
+        end
 
         return Picker;
     end,
