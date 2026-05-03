@@ -252,7 +252,7 @@ function Library.Save()
 
     local Values = {};
     for i, v in pairs(Library.Flags) do
-        if not v then continue; end;
+        if typeof(v) ~= "table" then continue; end;
         Values[i] = v.Value;
     end;
     
