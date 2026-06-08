@@ -1471,7 +1471,6 @@ local SectionMT = {
         return Slider
     end,
     
-    --- Create a ColorPicker (placeholder structure)
     CreateColorPicker = function(self, Data)
         Data = Data or {}
         def(Data, 'Text', 'Color')
@@ -1970,6 +1969,99 @@ local SectionMT = {
 
         return Picker;
     end,
+
+    CreateLog = function(self, Data)
+        Data = Data or {}
+        def(Data, 'Default', {})
+        def(Data, 'Size', 60)
+        def(Data, 'Max', 99)
+        def(Data, 'Alpha', 1)
+
+        local baseZ = self.Holder.ZIndex
+        local Log = {
+            Value = Data.Default,
+        }
+
+        local Background = Library.Create("ScrollingFrame", {
+            Parent = ParentUI,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, Data.Size),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            ScrollBarThickness = 1,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            ZIndex = baseZ,
+        });
+
+        Library:Create('UICorner', {Parent=Background,CornerRadius=UDim.new(0, 5)});
+        Library:Create('UIPadding', {PaddingBottom=UDim.new(0, 5),PaddingLeft=UDim.new(0, 5),PaddingRight=UDim.new(0, 5),PaddingTop=UDim.new(0, 5),Parent=Background});
+        Library:Create("UIListLayout", {Parent = Background,SortOrder = Enum.SortOrder.LayoutOrder});
+        Library:Register(Library:Create('UIStroke', { Parent = MiniHolder }), { Color = 'Accent1' });
+
+        Library.Create("Frame", {
+            Parent = Background,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, .3, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            LayoutOrder = 999999,
+            ZIndex = baseZ,
+        });
+
+        function Log:AddEntry(Contents)
+            local Entry = {};
+            local Frame = Library.Create("Frame", {
+                Parent = Background,
+                BackgroundTransparency = 1,
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Size = UDim2.new(1, 0, .1, 0),
+                ZIndex = bazeZ
+            });
+
+            local Label = Library.Create("TextLabel", {
+                Parent = EF,
+                AnchorPoint = Vector2.new(1, 0),
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, 0, 0, 0),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Size = UDim2.new(1, 0, 1, 0),
+                Text = Contents or "",
+                ZIndex = baseZ,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, { FontFace = "Font", TextColor3 = "Text" });
+
+            Library:ApplyTextSize(Label, 16);
+            Library.Create("UIPadding", {
+                Parent = Label,
+                PaddingLeft = UDim.new(.1, 0),
+                PaddingRight = UDim.new(.1, 0),
+                PaddingTop = UDim.new(0, 5),
+                PaddingBottom = UDim.new(0, 5),
+            });
+
+            if not self.isSub then
+                Entry.Clicker = Library.Clicker(Frame, baseZ+1)
+                setmetatable(Entry, { __index = SubWindowMT })
+            end
+
+            Entry.Destroy = Frame.Destroy;
+            return Entry;
+        end;
+
+        function Log:RemoveEntry(Entry)
+            if typeof(Entry) == "number" then
+                Log.Value[Entry]:Destroy();
+            end;
+
+            -- More later maybe
+        end;
+
+        function Log:Clear()
+            for i, __ in pairs(Log.Value) do
+                Log:RemoveEntry(i);
+            end;
+        end;
+
+        return Log;
+    end,
     
     --- Create a Spacer
     CreateSpacer = function(self)
@@ -2004,7 +2096,7 @@ SubWindowMT = {
         def(Data, 'ClickOff', true)
         def(Data, 'Title', 'Window')
         
-        local SubWindow = {}
+        local SubWindow = {Owner=self}
         
         -- Section Holder
         local SectionHolder = Library:Create('Frame', {
@@ -2110,8 +2202,6 @@ SubWindowMT = {
         
         -- Right-click on parent to show
         if self.Clicker then
-
-
             self.Clicker.MouseButton2Click:Connect(function()
                 if CurrentSub and CurrentSub ~= SubWindow then
                     CurrentSub.Hide();
