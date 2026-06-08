@@ -2052,6 +2052,7 @@ local SectionMT = {
                 Frame:Destroy();
             end;
 
+            Log.Value[Entry.Index] = Entry;
             return Entry;
         end;
 
