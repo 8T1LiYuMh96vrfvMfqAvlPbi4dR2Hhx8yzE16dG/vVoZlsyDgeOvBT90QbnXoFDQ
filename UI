@@ -2623,13 +2623,13 @@ function Library:CreateWindow(Name)
         end
         
         -- Auto-focus first tab
-        if #Library:Created.Tabs == 0 then
+        if #Library.Created.Tabs == 0 then
             Tab:Focus()
         else
             Tab:Unfocus()
         end
         
-        table.insert(Library:Created.Tabs, Tab)
+        table.insert(Library.Created.Tabs, Tab)
         
         -- Create Section Method
         function Tab:CreateSection(sData)
