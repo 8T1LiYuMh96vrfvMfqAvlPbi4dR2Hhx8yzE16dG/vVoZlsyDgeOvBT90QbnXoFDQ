@@ -2010,15 +2010,15 @@ local SectionMT = {
             ZIndex = baseZ,
         });
 
-        local Count = 1;
+        local Count, Top = 1, 1;
         function Log:AddEntry(Contents)
-            local Entry = {Index=Count}; Count+=1;
+            local Entry = {Index=Count}; Count+=1; Top+=1;
             local Frame = Library:Create("Frame", {
                 Parent = Background,
                 BackgroundTransparency = 1,
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Size = UDim2.new(1, 0, .15, 0),
-                LayoutOrder = 999999-Count,
+                LayoutOrder = 999999-Top,
                 ZIndex = baseZ
             });
 
@@ -2051,6 +2051,11 @@ local SectionMT = {
 
             function Entry.SetText(n)
                 Label.Text = n or "";
+            end;
+
+            function Entry.Top()
+                Top+=1;
+                Frame.LayoutOrder = 999999-Top;
             end;
 
             function Entry:Destroy()
