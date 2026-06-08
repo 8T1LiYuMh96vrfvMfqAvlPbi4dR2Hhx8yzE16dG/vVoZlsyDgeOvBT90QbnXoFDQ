@@ -1982,7 +1982,7 @@ local SectionMT = {
         }
 
         local Background = Library:Create("ScrollingFrame", {
-            Parent = ParentUI,
+            Parent = self.Holder,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, Data.Size),
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
@@ -1994,7 +1994,7 @@ local SectionMT = {
         Library:Create('UICorner', {Parent=Background,CornerRadius=UDim.new(0, 5)});
         Library:Create('UIPadding', {PaddingBottom=UDim.new(0, 5),PaddingLeft=UDim.new(0, 5),PaddingRight=UDim.new(0, 5),PaddingTop=UDim.new(0, 5),Parent=Background});
         Library:Create("UIListLayout", {Parent = Background,SortOrder = Enum.SortOrder.LayoutOrder});
-        Library:Register(Library:Create('UIStroke', { Parent = MiniHolder }), { Color = 'Accent1' });
+        Library:Register(Library:Create('UIStroke', { Parent = Background }), { Color = 'Accent1' });
 
         Library:Create("Frame", {
             Parent = Background,
@@ -2014,11 +2014,11 @@ local SectionMT = {
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Size = UDim2.new(1, 0, .1, 0),
                 LayoutOrder = 999999-Count,
-                ZIndex = bazeZ
+                ZIndex = baseZ
             });
 
             local Label = Library:Create("TextLabel", {
-                Parent = EF,
+                Parent = Frame,
                 AnchorPoint = Vector2.new(1, 0),
                 BackgroundTransparency = 1,
                 Position = UDim2.new(1, 0, 0, 0),
@@ -2047,7 +2047,10 @@ local SectionMT = {
                 Label.Text = n or "";
             end;
 
-            Entry.Destroy = Frame.Destroy;
+            function Entry:Destroy()
+                Frame:Destroy();
+            end;
+
             return Entry;
         end;
 
