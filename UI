@@ -1975,7 +1975,6 @@ local SectionMT = {
         def(Data, 'Default', {})
         def(Data, 'Size', 60)
         def(Data, 'Max', 99)
-        def(Data, 'Alpha', 1)
 
         local baseZ = self.Holder.ZIndex
         local Log = {
@@ -2006,8 +2005,9 @@ local SectionMT = {
             ZIndex = baseZ,
         });
 
+        local Count = 1;
         function Log:AddEntry(Contents)
-            local Entry = {};
+            local Entry = {Index=Count}; Count+1;
             local Frame = Library.Create("Frame", {
                 Parent = Background,
                 BackgroundTransparency = 1,
