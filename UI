@@ -1981,7 +1981,7 @@ local SectionMT = {
             Value = Data.Default,
         }
 
-        local Background = Library.Create("ScrollingFrame", {
+        local Background = Library:Create("ScrollingFrame", {
             Parent = ParentUI,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, Data.Size),
@@ -1996,7 +1996,7 @@ local SectionMT = {
         Library:Create("UIListLayout", {Parent = Background,SortOrder = Enum.SortOrder.LayoutOrder});
         Library:Register(Library:Create('UIStroke', { Parent = MiniHolder }), { Color = 'Accent1' });
 
-        Library.Create("Frame", {
+        Library:Create("Frame", {
             Parent = Background,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, .3, 0),
@@ -2008,7 +2008,7 @@ local SectionMT = {
         local Count = 1;
         function Log:AddEntry(Contents)
             local Entry = {Index=Count}; Count+1;
-            local Frame = Library.Create("Frame", {
+            local Frame = Library:Create("Frame", {
                 Parent = Background,
                 BackgroundTransparency = 1,
                 AutomaticSize = Enum.AutomaticSize.Y,
@@ -2017,7 +2017,7 @@ local SectionMT = {
                 ZIndex = bazeZ
             });
 
-            local Label = Library.Create("TextLabel", {
+            local Label = Library:Create("TextLabel", {
                 Parent = EF,
                 AnchorPoint = Vector2.new(1, 0),
                 BackgroundTransparency = 1,
@@ -2030,7 +2030,7 @@ local SectionMT = {
             }, { FontFace = "Font", TextColor3 = "Text" });
 
             Library:ApplyTextSize(Label, 16);
-            Library.Create("UIPadding", {
+            Library:Create("UIPadding", {
                 Parent = Label,
                 PaddingLeft = UDim.new(.1, 0),
                 PaddingRight = UDim.new(.1, 0),
@@ -2620,13 +2620,13 @@ function Library:CreateWindow(Name)
         end
         
         -- Auto-focus first tab
-        if #Library.Created.Tabs == 0 then
+        if #Library:Created.Tabs == 0 then
             Tab:Focus()
         else
             Tab:Unfocus()
         end
         
-        table.insert(Library.Created.Tabs, Tab)
+        table.insert(Library:Created.Tabs, Tab)
         
         -- Create Section Method
         function Tab:CreateSection(sData)
