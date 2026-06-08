@@ -678,7 +678,7 @@ local SectionMT = {
                         Keybind.Fire()
                     end)
                 else
-                    Keybind.Fire()
+                    Data.Callback(Key)
                 end
             end
         end
