@@ -563,6 +563,7 @@ local SectionMT = {
         Data = Data or {}
         def(Data, 'Text', 'Keybind')
         def(Data, 'Default', nil)
+        def(Data, "Grabber", false)
         def(Data, 'Callback', EmptyF)
         
         local baseZ = self.Holder.ZIndex
@@ -672,9 +673,13 @@ local SectionMT = {
             end
             
             if Key then
-                Old = InputService:Bind(Key, function()
+                if not Data.Grabber then
+                    Old = InputService:Bind(Key, function()
+                        Keybind.Fire()
+                    end)
+                else
                     Keybind.Fire()
-                end)
+                end
             end
         end
         
