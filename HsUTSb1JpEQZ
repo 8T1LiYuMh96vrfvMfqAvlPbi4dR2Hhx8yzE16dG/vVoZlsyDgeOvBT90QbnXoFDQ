@@ -780,4 +780,147 @@ Setup["Loop"] = function(self)
     return Manager;
 end;
 
+Setup["Utils"] = function(self)
+    local Manager = {};
+    if Called["Utils"] then return Called["Utils"]; end;
+    Called["Utils"] = Manager;
+    Setup:Basics();
+
+    function Manager.GetDist(p1, p2)
+        local function Check(p)
+            if typeof(p) == "Vector3" then return p; 
+            elseif typeof(p) == "CFrame" then return p.Position;
+            elseif typeof(p) == "Instance" and p:IsA("BasePart") then return p.Position;
+            else return p; end;
+        end;
+
+        p1, p2 = Check(p1), Check(p2);
+        return (p1 - p2).Magnitude;
+    end;
+
+    function Manager.Combine(t1,t2) 
+        local nt = table.clone(t1);
+        for _, v in pairs(t2) do
+            table.insert(nt, v);
+        end;
+        return nt;
+    end;
+
+    function Manager.GetNearest(t, checkvisible)
+        if typeof(t) == "Instance" then t=t:GetChildren(); end;
+        if typeof(t) ~= "table" then return; end;
+        
+        local Closest, Dist = nil, math.huge
+        for _, v in pairs(t) do
+            if typeof(v) == "Vector3" then
+                local nDist = (HRP.Position - v).Magnitude;
+
+                if nDist < Dist then
+                    Closest = v;
+                    Dist = nDist;
+                end;
+            else
+                local tHumanoid = v:FindFirstChildOfClass('Humanoid');
+                local tHRP = v:FindFirstChild('HumanoidRootPart');
+                if v:IsA("Model") and tHumanoid then
+                    if v~=Character and tHRP and HRP and not v:FindFirstChildOfClass("ForceField") then
+                        if checkvisible and not Actions.Misc.isVisible(tHRP) then continue; end;
+
+                        local nDist = (HRP.Position - tHRP.Position).Magnitude;
+
+                        if nDist < Dist then
+                            Closest = v;
+                            Dist = nDist;
+                        end;
+                    end;
+                elseif v:IsA("Part") then
+                    local nDist = (HRP.Position - v.Position).Magnitude;
+
+                    if nDist < Dist then
+                        Closest = v;
+                        Dist = nDist;
+                    end;
+                end;
+            end;
+        end;
+
+        return Closest;
+    end;
+
+    function Manager.WithName(name, t)
+        if typeof(t) == "Instance" then t=t:GetChildren(); end;
+        if typeof(t) ~= "table" then return; end;
+
+        local Group = { };
+        for i, v in pairs(t) do
+            if v.Name:match(name) then
+                table.insert(Group, v);
+            end;
+        end;
+
+        return Group;
+    end;
+
+    function Manager.InRange(t, range, part)
+        if typeof(t) == "Instance" then t=t:GetChildren(); end;
+        if typeof(t) ~= "table" then return; end;
+        
+        local range=range or 10;
+        local Group = { };
+        for i, v in pairs(t) do
+            local tHumanoid = v:FindFirstChildOfClass('Humanoid');
+            local tHRP = v:FindFirstChild('HumanoidRootPart');
+
+            if v~=Character and tHumanoid and tHRP and HRP then
+                local dist = (HRP.Position - tHRP.Position).Magnitude;
+
+                if dist < range then
+                    if part then
+                        local found = v:FindFirstChild(part);
+                        if found then table.insert(Group, found); end;
+                    else
+                        table.insert(Group, v);
+                    end;
+                end;
+            end;
+        end;
+
+        return Group;
+    end;
+
+    function Manager.isVisible(target)
+        local targetPosition;
+        if typeof(target) == "Vector3" then
+            targetPosition = target;
+        elseif target:IsA("Model") then
+            targetPosition = target:FindFirstChild("HumanoidRootPart") or target.PrimaryPart or target:GetPivot().Position;
+        elseif target:IsA("BasePart") then
+            targetPosition = target.Position;
+        else
+            return nil;
+        end;
+
+        local direction = targetPosition - HRP.Position;
+
+        local params = RaycastParams.new();
+        params.FilterType = Enum.RaycastFilterType.Blacklist;
+        params.FilterDescendantsInstances = { Character };
+        params.IgnoreWater = true;
+
+        local result = workspace:Raycast(HRP.Position, direction, params);
+        return result;
+    end;
+
+    function Manager.getnil(name, ty, parent)
+        local parent = parent or game;
+        for _, v in pairs(parent:GetDescendants()) do
+            if (not name or v.Name == name) and (not ty or v:IsA(ty)) then
+                return v;
+            end;
+        end;
+    end;
+
+    return Manager;
+end;
+
 return Setup;
