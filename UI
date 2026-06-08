@@ -2012,7 +2012,7 @@ local SectionMT = {
                 Parent = Background,
                 BackgroundTransparency = 1,
                 AutomaticSize = Enum.AutomaticSize.Y,
-                Size = UDim2.new(1, 0, .1, 0),
+                Size = UDim2.new(1, 0, .15, 0),
                 LayoutOrder = 999999-Count,
                 ZIndex = baseZ
             });
@@ -2032,8 +2032,8 @@ local SectionMT = {
 
             Library:Create("UIPadding", {
                 Parent = Label,
-                PaddingLeft = UDim.new(.1, 0),
-                PaddingRight = UDim.new(.1, 0),
+                PaddingLeft = UDim.new(0, 5),
+                PaddingRight = UDim.new(0, 5),
                 PaddingTop = UDim.new(0, 5),
                 PaddingBottom = UDim.new(0, 5),
             });
