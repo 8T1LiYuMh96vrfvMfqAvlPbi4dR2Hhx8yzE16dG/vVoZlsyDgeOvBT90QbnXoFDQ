@@ -2007,7 +2007,7 @@ local SectionMT = {
 
         local Count = 1;
         function Log:AddEntry(Contents)
-            local Entry = {Index=Count}; Count+1;
+            local Entry = {Index=Count}; Count+=1;
             local Frame = Library:Create("Frame", {
                 Parent = Background,
                 BackgroundTransparency = 1,
