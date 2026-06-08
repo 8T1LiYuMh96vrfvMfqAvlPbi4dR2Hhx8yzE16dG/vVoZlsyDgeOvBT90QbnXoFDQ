@@ -2013,6 +2013,7 @@ local SectionMT = {
                 BackgroundTransparency = 1,
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Size = UDim2.new(1, 0, .1, 0),
+                LayoutOrder = 999999-Count,
                 ZIndex = bazeZ
             });
 
@@ -2041,6 +2042,10 @@ local SectionMT = {
                 Entry.Clicker = Library.Clicker(Frame, baseZ+1)
                 setmetatable(Entry, { __index = SubWindowMT })
             end
+
+            function Entry.SetText(n)
+                Label.Text = n or "";
+            end;
 
             Entry.Destroy = Frame.Destroy;
             return Entry;
