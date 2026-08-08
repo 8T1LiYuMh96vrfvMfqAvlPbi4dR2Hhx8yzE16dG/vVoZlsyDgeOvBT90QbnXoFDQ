@@ -21,20 +21,20 @@ local Library = {
 
     Theme = "Default",
     Themes = {
-        ["Default"] = {
-            ["Title"] = RGB(255, 255, 255),
-            ["Background"] = RGB(9, 9, 13),
-            ["Background2"] = RGB(10, 10, 15),
-            ["Tone"] = RGB(23, 22, 32),
-            ["Accent1"] = RGB(19, 19, 23),
-            ["Highlight"] = RGB(121, 115, 234),
-            ["Hover"] = RGB(77, 75, 116),
-            ["Selected"] = RGB(117, 113, 175),
-            ["Text"] = RGB(199, 199, 199),
-            ["Subtext"] = RGB(95, 95, 95),
-            ["Icons"] = RGB(199, 199, 199),
+        ['Default'] = {
+            ["Title"] = RGB(200, 170, 255),
+            ["Background"] = RGB(18, 18, 22),
+            ["Background2"] = RGB(24, 24, 30),
+            ["Tone"] = RGB(30, 30, 38),
+            ["Accent1"] = RGB(70, 70, 90),
+            ["Highlight"] = RGB(140, 100, 255),
+            ["Hover"] = RGB(120, 85, 200),
+            ["Selected"] = RGB(165, 110, 255),
+            ["Text"] = RGB(235, 235, 240),
+            ["Subtext"] = RGB(160, 160, 175),
+            ["Icons"] = RGB(220, 220, 230),
             ["Font"] = Font.new("rbxasset://fonts/families/Arimo.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
-            ["NotiFont"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+            ["NotiFont"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
         },
         ["Lotus"] = {
             ["Title"] = RGB(200, 170, 255),
@@ -157,72 +157,72 @@ local Library = {
 do -- Hidden
     -- Save / Load
 
-        function Library:Save()
-    local Paths = Library.Paths;
-    local Folder = Paths["Folder"];
-    local Secondary = Paths["Secondary"];
-    local DataName = Paths["Data"] or "Data";
+    function Library:Save()
+        local Paths = Library.Paths;
+        local Folder = Paths["Folder"];
+        local Secondary = Paths["Secondary"];
+        local DataName = Paths["Data"] or "Data";
 
-    if not isfolder(Folder) then makefolder(Folder) end;
+        if not isfolder(Folder) then makefolder(Folder) end;
 
-    local FullPath = Folder;
-    if Secondary then
-        FullPath = Folder .. "/" .. Secondary;
-        if not isfolder(FullPath) then makefolder(FullPath) end;
+        local FullPath = Folder;
+        if Secondary then
+            FullPath = Folder .. "/" .. Secondary;
+            if not isfolder(FullPath) then makefolder(FullPath) end;
+        end;
+
+        local Path = FullPath .. "/" .. DataName .. ".json";
+        local SaveData = {};
+
+        for i, v in pairs(self.Created.Flags) do
+            if v.Value ~= nil then
+                if typeof(v.Value) == "Color3" then
+                    SaveData[i] = {
+                        __type = "Color3",
+                        R = math.round(v.Value.R * 255),
+                        G = math.round(v.Value.G * 255),
+                        B = math.round(v.Value.B * 255),
+                    };
+                else
+                    SaveData[i] = v.Value;
+                end;
+            end;
+        end;
+
+        local hs = game:GetService("HttpService");
+        writefile(Path, hs:JSONEncode(SaveData));
     end;
 
-    local Path = FullPath .. "/" .. DataName .. ".json";
-    local SaveData = {};
+    function Library:Load()
+        local Paths = Library.Paths;
+        local Folder = Paths["Folder"];
+        local Secondary = Paths["Secondary"];
+        local DataName = Paths["Data"] or "Data";
 
-    for i, v in pairs(self.Created.Flags) do
-        if v.Value ~= nil then
-            if typeof(v.Value) == "Color3" then
-                SaveData[i] = {
-                    __type = "Color3",
-                    R = math.round(v.Value.R * 255),
-                    G = math.round(v.Value.G * 255),
-                    B = math.round(v.Value.B * 255),
-                };
-            else
-                SaveData[i] = v.Value;
+        local FullPath = Folder;
+        if Secondary then
+            FullPath = Folder .. "/" .. Secondary;
+        end;
+
+        local Path = FullPath .. "/" .. DataName .. ".json";
+        if not isfile(Path) then return end;
+
+        local Raw = readfile(Path);
+        if not Raw or Raw == "" then return end;
+
+        local hs = game:GetService("HttpService");
+        local ok, data = pcall(hs.JSONDecode, hs, Raw);
+        if not ok or type(data) ~= "table" then return end;
+
+        for i, v in pairs(data) do
+            if Library.Created.Flags[i] then
+                if type(v) == "table" and v.__type == "Color3" then
+                    v = Color3.fromRGB(v.R, v.G, v.B);
+                end;
+                Library.Created.Flags[i]:Load(v);
             end;
         end;
     end;
-
-    local hs = game:GetService("HttpService");
-    writefile(Path, hs:JSONEncode(SaveData));
-end;
-
-function Library:Load()
-    local Paths = Library.Paths;
-    local Folder = Paths["Folder"];
-    local Secondary = Paths["Secondary"];
-    local DataName = Paths["Data"] or "Data";
-
-    local FullPath = Folder;
-    if Secondary then
-        FullPath = Folder .. "/" .. Secondary;
-    end;
-
-    local Path = FullPath .. "/" .. DataName .. ".json";
-    if not isfile(Path) then return end;
-
-    local Raw = readfile(Path);
-    if not Raw or Raw == "" then return end;
-
-    local hs = game:GetService("HttpService");
-    local ok, data = pcall(hs.JSONDecode, hs, Raw);
-    if not ok or type(data) ~= "table" then return end;
-
-    for i, v in pairs(data) do
-        if Library.Created.Flags[i] then
-            if type(v) == "table" and v.__type == "Color3" then
-                v = Color3.fromRGB(v.R, v.G, v.B);
-            end;
-            Library.Created.Flags[i]:Load(v);
-        end;
-    end;
-end;
 
     function Library:SaveExternal(File, Data)
         if not File then return; end;
