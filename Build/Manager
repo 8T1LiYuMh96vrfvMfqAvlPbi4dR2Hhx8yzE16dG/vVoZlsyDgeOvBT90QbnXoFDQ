@@ -254,9 +254,13 @@ Setup["Tween"] = function(self)
 
         -- Always reuse active tween
         if Storage.Active then
-            local Active = Storage.Active
-            Active:ChangeSpeed(Data.Speed)
+            local Active = Storage.Active;
+            if (Active.Data.Priority or 0) > (Data.Priority or 0) then 
+                return;
+            end;
 
+            Active:ChangeSpeed(Data.Speed);
+            
             -- Update the target position for moving mobs
             Active.Data.Position = Data.Position
             Active.Data.Continue = Data.Continue
