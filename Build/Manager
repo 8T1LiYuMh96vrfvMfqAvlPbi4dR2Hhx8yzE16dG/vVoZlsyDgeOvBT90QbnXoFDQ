@@ -635,38 +635,74 @@ end;
 
 Setup["Hooking"] = function(self)
     local Manager = {};
+
     if Called["Hooking"] then return Called["Hooking"]; end;
     Called["Hooking"] = Manager;
 
     local Hooks = {};
+
     local function AttemptHook(Instance, Method, ...)
         local Hook = Hooks[Instance];
         if Hook and Hook[1] == Method then
-            return Hook[2](...) or nil;
+            return Hook[2](...);
         end;
     end;
 
-    function Manager.Add(Instance, Method, Response)
+    function Manager.Add(Instance, Method, Response, Type)
         if Hooks[Instance] then return; end;
-        return pcall(function() Hooks[Instance] = {Method, Response} end);
+
+        if Type == "Function" then
+            local Old;
+            Old = hookfunction(Instance, function(...)
+                if not checkcaller() then
+                    local Result = Response(Old, ...);
+                    if Result ~= nil then return Result; end;
+                end;
+                return Old(...);
+            end);
+
+            Hooks[Instance] = {"Function", Old};
+        else
+            Hooks[Instance] = {Method, Response, Type or "Namecall"};
+        end;
+
+        return true;
     end;
 
     function Manager.Remove(Instance)
-        return pcall(function() Hooks[Instance] = nil; end);
+        Hooks[Instance] = nil;
     end;
 
     function Manager.Exists(Instance)
         return Hooks[Instance] ~= nil;
     end;
 
-    local old;
-    old = hookmetamethod(game, "__namecall", function(self, ...)
+    local namecall;
+    namecall = hookmetamethod(game, "__namecall", function(self, ...)
         if not checkcaller() then
-            local Response = AttemptHook(self, getnamecallmethod(), ...); -- 0 = Return, 
-            if Response == 0 then return; end;
+            local Hook = Hooks[self];
+
+            if Hook and Hook[3] == "Namecall" and Hook[1] == getnamecallmethod() then
+                local Result = Hook[2](...);
+                if Result ~= nil then return Result; end;
+            end;
         end;
 
-        return old(self, ...);
+        return namecall(self, ...);
+    end);
+
+    local index;
+    index = hookmetamethod(game, "__index", function(self, Key)
+        if not checkcaller() then
+            local Hook = Hooks[self];
+
+            if Hook and Hook[3] == "Index" and Hook[1] == Key then
+                local Result = Hook[2](self, Key);
+                if Result ~= nil then return Result; end;
+            end;
+        end;
+
+        return index(self, Key);
     end);
 
     return Manager;
