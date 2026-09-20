@@ -1781,10 +1781,11 @@ local SubFunctions; SubFunctions = {
         nself.ClearDropdown = nself.SetOptions;
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = function(self, Value)
-        nself.Value = Value or false;
-        self.Callback(self.Value);
-        Update();
+            nself.Value = Value or false;
+            self.Callback(self.Value);
+            Update();
         end;
+        
         Update();
 
         local SubUI;
@@ -1794,7 +1795,9 @@ local SubFunctions; SubFunctions = {
             SubUI = Sub;
 
             Connections[5] = InputService:Bind({ "MouseButton1", "MouseButton2" }, function()
+                print("detecting click")
                 local n = MouseInBounds(SettingsUI.AbsolutePosition, SettingsUI.AbsoluteSize);
+                print(n, "in box")
                 Sub.Visibility((n and SettingsUI.Visible) or false)
             end, false, true);
         end;
