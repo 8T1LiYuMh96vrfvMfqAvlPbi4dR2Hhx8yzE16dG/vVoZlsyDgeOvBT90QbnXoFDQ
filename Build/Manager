@@ -546,7 +546,7 @@ Setup["InputRecorder"] = function(self)
             if not Keycode then return; end;
             local KeyName = Keycode.Name;
 
-            if KeyName == "Unknown" then
+            if KeyName == "None" then
                 if Type == "KeyCode" then return; end;
 
                 KeyName = UserInputType.Name;
