@@ -254,13 +254,9 @@ Setup["Tween"] = function(self)
 
         -- Always reuse active tween
         if Storage.Active then
-            local Active = Storage.Active;
-            if (Active.Data.Priority or 0) > (Data.Priority or 0) then 
-                return;
-            end;
+            local Active = Storage.Active
+            Active:ChangeSpeed(Data.Speed)
 
-            Active:ChangeSpeed(Data.Speed);
-            
             -- Update the target position for moving mobs
             Active.Data.Position = Data.Position
             Active.Data.Continue = Data.Continue
@@ -728,7 +724,7 @@ Setup["Loop"] = function(self)
 
                         local p = Self.History[i];
                         if p then
-                            if os.time()-p < t then return; end;
+                            if os.time()-p < t then continue; end;
                         end;
 
                         Self.History[i] = os.time();
@@ -752,7 +748,7 @@ Setup["Loop"] = function(self)
                         
                         local p = Self.History[i];
                         if p then
-                            if os.time()-p < t then return; end;
+                            if os.time()-p < t then continue; end;
                         end;
 
                         Self.History[i] = os.time();
