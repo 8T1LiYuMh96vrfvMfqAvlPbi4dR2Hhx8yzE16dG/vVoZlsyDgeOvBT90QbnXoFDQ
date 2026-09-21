@@ -2067,290 +2067,290 @@ local SubFunctions; SubFunctions = {
     end,
 
     CreateColorPicker = function(self, INFO)
-    local ParentUI, isSetting = self.UI, self.isSetting;
-    if not ParentUI then return; end;
+        local ParentUI, isSetting = self.UI, self.isSetting;
+        if not ParentUI then return; end;
 
-    local nself = INFO or {};
-    nself.Text = nself.Text or "Color Picker";
-    nself.Subtext = nself.Subtext or "";
-    nself.Alignment = nself.Alignment or "Left";
-    nself.Default = nself.Default or Color3.fromRGB(121, 115, 234);
-    nself.ThemeKey = nself.ThemeKey or nil;
-    nself.Callback = nself.Callback or function(...) end;
-    nself.Flag = nself.Flag or nil;
+        local nself = INFO or {};
+        nself.Text = nself.Text or "Color Picker";
+        nself.Subtext = nself.Subtext or "";
+        nself.Alignment = nself.Alignment or "Left";
+        nself.Default = nself.Default or Color3.fromRGB(121, 115, 234);
+        nself.ThemeKey = nself.ThemeKey or nil;
+        nself.Callback = nself.Callback or function(...) end;
+        nself.Flag = nself.Flag or nil;
 
-    nself.Value = nself.Default;
+        nself.Value = nself.Default;
 
-    if nself.Flag then
-        Library.Created.Flags[nself.Flag] = nself;
-    end;
+        if nself.Flag then
+            Library.Created.Flags[nself.Flag] = nself;
+        end;
 
-    local hue, sat, val = Color3.toHSV(nself.Value);
+        local hue, sat, val = Color3.toHSV(nself.Value);
 
-    -- Header row
-    local Background = Library.Create("Frame", {
-        Parent = ParentUI,
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1,
-        ZIndex = ParentUI.ZIndex,
-    });
+        -- Header row
+        local Background = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, 30),
+            BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
+        });
 
-    local Title = Library.Create("TextLabel", {
-        Parent = Background,
-        Size = UDim2.new(.75, 0, 1, 0),
-        BackgroundTransparency = 1,
-        ZIndex = ParentUI.ZIndex,
-    }, { FontFace = "Font", TextColor3 = "Text" });
+        local Title = Library.Create("TextLabel", {
+            Parent = Background,
+            Size = UDim2.new(.75, 0, 1, 0),
+            BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex,
+        }, { FontFace = "Font", TextColor3 = "Text" });
 
-    Library:ApplyTextSize(Title, 16);
-    Library.Create("UIPadding", {
-        Parent = Title,
-        PaddingLeft = UDim.new(0, 7),
-    });
+        Library:ApplyTextSize(Title, 16);
+        Library.Create("UIPadding", {
+            Parent = Title,
+            PaddingLeft = UDim.new(0, 7),
+        });
 
-    local Preview = Library.Create("Frame", {
-        Parent = Background,
-        AnchorPoint = Vector2.new(1, .5),
-        Position = UDim2.new(1, 0, .5, 0),
-        Size = UDim2.new(0, 24, 0, 18),
-        BackgroundColor3 = nself.Value,
-        ZIndex = ParentUI.ZIndex,
-    });
-    Library:ApplyCorner(Preview, 4);
-    Library:ApplyStroke(Preview, "Accent1", 1, "Round");
+        local Preview = Library.Create("Frame", {
+            Parent = Background,
+            AnchorPoint = Vector2.new(1, .5),
+            Position = UDim2.new(1, 0, .5, 0),
+            Size = UDim2.new(0, 24, 0, 18),
+            BackgroundColor3 = nself.Value,
+            ZIndex = ParentUI.ZIndex,
+        });
+        Library:ApplyCorner(Preview, 4);
+        Library:ApplyStroke(Preview, "Accent1", 1, "Round");
 
-    -- Popup panel
-    local Popup = Library.Create("Frame", {
-        Parent = ParentUI,
-        Size = UDim2.new(1, 0, 0, 130),
-        BackgroundTransparency = 1,
-        ZIndex = ParentUI.ZIndex + 5,
-        Visible = false,
-    });
+        -- Popup panel
+        local Popup = Library.Create("Frame", {
+            Parent = ParentUI,
+            Size = UDim2.new(1, 0, 0, 130),
+            BackgroundTransparency = 1,
+            ZIndex = ParentUI.ZIndex + 5,
+            Visible = false,
+        });
 
-    Library.Create("UIPadding", {
-        Parent = Popup,
-        PaddingLeft = UDim.new(0, 7),
-        PaddingRight = UDim.new(0, 7),
-        PaddingTop = UDim.new(0, 4),
-        PaddingBottom = UDim.new(0, 4),
-    });
+        Library.Create("UIPadding", {
+            Parent = Popup,
+            PaddingLeft = UDim.new(0, 7),
+            PaddingRight = UDim.new(0, 7),
+            PaddingTop = UDim.new(0, 4),
+            PaddingBottom = UDim.new(0, 4),
+        });
 
-    -- SV Box (2D field)
-    local SVBox = Library.Create("Frame", {
-        Parent = Popup,
-        Size = UDim2.new(1, -30, 1, 0),
-        BackgroundColor3 = Color3.fromHSV(hue, 1, 1),
-        ZIndex = ParentUI.ZIndex + 5,
-        ClipsDescendants = true,
-    });
-    Library:ApplyCorner(SVBox, 4);
+        -- SV Box (2D field)
+        local SVBox = Library.Create("Frame", {
+            Parent = Popup,
+            Size = UDim2.new(1, -30, 1, 0),
+            BackgroundColor3 = Color3.fromHSV(hue, 1, 1),
+            ZIndex = ParentUI.ZIndex + 5,
+            ClipsDescendants = true,
+        });
+        Library:ApplyCorner(SVBox, 4);
 
-    -- White left-to-right gradient (saturation)
--- White left-to-right gradient (saturation)
-local SatGrad = Library.Create("Frame", {
-    Parent = SVBox,
-    Size = UDim2.new(1, 0, 1, 0),
-    BackgroundColor3 = Color3.new(1, 1, 1),
-    ZIndex = ParentUI.ZIndex + 5,
-});
-Library.Create("UIGradient", {
-    Parent = SatGrad,
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-        ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
-    }),
-    Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0),
-        NumberSequenceKeypoint.new(1, 1),
-    }),
-});
+        -- White left-to-right gradient (saturation)
+        -- White left-to-right gradient (saturation)
+        local SatGrad = Library.Create("Frame", {
+            Parent = SVBox,
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = ParentUI.ZIndex + 5,
+        });
+        Library.Create("UIGradient", {
+            Parent = SatGrad,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+                ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+            }),
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1),
+            }),
+        });
 
--- Black top-to-bottom gradient (value)
-local ValGrad = Library.Create("Frame", {
-    Parent = SVBox,
-    Size = UDim2.new(1, 0, 1, 0),
-    BackgroundColor3 = Color3.new(0, 0, 0),
-    ZIndex = ParentUI.ZIndex + 5,
-});
-Library.Create("UIGradient", {
-    Parent = ValGrad,
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
-    }),
-    Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(1, 0),
-    }),
-    Rotation = 90,
-});
+        -- Black top-to-bottom gradient (value)
+        local ValGrad = Library.Create("Frame", {
+            Parent = SVBox,
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundColor3 = Color3.new(0, 0, 0),
+            ZIndex = ParentUI.ZIndex + 5,
+        });
+        Library.Create("UIGradient", {
+            Parent = ValGrad,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+                ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+            }),
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(1, 0),
+            }),
+            Rotation = 90,
+        });
 
-    -- SV Cursor
-    local SVCursor = Library.Create("Frame", {
-        Parent = SVBox,
-        AnchorPoint = Vector2.new(.5, .5),
-        Position = UDim2.new(sat, 0, 1 - val, 0),
-        Size = UDim2.new(0, 8, 0, 8),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        ZIndex = ParentUI.ZIndex + 6,
-    });
-    Library:ApplyCorner(SVCursor, 100);
-    Library:ApplyStroke(SVCursor, "Background", 1, "Round");
+        -- SV Cursor
+        local SVCursor = Library.Create("Frame", {
+            Parent = SVBox,
+            AnchorPoint = Vector2.new(.5, .5),
+            Position = UDim2.new(sat, 0, 1 - val, 0),
+            Size = UDim2.new(0, 8, 0, 8),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = ParentUI.ZIndex + 6,
+        });
+        Library:ApplyCorner(SVCursor, 100);
+        Library:ApplyStroke(SVCursor, "Background", 1, "Round");
 
-    -- Hue slider (vertical, right side)
-    local HueSlider = Library.Create("Frame", {
-        Parent = Popup,
-        AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, 0, 0, 0),
-        Size = UDim2.new(0, 22, 1, 0),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        ZIndex = ParentUI.ZIndex + 5,
-        ClipsDescendants = true,
-    });
-    Library:ApplyCorner(HueSlider, 4);
+        -- Hue slider (vertical, right side)
+        local HueSlider = Library.Create("Frame", {
+            Parent = Popup,
+            AnchorPoint = Vector2.new(1, 0),
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(0, 22, 1, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = ParentUI.ZIndex + 5,
+            ClipsDescendants = true,
+        });
+        Library:ApplyCorner(HueSlider, 4);
 
-    -- Rainbow gradient for hue
-    Library.Create("UIGradient", {
-        Parent = HueSlider,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0,    Color3.fromHSV(0, 1, 1)),
-            ColorSequenceKeypoint.new(0.17, Color3.fromHSV(0.17, 1, 1)),
-            ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 1, 1)),
-            ColorSequenceKeypoint.new(0.5,  Color3.fromHSV(0.5, 1, 1)),
-            ColorSequenceKeypoint.new(0.67, Color3.fromHSV(0.67, 1, 1)),
-            ColorSequenceKeypoint.new(0.83, Color3.fromHSV(0.83, 1, 1)),
-            ColorSequenceKeypoint.new(1,    Color3.fromHSV(1, 1, 1)),
-        }),
-        Rotation = 90,
-    });
+        -- Rainbow gradient for hue
+        Library.Create("UIGradient", {
+            Parent = HueSlider,
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0,    Color3.fromHSV(0, 1, 1)),
+                ColorSequenceKeypoint.new(0.17, Color3.fromHSV(0.17, 1, 1)),
+                ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 1, 1)),
+                ColorSequenceKeypoint.new(0.5,  Color3.fromHSV(0.5, 1, 1)),
+                ColorSequenceKeypoint.new(0.67, Color3.fromHSV(0.67, 1, 1)),
+                ColorSequenceKeypoint.new(0.83, Color3.fromHSV(0.83, 1, 1)),
+                ColorSequenceKeypoint.new(1,    Color3.fromHSV(1, 1, 1)),
+            }),
+            Rotation = 90,
+        });
 
-    -- Hue cursor
-    local HueCursor = Library.Create("Frame", {
-        Parent = HueSlider,
-        AnchorPoint = Vector2.new(.5, .5),
-        Position = UDim2.new(.5, 0, hue, 0),
-        Size = UDim2.new(1, 0, 0, 4),
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        ZIndex = ParentUI.ZIndex + 6,
-    });
-    Library:ApplyCorner(HueCursor, 2);
+        -- Hue cursor
+        local HueCursor = Library.Create("Frame", {
+            Parent = HueSlider,
+            AnchorPoint = Vector2.new(.5, .5),
+            Position = UDim2.new(.5, 0, hue, 0),
+            Size = UDim2.new(1, 0, 0, 4),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            ZIndex = ParentUI.ZIndex + 6,
+        });
+        Library:ApplyCorner(HueCursor, 2);
 
-    local function ApplyColor()
-        local color = Color3.fromHSV(hue, sat, val);
-        nself.Value = color;
-        Preview.BackgroundColor3 = color;
-        SVBox.BackgroundColor3 = Color3.fromHSV(hue, 1, 1);
-        SVCursor.Position = UDim2.new(sat, 0, 1 - val, 0);
-        HueCursor.Position = UDim2.new(.5, 0, hue, 0);
+        local function ApplyColor()
+            local color = Color3.fromHSV(hue, sat, val);
+            nself.Value = color;
+            Preview.BackgroundColor3 = color;
+            SVBox.BackgroundColor3 = Color3.fromHSV(hue, 1, 1);
+            SVCursor.Position = UDim2.new(sat, 0, 1 - val, 0);
+            HueCursor.Position = UDim2.new(.5, 0, hue, 0);
 
-        if nself.ThemeKey then
-            if not Library.Themes["Custom"] then
-                Library.Themes["Custom"] = {};
-                for k, v in pairs(Library.Themes["Default"]) do
-                    Library.Themes["Custom"][k] = v;
+            if nself.ThemeKey then
+                if not Library.Themes["Custom"] then
+                    Library.Themes["Custom"] = {};
+                    for k, v in pairs(Library.Themes["Default"]) do
+                        Library.Themes["Custom"][k] = v;
+                    end;
                 end;
+                Library.Themes["Custom"][nself.ThemeKey] = color;
+                Library.Theme = "Custom";
             end;
-            Library.Themes["Custom"][nself.ThemeKey] = color;
-            Library.Theme = "Custom";
+
+            task.spawn(nself.Callback, color);
         end;
 
-        task.spawn(nself.Callback, color);
-    end;
+        -- SV drag
+        local svDragging = false;
+        local SVClick = Library:ApplyClick(SVBox);
+        SVClick.ZIndex = ParentUI.ZIndex + 7;
 
-    -- SV drag
-    local svDragging = false;
-    local SVClick = Library:ApplyClick(SVBox);
-    SVClick.ZIndex = ParentUI.ZIndex + 7;
-
-    SVClick.MouseButton1Down:Connect(function()
-        svDragging = true;
-        while svDragging and Popup.Visible do
-            local px = SVBox.AbsolutePosition.X;
-            local py = SVBox.AbsolutePosition.Y;
-            local sx = SVBox.AbsoluteSize.X;
-            local sy = SVBox.AbsoluteSize.Y;
-            sat = math.clamp((Mouse.X - px) / sx, 0, 1);
-            val = 1 - math.clamp((Mouse.Y - py) / sy, 0, 1);
-            ApplyColor();
-            RunService.Heartbeat:Wait();
-        end;
-        svDragging = false;
-    end);
-
-    SVClick.MouseButton1Up:Connect(function()
-        svDragging = false;
-    end);
-
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        SVClick.MouseButton1Down:Connect(function()
+            svDragging = true;
+            while svDragging and Popup.Visible do
+                local px = SVBox.AbsolutePosition.X;
+                local py = SVBox.AbsolutePosition.Y;
+                local sx = SVBox.AbsoluteSize.X;
+                local sy = SVBox.AbsoluteSize.Y;
+                sat = math.clamp((Mouse.X - px) / sx, 0, 1);
+                val = 1 - math.clamp((Mouse.Y - py) / sy, 0, 1);
+                ApplyColor();
+                RunService.Heartbeat:Wait();
+            end;
             svDragging = false;
-            hueDragging = false;
-        end;
-    end);
+        end);
 
-    -- Hue drag
-    local hueDragging = false;
-    local HueClick = Library:ApplyClick(HueSlider);
-    HueClick.ZIndex = ParentUI.ZIndex + 7;
-
-    HueClick.MouseButton1Down:Connect(function()
-        hueDragging = true;
-        while hueDragging and Popup.Visible do
-            local py = HueSlider.AbsolutePosition.Y;
-            local sy = HueSlider.AbsoluteSize.Y;
-            hue = math.clamp((Mouse.Y - py) / sy, 0, 1);
-            ApplyColor();
-            RunService.Heartbeat:Wait();
-        end;
-        hueDragging = false;
-    end);
-
-    HueClick.MouseButton1Up:Connect(function()
-        hueDragging = false;
-    end);
-
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
-            hueDragging = false;
+        SVClick.MouseButton1Up:Connect(function()
             svDragging = false;
+        end);
+
+        UserInputService.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                svDragging = false;
+                hueDragging = false;
+            end;
+        end);
+
+        -- Hue drag
+        local hueDragging = false;
+        local HueClick = Library:ApplyClick(HueSlider);
+        HueClick.ZIndex = ParentUI.ZIndex + 7;
+
+        HueClick.MouseButton1Down:Connect(function()
+            hueDragging = true;
+            while hueDragging and Popup.Visible do
+                local py = HueSlider.AbsolutePosition.Y;
+                local sy = HueSlider.AbsoluteSize.Y;
+                hue = math.clamp((Mouse.Y - py) / sy, 0, 1);
+                ApplyColor();
+                RunService.Heartbeat:Wait();
+            end;
+            hueDragging = false;
+        end);
+
+        HueClick.MouseButton1Up:Connect(function()
+            hueDragging = false;
+        end);
+
+        UserInputService.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                hueDragging = false;
+                svDragging = false;
+            end;
+        end);
+
+        -- Functions
+        local function Update()
+            Title.Text = nself.Text;
+            Title.TextXAlignment = Enum.TextXAlignment.Left;
+            Preview.BackgroundColor3 = nself.Value;
+            if not isSetting then
+                self:AddContent(Background, nself.Text .. "_" .. (nself.Subtext or ""));
+            end;
         end;
-    end);
 
-    -- Functions
-    local function Update()
-        Title.Text = nself.Text;
-        Title.TextXAlignment = Enum.TextXAlignment.Left;
-        Preview.BackgroundColor3 = nself.Value;
-        if not isSetting then
-            self:AddContent(Background, nself.Text .. "_" .. (nself.Subtext or ""));
+        function nself:SetValue(color)
+            nself.Value = color;
+            hue, sat, val = Color3.toHSV(color);
+            ApplyColor();
         end;
-    end;
 
-    function nself:SetValue(color)
-        nself.Value = color;
-        hue, sat, val = Color3.toHSV(color);
-        ApplyColor();
-    end;
-
-    nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
-    nself.Load = function(self, Value)
-        if typeof(Value) == "Color3" then
-            nself:SetValue(Value);
+        nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
+        nself.Load = function(self, Value)
+            if typeof(Value) == "Color3" then
+                nself:SetValue(Value);
+            end;
         end;
-    end;
 
-    Update();
+        Update();
 
-    local Click = Library:ApplyClick(Background);
-    local open = false;
-    Click.MouseButton1Up:Connect(function()
-        open = not open;
-        Popup.Visible = open;
-    end);
+        local Click = Library:ApplyClick(Background);
+        local open = false;
+        Click.MouseButton1Up:Connect(function()
+            open = not open;
+            Popup.Visible = open;
+        end);
 
-    return nself;
-end,
+        return nself;
+    end,
 };
 
 -- Main
@@ -2889,7 +2889,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
-            ClipsDescendants = true,
+            ClipsDescendants = false,
         });
 
         local LeftTab = Library.Create("ScrollingFrame", {
