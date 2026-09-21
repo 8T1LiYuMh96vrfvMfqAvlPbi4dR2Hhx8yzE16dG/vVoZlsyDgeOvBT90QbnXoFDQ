@@ -1,0 +1,520 @@
+repeat task.wait() until game~=nil and game:IsLoaded();
+
+local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ"
+local Library = loadstring(game:HttpGet(Repo .. "/refs/heads/main/Build/GUI"))();
+local Setup = loadstring(game:HttpGet(Repo .. "/refs/heads/main/Build/Manager"))();
+Setup:Basics();
+
+local Window = Library:CreateWindow({ Title = "", Icon = { "rbxassetid://101308344257609", UDim2.new(0, 125, 0, 125) } });
+local Tabs = {
+    Main = Window:CreateTab({ Title = "Main", Icon = "rbxassetid://100148767701369" }),
+    Config = Window:CreateTab({ Title = "Config", Icon = "rbxassetid://94377454418556" }),
+};
+local Sections = {
+    Farming = Tabs.Main:CreateSection({ Title = "Farming", Side = "Left" });
+    Other = Tabs.Main:CreateSection({ Title = "Additional", Side = "Left" });
+    Config = Tabs.Main:CreateSection({ Title = "Config", Side = "Right" });
+    QoL = Tabs.Main:CreateSection({ Title = "QoL", Side = "Right" });
+
+    UI_Controls = Tabs.Config:CreateSection({ Title = "UI",Side = "Left"  }),
+    Save = Tabs.Config:CreateSection({ Title = "Save",Side = "Right" }),
+};
+
+--; Load Setups
+local Controller = Setup:ClientController();
+local VIM = Setup:VirtualInputManager();
+
+local Loop = Setup:Loop();
+local Maids = Setup:Maid();
+local Tween = Setup:Tween();
+local Utils = Setup:Utils();
+local Hooking = Setup:Hooking();
+
+
+--; Maid
+local Maid = Maids.new();
+Maid:GiveTask(Loop.Kill);
+Maid:GiveTask(function() Tween:Cancel(); end);
+Maid:GiveTask(function() Window:Exit(); end);
+
+--; Paths
+local Entities = workspace:WaitForChild("Humanoids");
+local Regions = Entities:FindFirstChild("Regions");
+local Signal = ReplicatedStorage:WaitForChild("Communication"):WaitForChild("ServerAndClient"):WaitForChild("Signals"):WaitForChild("SignalEvent"):WaitForChild("Event");
+
+local CAM = ReplicatedStorage.CAM;
+local Combat = require(CAM.Global.Combat_presets);
+local Info = require(CAM.Global.Character_info_provider);
+local Locator = require(CAM.Global.Subsets.Areas.AreaLocator.Locator);
+local NPCs = ReplicatedStorage.Assets.Npcs;
+
+--; Defaults
+getgenv().Farm = {Mobs = {}, Offset=CFrame.new(0, 4, 4)}; -- Mob Farm
+getgenv().Patrol = {Regions = {}}; -- Patrol for loading
+getgenv().Skills = {Selected={}, All={}};
+getgenv().IK = {Enabled=false, Bosses=false};
+
+--; Helpers
+local Mobs = {};
+local function addFolder(Folder)
+    local Name = Folder.Name:gsub("%s", "");
+    local List = Mobs[Name] or {Spawned = {}};
+
+    Mobs[Name] = List;
+
+    local Info = Folder:FindFirstChild("BossInfo");
+    List.Location = Info and Info:GetAttribute("Center");
+
+    local function Add(v)
+        if not v:IsA("Model") or table.find(List.Spawned, v) then return; end;
+
+        table.insert(List.Spawned, v);
+
+        v.AncestryChanged:Once(function()
+            local Index = table.find(List.Spawned, v);
+            if Index then
+                table.remove(List.Spawned, Index);
+            end;
+        end);
+    end;
+
+    for _, v in ipairs(Folder:GetChildren()) do
+        Add(v);
+    end;
+
+    Maid:GiveTask(Folder.ChildAdded:Connect(Add));
+end;
+
+for _, Region in ipairs(Regions:GetChildren()) do
+	local Active = Region:FindFirstChild("ActiveNpcs");
+
+	if Active then
+		for _, Folder in ipairs(Active:GetChildren()) do
+			addFolder(Folder);
+		end;
+
+		local c1 = Active.ChildAdded:Connect(addFolder);
+        Maid:GiveTask(function() c1:Disconnect(); end);
+	end;
+end;
+
+local function getMobs(Targets)
+    if not Targets then return Mobs; end;
+
+	local Result = {};
+	for _, Name in ipairs(Targets) do
+		if Mobs[Name] then
+			Result[Name] = Mobs[Name];
+		end;
+	end;
+
+	return Result;
+end;
+
+local Last, At, Attempted = 0, 0, nil;
+local function Attack()
+    local Combo = (Char:GetAttribute("last_combo") or 0)%5 + 1;
+
+    local Tool = Info.Get_equipped_tool(Char);
+    local P = (Tool and Combat.Presets[Tool.Name]) or Combat.Presets.Combat;
+    local Base = 0;
+    if Last ~= 0 then
+        if Combo == 1 then
+            Base = Last == 5 and P.final or Combat.combo_duration;
+        else
+            Base = (P.customDelay and P.customDelay[Combo]) or P.default;
+        end;
+    end;
+    
+    local Wait = Base / Combat.attackSpeedMult(client);
+    local Lead = (Combo == 1) and -0.05 or client:GetNetworkPing();
+    local Rest = At + Wait - Lead - os.clock();
+
+    if Rest > 0 then return; end;
+    Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
+
+    At = os.clock();
+    Last = Combo;
+
+    return true;
+end;
+
+
+
+
+
+
+
+
+--; Main
+Sections.Farming:CreateToggle({
+    Text = "Mob Farm"; 
+    Flag = "mob_farm";
+    Callback = function(Value)
+        Loop("RenderStepped", "mob_farm", Value, function()
+            local Targets = getMobs((not Farm.Ignore and Farm.Mobs));
+            local Alive, Indexed = {}, {};
+            local Bosses = {};
+
+            for _, v in pairs(Targets) do -- Gather mobs
+                if #v.Spawned > 0 then 
+                    for _, Spawned in pairs(v.Spawned) do
+                        if not Spawned.Parent then continue; end;
+                        table.insert(Alive, Spawned);
+
+                        if v.Location then
+                            table.insert(Bosses, Spawned);
+                        end;
+                    end;
+                end;
+
+
+                table.insert(Indexed, v);
+            end;
+
+            if #Alive > 0 then
+                local Target = Utils.GetNearest(Alive);
+
+                local Root = Target.HumanoidRootPart or Target.PrimaryPart;
+                local Position = (Root.CFrame * Farm.Offset).Position;
+                
+                if Tween:Create({Priority=2, Position=CFrame.lookAt(Position, Root.Position), Speed=TweenSpeed}) then
+                    Farm.Position = Root.Position;
+                    Attack();
+
+                    if IK.Enabled then
+                        if not IK.Bosses and table.find(Bosses, Target) then print("boss"); return; end;
+
+                        local mhum = Target:FindFirstChild("Humanoid", true);
+                        mhum.Health=0;
+                    end;
+                end;
+            else
+                if Farm.Position then
+                    if Tween:Create({Priority=2, Position=Farm.Position, Speed=TweenSpeed}) then
+                        Farm.Position = nil;
+                    end;
+
+                    return;
+                end;
+
+                Target=Target or 1;
+                local Mob = Indexed[Target];
+                local Found = false;
+                if not Mob then return; end;
+                local Spawn = Mob.Location; 
+                if not Spawn then return; 
+                else 
+                    if not Tween:Create({Position=Spawn-vector.create(0, 50, 0), Speed=TweenSpeed}) then
+                        Found=true;
+                    end;
+                end;
+
+                if not Found then Target=(Target%#Indexed)+1; end;
+            end;
+        end);
+
+        if not Value then Tween:Cancel(); end;
+    end;
+});
+
+local mob_list = Sections.Farming:CreateDropdown({
+    Text = "Mobs"; 
+    Flag = "target_mobs";
+    Choices = (function() 
+    local m={"Mizunoto"}; 
+    for _, f in pairs(NPCs:GetChildren()) do  
+        if not f:IsA("Folder") or f.Name == "Civilians" or table.find(m, f.Name) then continue; end;
+        for i, v in pairs(f:GetChildren()) do  
+            local NPC = string.gsub(string.split(v.Name, "_")[1], "(%u)", " %1"):gsub("^ ", ""); 
+            if table.find(m, NPC) then continue; end;
+            table.insert(m, NPC);
+        end; 
+    end; return m; end)();
+    Multi = true;
+    Callback = function(Value) 
+        Farm.Mobs = {};
+
+        for i, v in pairs(Value) do
+            local subbed = v:gsub("%s", "");
+            table.insert(Farm.Mobs, subbed);
+        end;
+    end;
+});
+
+local SubFarm = Library:CreateSubWindow({Title="Config", Size=UDim2.new(0, 300, 0, 150)});
+mob_list:AssignSub(SubFarm);
+
+SubFarm:CreateToggle({Text="Locked Cache", Callback=function(Value)
+    if not mob_list.Value then return; end;
+    
+    local Locked = { "Grove Raider", "Raid Captain", "Cache Lancer", "Cache Prowler", "Lancer Captain", "Prowler Captain" };
+    local New = table.clone(mob_list.Value);
+
+    for _, v in pairs(Locked) do
+        local Found = table.find(New, v);
+
+        if Value and not Found then
+            table.insert(New, v);
+        elseif not Value and Found then
+            table.remove(New, Found);
+        end;
+    end;
+
+    mob_list:SetValue(New);
+end});
+
+SubFarm:CreateLabel({Text=""}); -- Gap
+SubFarm:CreateButton({Text="Deselect All", Callback=function() mob_list:SetValue({}) end});
+SubFarm:CreateToggle({Text="Farm All", SubText="Ignore Mob List", Callback=function(Value) Farm.Ignore=Value end, Flag="ignore_list"});
+
+
+local bad_ik = Sections.Farming:CreateToggle({
+    Text = "Instakill";
+    Callback = function(Value)
+        IK.Enabled = Value;
+    end;
+
+    Flag = "ownership_kill"
+});
+
+local SubIK = Library:CreateSubWindow({Title="Config"});
+bad_ik:AssignSub(SubIK);
+
+SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
+
+Sections.Other:CreateToggle({
+    Text = "Auto Chest";
+    Callback = function(Value)
+        Loop("RenderStepped", "autoChest", Value, function()
+            local drops = workspace:FindFirstChild("LootDrops", true);
+        
+            for _, folder in ipairs({ workspace.Chests, drops }) do
+                for _, d in ipairs(folder:GetDescendants()) do
+                    if d:IsA("ProximityPrompt") and d.Enabled then
+                        local Part = d;
+                        for i=1, 100 do
+                            Part = Part.Parent;
+                            if not Part or Part:IsA("Part") then
+                                break;
+                            end;
+                        end;
+
+                        if not Part then continue; end;
+
+                        if Tween:Create({Priority=3, Position=Part.Position, Speed=TweenSpeed}) then
+                            fireproximityprompt(d);
+                        end;
+                    end;
+                end;
+            end;
+        end);
+    end;
+
+    Flag = "auto_chest"
+});
+
+local SHC;
+Sections.Other:CreateToggle({
+    Text="Auto Skills";
+    Callback = function(Value)
+        Loop("Heartbeat", "autoSkills", Value, function()
+            if Humanoid.Health <= 1 then return; end;
+            if Char:FindFirstChild("SHCS") ~= SHC then
+                SHC = Char.SHCS;
+            end;
+
+            for i, v in pairs(Skills.Selected) do    
+                if SHC:FindFirstChild(v) then continue; end;
+                Signal:FireServer("server_skill_controller_signaler", v, "Hold", HRP.Position);
+                task.delay(.5, function()
+                    Signal:FireServer("server_skill_controller_signaler", v, "UnHold", HRP.Position);
+                end);
+            end;
+        end)
+    end;
+
+    Flag="auto_skill"
+});
+
+local skill_list = Sections.Other:CreateDropdown({
+    Text="Skills";
+    Choices = {};
+    Multi=true;
+    Callback = function(Value)
+        Skills.Selected = Value
+    end;
+
+    Flag="skill_list"
+});
+
+local old = table.clone(Skills.All);
+Loop("Heartbeat", "newSkills", true, {function()
+    for i, v in pairs(Skills.All) do
+        if not old[i] then
+            old[i] = v;
+            skill_list:AddOption(v);
+        end;
+    end;
+end, 1})
+
+Sections.Config:CreateToggle({
+    Text = "Noclip"; 
+    Callback = function(Value)
+        Loop("Heartbeat", "Noclip", Value, function()
+            for _, part in ipairs(char:GetDescendants()) do
+             if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false; end;
+            end;
+        end); 
+    end;
+    Flag = "noclip";
+});
+
+Sections.Config:CreateSlider({
+    Text = "Tween Speed";
+    Limits = {0, 1000};
+    Default = 250;
+    Callback = function(Value)
+        TweenSpeed = Value;
+    end;
+
+    Flag = "tweenSpeed"
+});
+
+Sections.QoL:CreateToggle({Text="Block Dash", Callback=function(Value) blockDash=Value end, Flag="block_dash"})
+
+Hooking.Add(Signal.FireServer, nil, function(...) -- args[1/2] are the function and the Instance
+    local args = {...};
+
+    if args[3] == "server_skill_controller_signaler" and args[5] == "Hold" then
+        if args[4] == "Dash" and blockDash then return 0; end;
+
+        if not table.find(Skills.All, args[4]) then
+            table.insert(Skills.All, args[4]);
+        end;
+    end;
+end, "Function");
+
+Sections.Farming:CreateLabel({Text=""});
+Sections.Farming:CreateToggle({
+    Text = "Patrol";
+    Callback = function(Value)
+        Loop("RenderStepped", "Patrol", Value, function()
+            local Areas = Locator.Areas;
+            local Selected = {};
+
+            for _, Name in pairs(Patrol.Regions) do
+                if Areas[Name] then
+                    table.insert(Selected, Areas[Name].Grid);
+                end;
+            end;
+
+            if #Selected == 0 then return; end;
+
+            Patrol.Progress = Patrol.Progress or 1;
+            Patrol.Section = Patrol.Section or 1;
+
+            local Grid = Selected[Patrol.Progress];
+
+            if not Grid or Patrol.Section > #Grid then
+                Patrol.Section = 1;
+                Patrol.Progress = Patrol.Progress % #Selected + 1;
+                Grid = Selected[Patrol.Progress];
+            end;
+
+            local Section = Grid[Patrol.Section];
+            if not Section then
+                Patrol.Section = 1;
+                Patrol.Progress = Patrol.Progress % #Selected + 1;
+                return;
+            end;
+
+            local Center = Section.Center;
+            local Origin = vector.create(Center.X, 1000, Center.Y);
+            local Result = workspace:Raycast(Origin, Vector3.new(0, -2000, 0));
+
+            local Y = Result and Result.Position.Y + 3 or HRP.Position.Y;
+
+            if Tween:Create({Priority=1, Position = vector.create(Center.X, Y, Center.Y), Speed = TweenSpeed}) then
+                Patrol.Section += 1;
+            end;
+        end);
+    end;
+
+    Flag = "patrol"
+});
+
+Sections.Farming:CreateDropdown({
+    Text = "Patrol Regions";
+    Choices = (function() local m={}; for i, v in pairs(Locator.Areas) do table.insert(m,i) end; return m; end)();
+    Multi = true;
+    Callback = function(Value)
+        Patrol.Regions = Value;
+    end;
+
+    Flag = "patrolRegions"
+});
+
+Sections.Save:CreateButton({
+    Text = "Save Config",
+    Alignment = "Left",
+    Callback = function()
+        Library:Save();
+        Library:Notify("Config Saved", 5, "Notification");
+    end,
+})
+
+Sections.Save:CreateButton({
+    Text = "Load Config",
+    Alignment = "Left",
+    Callback = function()
+        Library:Load();
+        Library:Notify("Loaded Config", 5, "Notification");
+    end,
+});
+
+Sections.UI_Controls:CreateKeybind({
+    Text = "Toggle UI";
+    Subtext = "Hide Menu with Key" ;
+    Alignment = "Left"; 
+    Default = "N"; 
+    Callback = function() 
+        Window:Visibility();
+    end;
+    Flag = "ui_keybind";
+});
+
+Sections.UI_Controls:CreateButton({
+    Text = "Exit";
+    Callback = function() Maid:DoCleaning(); end;
+});
+    
+
+-- Auto Dungeons
+
+
+Sections.Other:CreateButton({
+    Text="Dungeon Test";
+    Callback = function()
+        local Cards = PlayerGui.ComponentsHolder.MainNotificationFrame.OuwigaharaOffers.BBCards.Cards
+        if Cards then
+            for i, v in pairs(Cards:GetChildren()) do
+                if not v:FindFirstChild("Card") then return; end;
+
+                local Card = v.Card["1"];
+                local Title = Card.Title.Text;
+                local Bottom = Card.Bottom.Text;
+
+                if string.lower(Bottom):match("rest of") then
+                    print(Card .. i, "is perm");
+                elseif string.lower(Bottom):match("points") then
+                    local Amount = Title:match("%d+");
+                    print(Card .. i, Amount, "gives points");
+                end;
+            end;
+        end;
+    end;
+});
+
+
+Library:Load();
