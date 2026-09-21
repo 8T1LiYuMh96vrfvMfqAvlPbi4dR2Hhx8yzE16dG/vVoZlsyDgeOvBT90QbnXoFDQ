@@ -1820,6 +1820,7 @@ local SubFunctions; SubFunctions = {
             local RowSize = Background.AbsoluteSize;   -- the row's own size
 
             Subframe.Parent = Library.ScreenUI;
+            Subframe.AnchorPoint = Vector2.new(.5, 0);
             Subframe.Position = UDim2.new(0, AbsPos.X, 0, AbsPos.Y);
             Subframe.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y); -- pixel-equivalent, no jump
 
