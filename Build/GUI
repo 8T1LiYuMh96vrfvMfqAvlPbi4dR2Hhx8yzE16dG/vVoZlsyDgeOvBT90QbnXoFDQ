@@ -1811,52 +1811,38 @@ local SubFunctions; SubFunctions = {
 
         local lastC = tick();
         local function Show()
+            Subframe.Parent = Library.ScreenGui;
+
             Subframe.ZIndex = ParentUI.ZIndex + 10;
             Circle.ZIndex = ParentUI.ZIndex + 10;
             ValueLabel.ZIndex = ParentUI.ZIndex + 10;
+            ItemHolder.ZIndex = ParentUI.ZIndex + 10;
 
             SearchBox.Visible = true;
             ValueLabel.Visible = false;
-
-            local TargetWidth = Subframe.AbsoluteSize.X;
-            local TargetPos = UDim2.new(0, Subframe.AbsolutePosition.X, 0,
-                Subframe.AbsolutePosition.Y + Subframe.AbsoluteSize.Y);
-
-            ItemHolder.Parent = Library.ScreenUI;
-            ItemHolder.AnchorPoint = Vector2.new(0, 0);
-            ItemHolder.Position = TargetPos;
-            ItemHolder.Size = UDim2.new(0, TargetWidth, 0, 0); -- start collapsed
-            ItemHolder.ZIndex = ParentUI.ZIndex + 10;
-            ItemHolder.Visible = true;
-
-            local Tween = TweenService:Create(ItemHolder,
-                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = UDim2.new(0, TargetWidth, 0, 150) });
+            
+            local Tween = TweenService:Create(Subframe, TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Size = UDim2.new(0, Background.AbsoluteSize.X, 0, Background.AbsoluteSize.Y + 150) });
             Tween:Play();
+            Tween.Completed:Once(function()
+                ItemHolder.Visible = true;
+            end);
         end;
 
         local function Hide()
+            Subframe.Parent = Background;
+
             Subframe.ZIndex = ParentUI.ZIndex;
             Circle.ZIndex = ParentUI.ZIndex;
             ValueLabel.ZIndex = ParentUI.ZIndex;
-
-            local TargetWidth = Subframe.AbsoluteSize.X;
-
-            local Tween = TweenService:Create(ItemHolder,
-                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = UDim2.new(0, TargetWidth, 0, 0) });
-            Tween:Play();
-            Tween.Completed:Wait();
+            ItemHolder.ZIndex = ParentUI.ZIndex;
 
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
-
-            ItemHolder.Parent = Subframe;
-            ItemHolder.AnchorPoint = Vector2.new(0, 1);
-            ItemHolder.Position = UDim2.new(0, 0, 1, 0);
-            ItemHolder.Size = UDim2.new(1, 0, 0, 150);
-            ItemHolder.ZIndex = ParentUI.ZIndex;
-
+            local Tween = TweenService:Create(Subframe,
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(.4, 0, 1, 0) });
+            Tween:Play();
+            Tween.Completed:Wait();
             ValueLabel.Visible = true;
         end;
 
@@ -2907,7 +2893,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
-            ClipsDescendants = false,
+            ClipsDescendants = true,
         });
 
         local LeftTab = Library.Create("ScrollingFrame", {
