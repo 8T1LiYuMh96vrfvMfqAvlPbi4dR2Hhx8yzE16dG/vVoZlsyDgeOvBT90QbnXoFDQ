@@ -29,13 +29,16 @@ local Maids = Setup:Maid();
 local Tween = Setup:Tween();
 local Utils = Setup:Utils();
 local Hooking = Setup:Hooking();
+local Anticheat = Setup:Anticheat();
+Anticheat.Idle(); Anticheat.Error();
 
 
 --; Maid
 local Maid = Maids.new();
+Library.Maid = Maid;
+
 Maid:GiveTask(Loop.Kill);
 Maid:GiveTask(function() Tween:Cancel(); end);
-Maid:GiveTask(function() Window:Exit(); end);
 
 --; Paths
 local Entities = workspace:WaitForChild("Humanoids");
@@ -486,7 +489,7 @@ Sections.UI_Controls:CreateKeybind({
 
 Sections.UI_Controls:CreateButton({
     Text = "Exit";
-    Callback = function() Maid:DoCleaning(); end;
+    Callback = function() Window:Exit() end;
 });
     
 
