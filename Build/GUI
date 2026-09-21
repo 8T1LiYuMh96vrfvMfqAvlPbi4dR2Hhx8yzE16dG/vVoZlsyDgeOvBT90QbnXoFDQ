@@ -1814,15 +1814,17 @@ local SubFunctions; SubFunctions = {
             Subframe.ZIndex = ParentUI.ZIndex + 10;
             Circle.ZIndex = ParentUI.ZIndex + 10;
             ValueLabel.ZIndex = ParentUI.ZIndex + 10;
-            ItemHolder.ZIndex = ParentUI.ZIndex + 10;
 
             SearchBox.Visible = true;
             ValueLabel.Visible = false;
-            local Tween = TweenService:Create(Subframe,
-                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = UDim2.new(1, 0, 1, 150) });
-            Tween:Play();
-            Tween.Completed:Wait();
+
+            ItemHolder.Parent = Library.ScreenUI;
+            ItemHolder.AnchorPoint = Vector2.new(0, 0);
+            ItemHolder.Position = UDim2.new(0, Subframe.AbsolutePosition.X, 0,
+                Subframe.AbsolutePosition.Y + Subframe.AbsoluteSize.Y);
+            ItemHolder.Size = UDim2.new(0, Subframe.AbsoluteSize.X, 0, 150);
+            ItemHolder.ZIndex = ParentUI.ZIndex + 10; 
+
             ItemHolder.Visible = true;
         end;
 
@@ -1830,15 +1832,16 @@ local SubFunctions; SubFunctions = {
             Subframe.ZIndex = ParentUI.ZIndex;
             Circle.ZIndex = ParentUI.ZIndex;
             ValueLabel.ZIndex = ParentUI.ZIndex;
-            ItemHolder.ZIndex = ParentUI.ZIndex;
 
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
-            local Tween = TweenService:Create(Subframe,
-                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = UDim2.new(.4, 0, 1, 0) });
-            Tween:Play();
-            Tween.Completed:Wait();
+
+            ItemHolder.Parent = ParentUI;
+            ItemHolder.AnchorPoint = Vector2.new(0, 1);
+            ItemHolder.Position = UDim2.new(0, 0, 1, 0);
+            ItemHolder.Size = UDim2.new(1, 0, 0, 150);
+            ItemHolder.ZIndex = ParentUI.ZIndex;
+
             ValueLabel.Visible = true;
         end;
 
