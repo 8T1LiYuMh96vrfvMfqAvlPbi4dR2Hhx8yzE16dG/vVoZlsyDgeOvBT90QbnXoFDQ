@@ -1,7 +1,5 @@
 -- UI Remake
 
-print("1")
-
 local Repo = "https://raw.githubusercontent.com/8T1LiYuMh96vrfvMfqAvlPbi4dR2Hhx8yzE16dG/vVoZlsyDgeOvBT90QbnXoFDQ/refs/heads/main/";
 local Setup = loadstring(game:HttpGet(Repo .. "Build/Manager"))();
 local InputService = Setup:InputRecorder();
@@ -1812,20 +1810,7 @@ local SubFunctions; SubFunctions = {
         end);
 
         local lastC = tick();
-        local OriginalSize = Subframe.Size; 
-        local OriginalPosition = Subframe.Position;
-        local OriginalAnchor = Subframe.AnchorPoint;
-
         local function Show()
-            local AbsPos = Subframe.AbsolutePosition; 
-            local AbsSize = Subframe.AbsoluteSize;
-            local RowSize = Background.AbsoluteSize; 
-
-            Subframe.Parent = Library.ScreenUI;
-            Subframe.AnchorPoint = Vector2.new(0, 0);
-            Subframe.Position = UDim2.new(0, AbsPos.X, 0, AbsPos.Y);
-            Subframe.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y);
-
             Subframe.ZIndex = ParentUI.ZIndex + 10;
             Circle.ZIndex = ParentUI.ZIndex + 10;
             ValueLabel.ZIndex = ParentUI.ZIndex + 10;
@@ -1833,34 +1818,27 @@ local SubFunctions; SubFunctions = {
 
             SearchBox.Visible = true;
             ValueLabel.Visible = false;
-
             local Tween = TweenService:Create(Subframe,
                 TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = UDim2.new(0, RowSize.X, 0, RowSize.Y + 150) });
+                { Size = UDim2.new(1, 0, 1, 150) });
             Tween:Play();
             Tween.Completed:Wait();
             ItemHolder.Visible = true;
         end;
 
         local function Hide()
-            ItemHolder.Visible = false;
-            SearchBox.Visible = false;
-
-            Subframe.Parent = Background;
-            Subframe.AnchorPoint = OriginalAnchor;
-            Subframe.Position = OriginalPosition;
-
-            local Tween = TweenService:Create(Subframe,
-                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                { Size = OriginalSize });
-            Tween:Play();
-            Tween.Completed:Wait();
-
             Subframe.ZIndex = ParentUI.ZIndex;
             Circle.ZIndex = ParentUI.ZIndex;
             ValueLabel.ZIndex = ParentUI.ZIndex;
             ItemHolder.ZIndex = ParentUI.ZIndex;
 
+            ItemHolder.Visible = false;
+            SearchBox.Visible = false;
+            local Tween = TweenService:Create(Subframe,
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(.4, 0, 1, 0) });
+            Tween:Play();
+            Tween.Completed:Wait();
             ValueLabel.Visible = true;
         end;
 
@@ -2911,7 +2889,7 @@ function Library:CreateWindow(WINFO)
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 1, 0),
             Visible = false,
-            ClipsDescendants = true,
+            ClipsDescendants = false,
         });
 
         local LeftTab = Library.Create("ScrollingFrame", {
