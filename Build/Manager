@@ -256,6 +256,7 @@ Setup["Tween"] = function(self)
         if Storage.Active then
             local Active = Storage.Active;
             if (Active.Data.Priority or 0) > (Data.Priority or 0) then 
+                Controller:NoFall();
                 return;
             end;
 
@@ -275,11 +276,13 @@ Setup["Tween"] = function(self)
 
         local Temporary = nil
         local function Move(dt)
+            Controller:NoFall();
+
             local Active = Storage.Active;
             local Data = (Active and Active.Data) or Data;
             
-            local Target = Data.Position
-            local CF
+            local Target = Data.Position;
+            local CF;
             if typeof(Target) == "CFrame" then
                 CF = Target
                 Target = Target.Position
@@ -321,7 +324,7 @@ Setup["Tween"] = function(self)
             if xDis <= math.max(stepX, 1) and yDis <= math.max(stepY, 1) then
                 if p2 == Target then
                     HRP.CFrame = CF;
-                    Controller:NoFall();
+                    
 
                     if Data.Extra then
                         Data.Extra(true)
@@ -399,7 +402,6 @@ Setup["Tween"] = function(self)
                     yDir * math.min(stepY, yDis)
             end
 
-            Controller:NoFall()
             HRP.CFrame += Translation
         end
 
