@@ -1810,22 +1810,20 @@ local SubFunctions; SubFunctions = {
         end);
 
         local lastC = tick();
-        local OriginalSize = Subframe.Size;         -- UDim2.new(.4, 0, 1, 0)
-        local OriginalPosition = Subframe.Position; -- UDim2.new(1, 0, 0, 0)
-        -- AnchorPoint is never touched — stays (1, 0) throughout
+        local OriginalSize = Subframe.Size;
+        local OriginalPosition = Subframe.Position; 
 
         local function Show()
             local AbsPos = Subframe.AbsolutePosition;
             local AbsSize = Subframe.AbsoluteSize;
             local RowSize = Background.AbsoluteSize;
 
-            -- with AnchorPoint (1,0), Position marks the frame's TOP-RIGHT corner
             local AnchorX = AbsPos.X + AbsSize.X;
             local AnchorY = AbsPos.Y;
 
             Subframe.Parent = Library.ScreenUI;
             Subframe.Position = UDim2.new(0, AnchorX, 0, AnchorY);
-            Subframe.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y); -- pixel-equivalent, no jump
+            Subframe.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y); 
 
             Subframe.ZIndex = ParentUI.ZIndex + 10;
             Circle.ZIndex = ParentUI.ZIndex + 10;
@@ -1847,8 +1845,6 @@ local SubFunctions; SubFunctions = {
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
 
-            -- reparent back and restore the original scale-based Position/Size together;
-            -- Background hasn't moved, so this doesn't cause a jump
             Subframe.Parent = Background;
             Subframe.Position = OriginalPosition;
 
@@ -2822,6 +2818,10 @@ function Library:CreateWindow(WINFO)
 
     function Window:Exit()
         ScreenUI:Destroy();
+
+        if Library.Maid then 
+            Library.Maid:DoCleaning();
+        end;
 
         for _, n in pairs(Library.Created) do
             for __, v in pairs(n) do
