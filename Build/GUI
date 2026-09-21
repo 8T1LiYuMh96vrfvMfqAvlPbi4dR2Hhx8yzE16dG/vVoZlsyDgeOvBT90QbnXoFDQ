@@ -1818,14 +1818,21 @@ local SubFunctions; SubFunctions = {
             SearchBox.Visible = true;
             ValueLabel.Visible = false;
 
+            local TargetWidth = Subframe.AbsoluteSize.X;
+            local TargetPos = UDim2.new(0, Subframe.AbsolutePosition.X, 0,
+                Subframe.AbsolutePosition.Y + Subframe.AbsoluteSize.Y);
+
             ItemHolder.Parent = Library.ScreenUI;
             ItemHolder.AnchorPoint = Vector2.new(0, 0);
-            ItemHolder.Position = UDim2.new(0, Subframe.AbsolutePosition.X, 0,
-                Subframe.AbsolutePosition.Y + Subframe.AbsoluteSize.Y);
-            ItemHolder.Size = UDim2.new(0, Subframe.AbsoluteSize.X, 0, 150);
-            ItemHolder.ZIndex = ParentUI.ZIndex + 10; 
-
+            ItemHolder.Position = TargetPos;
+            ItemHolder.Size = UDim2.new(0, TargetWidth, 0, 0); -- start collapsed
+            ItemHolder.ZIndex = ParentUI.ZIndex + 10;
             ItemHolder.Visible = true;
+
+            local Tween = TweenService:Create(ItemHolder,
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(0, TargetWidth, 0, 150) });
+            Tween:Play();
         end;
 
         local function Hide()
@@ -1833,10 +1840,18 @@ local SubFunctions; SubFunctions = {
             Circle.ZIndex = ParentUI.ZIndex;
             ValueLabel.ZIndex = ParentUI.ZIndex;
 
+            local TargetWidth = Subframe.AbsoluteSize.X;
+
+            local Tween = TweenService:Create(ItemHolder,
+                TweenInfo.new(.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                { Size = UDim2.new(0, TargetWidth, 0, 0) });
+            Tween:Play();
+            Tween.Completed:Wait();
+
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
 
-            ItemHolder.Parent = ParentUI;
+            ItemHolder.Parent = Subframe;
             ItemHolder.AnchorPoint = Vector2.new(0, 1);
             ItemHolder.Position = UDim2.new(0, 0, 1, 0);
             ItemHolder.Size = UDim2.new(1, 0, 0, 150);
