@@ -1821,7 +1821,7 @@ local SubFunctions; SubFunctions = {
 
             Subframe.Parent = Library.ScreenUI;
             Subframe.AnchorPoint = Vector2.new(0, 0);
-            Subframe.Position = UDim2.new(0, AbsPos.X, 0, AbsPos.Y);
+            Subframe.Position = UDim2.new(0, AbsPos.X-(AbsSize.X/2), 0, AbsPos.Y);
             Subframe.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y); -- pixel-equivalent, no jump
 
             Subframe.ZIndex = ParentUI.ZIndex + 10;
