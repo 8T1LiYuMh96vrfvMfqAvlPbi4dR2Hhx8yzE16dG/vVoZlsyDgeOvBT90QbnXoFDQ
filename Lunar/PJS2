@@ -181,7 +181,7 @@ Sections.Farming:CreateToggle({
                 local Root = Target.HumanoidRootPart or Target.PrimaryPart;
                 local Position = (Root.CFrame * Farm.Offset).Position;
                 
-                if Tween:Create({Priority=2, Position=CFrame.lookAt(Position, Root.Position), Speed=TweenSpeed}) then
+                if Tween:Create({Priority=2, Continue=true, Position=CFrame.lookAt(Position, Root.Position), Speed=TweenSpeed}) then
                     Farm.Position = Root.Position;
                     Attack();
 
