@@ -50,9 +50,10 @@ local Combat = require(CAM.Global.Combat_presets);
 local Info = require(CAM.Global.Character_info_provider);
 local Locator = require(CAM.Global.Subsets.Areas.AreaLocator.Locator);
 local NPCs = ReplicatedStorage.Assets.Npcs;
+local GuiService = game:GetService("GuiService");
 
 --; Defaults
-getgenv().Farm = {Mobs = {}, Offset=CFrame.new(0, 4, 4)}; -- Mob Farm
+getgenv().Farm = {Mobs = {}, Offset=CFrame.new(0, -6, 0), StepAway=CFrame.new(0, -50, 0), Default=CFrame.new(0, -6, 0) }; -- Mob Farm
 getgenv().Patrol = {Regions = {}}; -- Patrol for loading
 getgenv().Skills = {Selected={}, All={}};
 getgenv().IK = {Enabled=false, Bosses=false};
@@ -115,12 +116,17 @@ local function getMobs(Targets)
 end;
 
 local Last, At, Attempted = 0, 0, nil;
-local function Attack()
+local function Attack(should)
     local Combo = (Char:GetAttribute("last_combo") or 0)%5 + 1;
+
+    if At ~= 0 and os.clock() - At > Combat.combo_duration then
+        Combo = 1;
+    end;
 
     local Tool = Info.Get_equipped_tool(Char);
     local P = (Tool and Combat.Presets[Tool.Name]) or Combat.Presets.Combat;
     local Base = 0;
+
     if Last ~= 0 then
         if Combo == 1 then
             Base = Last == 5 and P.final or Combat.combo_duration;
@@ -133,7 +139,9 @@ local function Attack()
     local Lead = (Combo == 1) and -0.05 or client:GetNetworkPing();
     local Rest = At + Wait - Lead - os.clock();
 
-    if Rest > 0 then return; end;
+    if Rest > 0 then if Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
+    if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; return; end;
+
     Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
 
     At = os.clock();
@@ -165,6 +173,10 @@ Sections.Farming:CreateToggle({
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
 
+                        if IK.Enabled then
+                            Spawned.Humanoid.Health = 0;
+                        end;
+
                         if v.Location then
                             table.insert(Bosses, Spawned);
                         end;
@@ -184,13 +196,6 @@ Sections.Farming:CreateToggle({
                 if Tween:Create({Priority=2, Continue=true, Position=CFrame.lookAt(Position, Root.Position), Speed=TweenSpeed}) then
                     Farm.Position = Root.Position;
                     Attack();
-
-                    if IK.Enabled then
-                        if not IK.Bosses and table.find(Bosses, Target) then print("boss"); return; end;
-
-                        local mhum = Target:FindFirstChild("Humanoid", true);
-                        mhum.Health=0;
-                    end;
                 end;
             else
                 if Farm.Position then
@@ -286,6 +291,15 @@ bad_ik:AssignSub(SubIK);
 
 SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
 
+Sections.Farming:CreateToggle({
+    Text = "Stepaway";
+    Callback = function(Value)
+        Farm.ShouldStep = Value;
+    end;
+
+    Flag = "farm_stepaway"
+});
+
 Sections.Other:CreateToggle({
     Text = "Auto Chest";
     Callback = function(Value)
@@ -326,6 +340,8 @@ Sections.Other:CreateToggle({
             if Char:FindFirstChild("SHCS") ~= SHC then
                 SHC = Char.SHCS;
             end;
+
+            if not SHC then return; end;
 
             for i, v in pairs(Skills.Selected) do    
                 if SHC:FindFirstChild(v) then continue; end;
@@ -496,26 +512,81 @@ Sections.UI_Controls:CreateButton({
 -- Auto Dungeons
 
 
-Sections.Other:CreateButton({
-    Text="Dungeon Test";
-    Callback = function()
-        local Cards = PlayerGui.ComponentsHolder.MainNotificationFrame.OuwigaharaOffers.BBCards.Cards
-        if Cards then
-            for i, v in pairs(Cards:GetChildren()) do
-                if not v:FindFirstChild("Card") then return; end;
+local OfferOrder = {
+    ["Heal"]=1;
+    ["Event"]=2;
+    ["Points"]=3; 
+    ["Fortune"]=3;
+};
 
-                local Card = v.Card["1"];
-                local Title = Card.Title.Text;
-                local Bottom = Card.Bottom.Text;
+Sections.Other:CreateToggle({
+    Text="Auto Dungeon";
+    Flag="auto_dungeon";
+    Callback = function(Value)
+        local NotiFrame = PlayerGui.ComponentsHolder.MainNotificationFrame;
 
-                if string.lower(Bottom):match("rest of") then
-                    print(Card .. i, "is perm");
-                elseif string.lower(Bottom):match("points") then
-                    local Amount = Title:match("%d+");
-                    print(Card .. i, Amount, "gives points");
+        Loop("Heartbeat", "autoDungeon", Value, function()
+            local Offers = Client:FindFirstChild("OuwigaharaOffers");
+
+            if Offers then
+                local Choices = {};
+
+                for _, Offer in pairs(Offers:GetChildren()) do
+                    local Attributes = Offer:GetAttributes();
+                    local Type = Attributes.Type;
+                    local Amount = tonumber(Attributes.Title:match("%d+%.?%d*")) or 0;
+                    local Priority = OfferOrder[Type] or 0;
+
+                    if Type == "Heal" and Humanoid.Health / Humanoid.MaxHealth < .33 then
+                        Priority = 4;
+                    end;
+
+                    if Priority==3 and Amount <= 250 then
+                        Priority = 1;
+                        continue;
+                    end;
+
+
+                    if Type == "Event" and Attributes.Floors == nil then
+                        local Lowered = string.lower(Attributes.Description);
+                        if (Lowered:match("point")) or (Lowered:match("card")) then
+                            Priority += 2;
+                        end;
+                    end;
+
+                    Choices[#Choices + 1] = {Priority, Amount, Offer.Name};
+                end;
+
+                table.sort(Choices, function(A, B)
+                    return A[1] > B[1] or A[1] == B[1] and A[2] > B[2];
+                end);
+
+                local Choice = Choices[1];
+
+                if Choice then  
+                    local Index = Choice[3];
+                    pcall(function()
+                        local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
+                        
+                        GuiService.SelectedObject = Card;
+                        if GuiService.SelectedObject == Card then
+                            VIM:Press("Return");
+                        end;
+                    end);
+                end;
+            else
+                local Success, Start = pcall(function()
+                    return NotiFrame.OuwigaharaTopBar.Skip.Button;
+                end);
+
+                if Success and Start then
+                    GuiService.SelectedObject = Start;
+                    if GuiService.SelectedObject == Start then
+                        VIM:Press("Return");
+                    end;
                 end;
             end;
-        end;
+        end);
     end;
 });
 
