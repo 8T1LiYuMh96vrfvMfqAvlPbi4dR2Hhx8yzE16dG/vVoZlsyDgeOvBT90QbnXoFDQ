@@ -767,6 +767,10 @@ local SubFunctions; SubFunctions = {
             oldDestroy();
         end;
 
+        if Library.Maid then
+            Library.Maid:GiveTask(self.Destroy);
+        end;
+
         return nself;
     end,
 
@@ -908,8 +912,8 @@ local SubFunctions; SubFunctions = {
 
         nself.Switch = function(self) task.spawn(self.SetValue, self, not self.Value); end;
         nself.Unload = function(self)
-        nself.Value = false;
-        Update();
+            nself.Value = false;
+            Update();
         end;
         nself.Fire = function(self) task.spawn(self.Callback, self.Value); end;
         nself.Load = function(self, Value)
@@ -934,6 +938,10 @@ local SubFunctions; SubFunctions = {
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             oldDestroy();
+        end;
+
+        if Library.Maid then
+            Library.Maid:GiveTask(self.Destroy);
         end;
 
         return nself;
@@ -1127,6 +1135,10 @@ local SubFunctions; SubFunctions = {
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             oldDestroy();
+        end;
+
+        if Library.Maid then
+            Library.Maid:GiveTask(self.Destroy);
         end;
 
         return nself;
@@ -1342,6 +1354,10 @@ local SubFunctions; SubFunctions = {
         self.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             oldDestroy();
+        end;
+
+        if Library.Maid then
+            Library.Maid:GiveTask(self.Destroy);
         end;
 
         return nself;
@@ -1902,6 +1918,10 @@ local SubFunctions; SubFunctions = {
             oldDestroy();
         end;
 
+        if Library.Maid then
+            Library.Maid:GiveTask(self.Destroy);
+        end;
+
         return nself;
     end,
 
@@ -2030,6 +2050,10 @@ local SubFunctions; SubFunctions = {
 
                 for _, v in pairs(Connections) do v:Disconnect(); end;
                 Update();
+            end;
+
+            if Library.Maid then
+                Library.Maid:GiveTask(self.Destroy);
             end;
 
             nself.Logs[Entries] = { eINFO, Number, Contents };
