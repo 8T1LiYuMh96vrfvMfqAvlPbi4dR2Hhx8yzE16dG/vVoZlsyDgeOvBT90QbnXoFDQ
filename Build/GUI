@@ -940,10 +940,6 @@ local SubFunctions; SubFunctions = {
             end;
         end;
 
-        if Library.Maid then
-            Library.Maid:GiveTask(self.Destroy);
-        end;
-
         return nself;
     end,
 
@@ -1137,10 +1133,6 @@ local SubFunctions; SubFunctions = {
             if oldDestroy then
                 oldDestroy();
             end;
-        end;
-
-        if Library.Maid then
-            Library.Maid:GiveTask(self.Destroy);
         end;
 
         return nself;
@@ -1358,10 +1350,6 @@ local SubFunctions; SubFunctions = {
             if oldDestroy then
                 oldDestroy();
             end;
-        end;
-
-        if Library.Maid then
-            Library.Maid:GiveTask(self.Destroy);
         end;
 
         return nself;
@@ -1924,10 +1912,6 @@ local SubFunctions; SubFunctions = {
             end;
         end;
 
-        if Library.Maid then
-            Library.Maid:GiveTask(self.Destroy);
-        end;
-
         return nself;
     end,
 
@@ -2059,7 +2043,7 @@ local SubFunctions; SubFunctions = {
             end;
 
             if Library.Maid then
-                Library.Maid:GiveTask(self.Destroy);
+                Library.Maid:GiveTask(eINFO.Destroy);
             end;
 
             nself.Logs[Entries] = { eINFO, Number, Contents };
@@ -2847,6 +2831,8 @@ function Library:CreateWindow(WINFO)
     end);
 
     function Window:Exit()
+        ScreenUI:Destroy();
+
         if Library.Destroy then
             Library.Destroy();
         end;
@@ -2862,8 +2848,6 @@ function Library:CreateWindow(WINFO)
                 end;
             end;
         end;
-
-        ScreenUI:Destroy();
     end;
 
     if Window.Icon then
