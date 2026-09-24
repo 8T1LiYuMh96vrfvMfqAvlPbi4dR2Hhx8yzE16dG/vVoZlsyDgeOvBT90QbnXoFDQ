@@ -573,8 +573,8 @@ Sections.Other:CreateToggle({
                     local Overall = {
                         Permenent = Type=="Event" and not Attributes.Floors and tonumber(Title:match("%d+%.?%d*"));
                         
-                        Damage = Type=="Stat" and ((Title:match("damage")) or (Description:match("damage")~=nil)); -- also counts as damage reduction because thats good
-                        Health = Type=="Stat" and Description:match("max health")~=nil;
+                        Damage = (Title:match("damage")) or (Description:match("damage")~=nil); -- also counts as damage reduction because thats good
+                        Health = Description:match("max health")~=nil;
 
                         Boss = Description:match("boss")~=nil;
                         Elite = Description:match("elite")~=nil;
