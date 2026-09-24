@@ -56,7 +56,7 @@ local GuiService = game:GetService("GuiService");
 getgenv().Farm = {Mobs = {}, Offset=CFrame.new(0, -6, 0), StepAway=CFrame.new(0, -50, 0), Default=CFrame.new(0, -6, 0) }; -- Mob Farm
 getgenv().Patrol = {Regions = {}}; -- Patrol for loading
 getgenv().Skills = {Selected={}, All={}};
-getgenv().IK = {Enabled=false, Bosses=false, Minimum=0};
+getgenv().IK = {Enabled=false, NormalP=1, BossP=100};
 
 --; Helpers
 local Mobs = {};
@@ -73,14 +73,6 @@ local function addFolder(Folder)
         if not v:IsA("Model") or table.find(List.Spawned, v) then return; end;
 
         table.insert(List.Spawned, v);
-
-        if v:FindFirstChild("Humanoid") then
-            v.Humanoid.HealthChanged:Connect(function()
-                if IK.Enabled then
-                    v.Humanoid.Health = 0;
-                end;
-            end);
-        end;
 
         v.AncestryChanged:Once(function()
             local Index = table.find(List.Spawned, v);
@@ -183,7 +175,7 @@ Sections.Farming:CreateToggle({
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
                     
-                        if IK.Enabled and Spawned.Humanoid.MaxHealth <= IK.Minimum then
+                        if IK.Enabled and Spawned.Humanoid.Health/Spawned.Humanoid.MaxHealth <= (v.Location and IK.BossP or IK.NormalP)/100 then
                             Spawned.Humanoid.Health = 0;
                         end;
 
@@ -300,7 +292,8 @@ local SubIK = Library:CreateSubWindow({Title="Config"});
 bad_ik:AssignSub(SubIK);
 
 SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
-SubIK:CreateSlider({Text="Wait on hit if over", Defaut=0, Limits={0, 1000}, Callback=function(Value) IK.Minimum=Value end, Flag="IK_Mini"})
+SubIK:CreateSlider({Text="Boss Percent", Defaut=100, Limits={1, 100}, Callback=function(Value) IK.BossP=Value end, Flag="bossp_ik"})
+SubIK:CreateSlider({Text="Normal Percent", Defaut=1, Limits={1, 100}, Callback=function(Value) IK.NormalP=Value end, Flag="normalp_ik"})
 
 Sections.Farming:CreateToggle({
     Text = "Stepaway";
