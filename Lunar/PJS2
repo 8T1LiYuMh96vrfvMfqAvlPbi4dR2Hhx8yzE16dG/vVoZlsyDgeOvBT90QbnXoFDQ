@@ -596,25 +596,25 @@ Sections.Other:CreateToggle({
                             Info[2] = Rarity;
                         end;
 
-                        Info[1]+=Imporatance;
+                        Info[1]+=Importance;
                     end;
+                end;
 
-                    table.sort(Choices, function(a,b)
-                        return a[1] > b[1] or (a[1] == b[1] and a[2] > b[2])
+                table.sort(Choices, function(a,b)
+                    return a[1] > b[1] or (a[1] == b[1] and a[2] > b[2])
+                end);
+
+                local Choice = Choices[1];
+                if Choice then  
+                    local Index = Choice[3];
+                    pcall(function()
+                        local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
+                        
+                        GuiService.SelectedObject = Card;
+                        if GuiService.SelectedObject == Card then
+                            VIM:Press("Return");
+                        end;
                     end);
-
-                    local Choice = Choices[1];
-                    if Choice then  
-                        local Index = Choice[3];
-                        pcall(function()
-                            local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
-                            
-                            GuiService.SelectedObject = Card;
-                            if GuiService.SelectedObject == Card then
-                                VIM:Press("Return");
-                            end;
-                        end);
-                    end;
                 end;
             else
                 local Success, Start = pcall(function()
