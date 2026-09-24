@@ -761,14 +761,12 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = self.Destroy;
-        self.Destroy = function()
+        local oldDestroy = Window.Destroy;
+        Window.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            oldDestroy();
-        end;
-
-        if Library.Maid then
-            Library.Maid:GiveTask(self.Destroy);
+            if oldDestroy then
+                oldDestroy();
+            end;
         end;
 
         return nself;
@@ -934,10 +932,12 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = self.Destroy;
-        self.Destroy = function()
+        local oldDestroy = Window.Destroy;
+        Window.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            oldDestroy();
+            if oldDestroy then
+                oldDestroy();
+            end;
         end;
 
         if Library.Maid then
@@ -1131,10 +1131,12 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = self.Destroy;
-        self.Destroy = function()
+        local oldDestroy = Window.Destroy;
+        Window.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            oldDestroy();
+            if oldDestroy then
+                oldDestroy();
+            end;
         end;
 
         if Library.Maid then
@@ -1350,10 +1352,12 @@ local SubFunctions; SubFunctions = {
 
         Connections[3] = input_ended_conn;
 
-        local oldDestroy = self.Destroy;
-        self.Destroy = function()
+        local oldDestroy = Window.Destroy;
+        Window.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            oldDestroy();
+            if oldDestroy then
+                oldDestroy();
+            end;
         end;
 
         if Library.Maid then
@@ -1830,6 +1834,7 @@ local SubFunctions; SubFunctions = {
         local OriginalPosition = Subframe.Position; 
 
         local function Show()
+            if not Subframe then return; end;
             local AbsPos = Subframe.AbsolutePosition;
             local AbsSize = Subframe.AbsoluteSize;
             local RowSize = Background.AbsoluteSize;
@@ -1858,6 +1863,7 @@ local SubFunctions; SubFunctions = {
         end;
 
         local function Hide()
+            if not Subframe then return; end;
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
 
@@ -1912,10 +1918,12 @@ local SubFunctions; SubFunctions = {
             end;
         end, true, true)
 
-        local oldDestroy = self.Destroy;
-        self.Destroy = function()
+        local oldDestroy = Window.Destroy;
+        Window.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
-            oldDestroy();
+            if oldDestroy then
+                oldDestroy();
+            end;
         end;
 
         if Library.Maid then
