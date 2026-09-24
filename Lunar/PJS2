@@ -74,6 +74,14 @@ local function addFolder(Folder)
 
         table.insert(List.Spawned, v);
 
+        if v:FindFirstChild("Humanoid") then
+            v.Humanoid.HealthChanged:Connect(function()
+                if IK.Enabled then
+                    v.Humanoid.Health = 0;
+                end;
+            end);
+        end;
+
         v.AncestryChanged:Once(function()
             local Index = table.find(List.Spawned, v);
             if Index then
@@ -172,10 +180,6 @@ Sections.Farming:CreateToggle({
                     for _, Spawned in pairs(v.Spawned) do
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
-
-                        if IK.Enabled then
-                            Spawned.Humanoid.Health = 0;
-                        end;
 
                         if v.Location then
                             table.insert(Bosses, Spawned);
