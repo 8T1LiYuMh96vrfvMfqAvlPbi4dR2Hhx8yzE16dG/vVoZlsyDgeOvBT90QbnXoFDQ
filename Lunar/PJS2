@@ -184,7 +184,7 @@ Sections.Farming:CreateToggle({
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
                     
-                        if IK.Enabled and Spawned.Humanoid.MaxHealth <= IK.Mini then
+                        if IK.Enabled and Spawned.Humanoid.MaxHealth <= IK.Minimum then
                             Spawned.Humanoid.Health = 0;
                         end;
 
