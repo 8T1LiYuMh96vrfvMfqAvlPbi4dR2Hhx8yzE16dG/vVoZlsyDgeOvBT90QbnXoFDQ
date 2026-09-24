@@ -175,7 +175,7 @@ Sections.Farming:CreateToggle({
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
                     
-                        if IK.Enabled and Spawned.Humanoid.Health/Spawned.Humanoid.MaxHealth <= (v.Location and IK.BossP or IK.NormalP)/100 then
+                        if IK.Enabled and Spawned.Humanoid.Health/Spawned.Humanoid.MaxHealth <= 1-(v.Location and IK.BossP or IK.NormalP)/100 then
                             Spawned.Humanoid.Health = 0;
                         end;
 
@@ -292,8 +292,8 @@ local SubIK = Library:CreateSubWindow({Title="Config"});
 bad_ik:AssignSub(SubIK);
 
 SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
-SubIK:CreateSlider({Text="Boss Percent", Defaut=100, Limits={1, 100}, Callback=function(Value) IK.BossP=Value end, Flag="bossp_ik"})
-SubIK:CreateSlider({Text="Normal Percent", Defaut=1, Limits={1, 100}, Callback=function(Value) IK.NormalP=Value end, Flag="normalp_ik"})
+SubIK:CreateSlider({Text="Boss Percent", Default=IK.BossP, Limits={0, 100}, Callback=function(Value) IK.BossP=Value end, Flag="bossp_ik"})
+SubIK:CreateSlider({Text="Normal Percent", Default=IK.NormalP, Limits={0, 100}, Callback=function(Value) IK.NormalP=Value end, Flag="normalp_ik"})
 
 Sections.Farming:CreateToggle({
     Text = "Stepaway";
