@@ -517,10 +517,15 @@ Sections.UI_Controls:CreateButton({
 
 
 local OfferOrder = {
-    ["Heal"]=1;
-    ["Event"]=2;
-    ["Points"]=3; 
-    ["Fortune"]=3;
+    ["Points"]=0; 
+    ["Heal"]=0;
+
+    ["Elite"]=1;
+    ["Health"]=2;
+    ["Kill"]=3;
+    ["Damage"]=3;
+    ["Boss"]=4;
+    ["Permenent"]=5;
 };
 
 Sections.Other:CreateToggle({
@@ -536,57 +541,65 @@ Sections.Other:CreateToggle({
                 local Choices = {};
 
                 for _, Offer in pairs(Offers:GetChildren()) do
+                    local Info = { 0, 0, Offer.Name }; -- Prio, Scale, Index
+                    Choices[#Choices+1]=Info;
+
                     local Attributes = Offer:GetAttributes();
                     local Type = Attributes.Type;
                     local Amount = tonumber(Attributes.Title:match("%d+%.?%d*")) or 0;
-                    local Priority = OfferOrder[Type] or 0;
+                    
+                    local Title = string.lower(Attributes.Title);
+                    local Description = string.lower(Attributes.Description);
+                    local Rarity = Attributes.Rarity or 0;
 
-                    if Type == "Heal" and Humanoid.Health / Humanoid.MaxHealth < .33 then
-                        Priority = 4;
-                    end;
+                    local Overall = {
+                        Permenent = Type=="Event" and not Attributes.Floors;
+                        
+                        Damage = Type=="Stat" and Description:match("damage")~=nil; -- also counts as damage reduction because thats good
+                        Health = Type=="Stat" and Description:match("max health")~=nil;
 
-                    if Priority==3 and Amount <= 250 then
-                        Priority = 1;
+                        Boss = Description:match("boss")~=nil;
+                        Elite = Description:match("elite")~=nil;
+                        Kill = Description:match("kill")~=nil;
+
+                        Points = Type=="Points";
+                    };
+
+                    if Title == "second wind" and Humanoid.Health/Humanoid.MaxHealth < .33 then
+                        Info[1] = 7;
                         continue;
                     end;
 
+                    for i, v in pairs(Overall) do
+                        if not v then return; end;
 
-                    if Type == "Event" and Attributes.Floors == nil then
-                        local Lowered = string.lower(Attributes.Description);
-                        if (Lowered:match("point")) or (Lowered:match("card")) then
-                            Priority += 2;
+                        local Importance = OfferOrder[i];
+                        
+                        if i == "Points" then
+                            Importance += Amount/1000;
+                            Info[2]=Amount;
+                        else
+                            Info[2] = Rarity;
                         end;
+
+                        Info[1]+=Imporatance;
                     end;
 
-                    Choices[#Choices + 1] = {Priority, Amount, Offer.Name};
-                end;
-
-                table.sort(Choices, function(A, B)
-                    return A[1] > B[1] or A[1] == B[1] and A[2] > B[2];
-                end);
-
-                local Choice = Choices[1];
-
-                if Choice then  
-                    local Index = Choice[3];
-                    pcall(function()
-                        local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
-                        
-                        GuiService.SelectedObject = Card;
-                        if GuiService.SelectedObject == Card then
-                            VIM:Press("Return");
-                        end;
+                    table.sort(Choices, function(a,b)
+                        return a[1] > b[1] or (a[1] == b[1] and a[2] > b[2])
                     end);
-                end;
-            else
-                local Success, Start = pcall(function()
-                    return NotiFrame.OuwigaharaTopBar.Skip.Button;
-                end);
 
-                if Success and Start then
-                    GuiService.SelectedObject = Start;
-                    if GuiService.SelectedObject == Start then
-                        VIM:Press("Return");
+                    local Choice = Choices[1];
+                    if Choice then  
+                        local Index = Choice[3];
+                        pcall(function()
+                            local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
+                            
+                            GuiService.SelectedObject = Card;
+                            if GuiService.SelectedObject == Card then
+                                VIM:Press("Return");
+                            end;
+                        end);
                     end;
                 end;
             end;
