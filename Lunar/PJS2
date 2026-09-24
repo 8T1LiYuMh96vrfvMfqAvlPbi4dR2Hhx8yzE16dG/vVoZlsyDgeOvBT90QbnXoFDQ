@@ -124,7 +124,9 @@ local function getMobs(Targets)
 end;
 
 local Last, At, Attempted = 0, 0, nil;
+local Stall = false;
 local function Attack(should)
+    if Stall then return; end;
     local Combo = (Char:GetAttribute("last_combo") or 0)%5 + 1;
 
     if At ~= 0 and os.clock() - At > Combat.combo_duration then
@@ -148,15 +150,12 @@ local function Attack(should)
     local Rest = At + Wait - Lead - os.clock();
 
     if Rest > 0 then if Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
-    if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; return; end;
+    if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; Stall=true; task.delay(function() Stall=false; end); return; end;
 
     At = os.clock();
     Last = Combo;
 
-    if Farm.ShouldStep then
-        task.wait(.1);
-        Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
-    end;
+    Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
 
     return true;
 end;
