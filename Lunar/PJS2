@@ -540,6 +540,8 @@ local OfferOrder = {
     ["Damage"]=2;
     ["Boss"]=3;
     ["Permenent"]=4;
+
+    ["Pick"] = 4;
 };
 
 Sections.Other:CreateToggle({
@@ -570,11 +572,18 @@ Sections.Other:CreateToggle({
                         continue; 
                     end;
 
+                    local HighPriority = {
+                        "pacifist";
+                        "vampiric";
+                        "venom fang";
+                    }
+
                     local Overall = {
+                        Pick = table.find(HighPriority, Title)~=nil;
                         Permenent = Type=="Event" and not Attributes.Floors and tonumber(Title:match("%d+%.?%d*"));
                         
-                        Damage = (Title:match("damage")) or (Description:match("damage")~=nil); -- also counts as damage reduction because thats good
-                        Health = Description:match("max health")~=nil;
+                        Damage = Type=="Stat" and ((Title:match("damage")) or (Description:match("damage")~=nil)); -- also counts as damage reduction because thats good
+                        Health = Type=="Stat" and Description:match("max health")~=nil;
 
                         Boss = Description:match("boss")~=nil;
                         Elite = Description:match("elite")~=nil;
