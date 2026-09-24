@@ -1853,7 +1853,7 @@ local SubFunctions; SubFunctions = {
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
 
-            pcall(function() Subframe.Parent = Background; end):
+            pcall(function() Subframe.Parent = Background; end);
             Subframe.Position = OriginalPosition;
 
             local Tween = TweenService:Create(Subframe,
