@@ -761,8 +761,8 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = Window.Destroy;
-        Window.Destroy = function()
+        local oldDestroy = Library.Destroy;
+        Library.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             if oldDestroy then
                 oldDestroy();
@@ -932,8 +932,8 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = Window.Destroy;
-        Window.Destroy = function()
+        local oldDestroy = Library.Destroy;
+        Library.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             if oldDestroy then
                 oldDestroy();
@@ -1131,8 +1131,8 @@ local SubFunctions; SubFunctions = {
             end;
         end);
 
-        local oldDestroy = Window.Destroy;
-        Window.Destroy = function()
+        local oldDestroy = Library.Destroy;
+        Library.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             if oldDestroy then
                 oldDestroy();
@@ -1352,8 +1352,8 @@ local SubFunctions; SubFunctions = {
 
         Connections[3] = input_ended_conn;
 
-        local oldDestroy = Window.Destroy;
-        Window.Destroy = function()
+        local oldDestroy = Library.Destroy;
+        Library.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             if oldDestroy then
                 oldDestroy();
@@ -1834,7 +1834,6 @@ local SubFunctions; SubFunctions = {
         local OriginalPosition = Subframe.Position; 
 
         local function Show()
-            if not Subframe then return; end;
             local AbsPos = Subframe.AbsolutePosition;
             local AbsSize = Subframe.AbsoluteSize;
             local RowSize = Background.AbsoluteSize;
@@ -1863,11 +1862,10 @@ local SubFunctions; SubFunctions = {
         end;
 
         local function Hide()
-            if not Subframe then return; end;
             ItemHolder.Visible = false;
             SearchBox.Visible = false;
 
-            Subframe.Parent = Background;
+            pcall(function() Subframe.Parent = Background; end):
             Subframe.Position = OriginalPosition;
 
             local Tween = TweenService:Create(Subframe,
@@ -1918,8 +1916,8 @@ local SubFunctions; SubFunctions = {
             end;
         end, true, true)
 
-        local oldDestroy = Window.Destroy;
-        Window.Destroy = function()
+        local oldDestroy = Library.Destroy;
+        Library.Destroy = function()
             for _, v in pairs(Connections) do v:Disconnect(); end;
             if oldDestroy then
                 oldDestroy();
@@ -2849,12 +2847,10 @@ function Library:CreateWindow(WINFO)
     end);
 
     function Window:Exit()
-        ScreenUI:Destroy();
-
-        if Window.Destroy then
-            Window.Destroy();
+        if Library.Destroy then
+            Library.Destroy();
         end;
-        
+
         if Library.Maid then 
             Library.Maid:DoCleaning();
         end;
@@ -2866,6 +2862,8 @@ function Library:CreateWindow(WINFO)
                 end;
             end;
         end;
+
+        ScreenUI:Destroy();
     end;
 
     if Window.Icon then
