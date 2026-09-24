@@ -566,10 +566,14 @@ Sections.Other:CreateToggle({
                     local Description = string.lower(Attributes.Description);
                     local Rarity = Attributes.Rarity or 0;
 
+                    if Title == "glass cannon" then -- shit card 
+                        continue; 
+                    end;
+
                     local Overall = {
                         Permenent = Type=="Event" and not Attributes.Floors;
                         
-                        Damage = Type=="Stat" and Description:match("damage")~=nil; -- also counts as damage reduction because thats good
+                        Damage = Type=="Stat" and ((Title:match("damage")) or (Description:match("damage")~=nil)); -- also counts as damage reduction because thats good
                         Health = Type=="Stat" and Description:match("max health")~=nil;
 
                         Boss = Description:match("boss")~=nil;
@@ -587,7 +591,7 @@ Sections.Other:CreateToggle({
                     for i, v in pairs(Overall) do
                         if not v then continue; end;
 
-                        local Importance = OfferOrder[i];
+                        local Importance = OfferOrder[i] or 0;
                         
                         if i == "Points" then
                             Importance += Amount/1000;
