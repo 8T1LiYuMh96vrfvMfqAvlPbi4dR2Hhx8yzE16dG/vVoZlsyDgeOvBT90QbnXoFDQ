@@ -102,6 +102,21 @@ for _, Region in ipairs(Regions:GetChildren()) do
 	end;
 end;
 
+local newRegion = Regions.ChildAdded:Connect(function(Region)
+    local Active = Region:WaitForChild("ActiveNpcs");
+
+	if Active then
+		for _, Folder in ipairs(Active:GetChildren()) do
+			addFolder(Folder);
+		end;
+
+		local c1 = Active.ChildAdded:Connect(addFolder);
+        Maid:GiveTask(function() c1:Disconnect(); end);
+	end;
+end);
+
+Maid:GiveTask(function() newRegion:Disconnect(); end);
+
 local function getMobs(Targets)
     if not Targets then return Mobs; end;
 
