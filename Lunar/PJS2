@@ -150,7 +150,7 @@ local function Attack(should)
     local Rest = At + Wait - Lead - os.clock();
 
     if Rest > 0 then if Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
-    if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; Stall=true; task.delay(function() Stall=false; end); return; end;
+    if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; Stall=true; task.delay(.1, function() Stall=false; end); return; end;
 
     At = os.clock();
     Last = Combo;
