@@ -150,10 +150,13 @@ local function Attack(should)
     if Rest > 0 then if Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
     if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; return; end;
 
-    Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
-
     At = os.clock();
     Last = Combo;
+
+    if Farm.ShouldStep then
+        task.wait(.1);
+        Signal:FireServer("Combat_Service", "Combat", Combo, false, 0.13, false, nil);
+    end;
 
     return true;
 end;
@@ -180,6 +183,10 @@ Sections.Farming:CreateToggle({
                     for _, Spawned in pairs(v.Spawned) do
                         if not Spawned.Parent then continue; end;
                         table.insert(Alive, Spawned);
+                    
+                        if IK.Enabled and Spawned.Humanoid.MaxHealth <= IK.Mini then
+                            Spawned.Humanoid.Health = 0;
+                        end;
 
                         if v.Location then
                             table.insert(Bosses, Spawned);
@@ -294,7 +301,7 @@ local SubIK = Library:CreateSubWindow({Title="Config"});
 bad_ik:AssignSub(SubIK);
 
 SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
-SubIK:CreateSlider({Text="Minimum Health", Defaut=0, Limits={0, 1000}, Callback=function(Value) IK.Minimum=Value end, Flag="IK_Mini"})
+SubIK:CreateSlider({Text="Wait on hit if over", Defaut=0, Limits={0, 1000}, Callback=function(Value) IK.Minimum=Value end, Flag="IK_Mini"})
 
 Sections.Farming:CreateToggle({
     Text = "Stepaway";
