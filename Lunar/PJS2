@@ -544,6 +544,13 @@ local OfferOrder = {
     ["Pick"] = 4;
 };
 
+local HighPriority = {
+    "pacifist";
+    "vampiric";
+    "venom fang";
+    "lucky draw";
+};
+
 Sections.Other:CreateToggle({
     Text="Auto Dungeon";
     Flag="auto_dungeon";
@@ -571,12 +578,6 @@ Sections.Other:CreateToggle({
                     if Title == "glass cannon" then -- shit card 
                         continue; 
                     end;
-
-                    local HighPriority = {
-                        "pacifist";
-                        "vampiric";
-                        "venom fang";
-                    }
 
                     local Overall = {
                         Pick = table.find(HighPriority, Title)~=nil;
