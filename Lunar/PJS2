@@ -149,7 +149,7 @@ local function Attack(should)
     local Lead = (Combo == 1) and -0.05 or client:GetNetworkPing();
     local Rest = At + Wait - Lead - os.clock();
 
-    if Rest > 0 then if Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
+    if Rest > 0 then if Last == 5 and Farm.ShouldStep then Farm.Offset = Farm.StepAway; end; return; end;
     if Farm.Offset == Farm.StepAway then Farm.Offset = Farm.Default; Stall=true; task.delay(.1, function() Stall=false; end); return; end;
 
     At = os.clock();
