@@ -2851,6 +2851,10 @@ function Library:CreateWindow(WINFO)
     function Window:Exit()
         ScreenUI:Destroy();
 
+        if Window.Destroy then
+            Window.Destroy();
+        end;
+        
         if Library.Maid then 
             Library.Maid:DoCleaning();
         end;
