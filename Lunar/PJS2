@@ -56,7 +56,7 @@ local GuiService = game:GetService("GuiService");
 getgenv().Farm = {Mobs = {}, Offset=CFrame.new(0, -6, 0), StepAway=CFrame.new(0, -50, 0), Default=CFrame.new(0, -6, 0) }; -- Mob Farm
 getgenv().Patrol = {Regions = {}}; -- Patrol for loading
 getgenv().Skills = {Selected={}, All={}};
-getgenv().IK = {Enabled=false, Bosses=false};
+getgenv().IK = {Enabled=false, Bosses=false, Minimum=0};
 
 --; Helpers
 local Mobs = {};
@@ -294,6 +294,7 @@ local SubIK = Library:CreateSubWindow({Title="Config"});
 bad_ik:AssignSub(SubIK);
 
 SubIK:CreateToggle({Text="Ignore Bosses", Default=not IK.Bosses, Callback=function(Value) IK.Bosses=not Value end, Flag="IK_bosses"})
+SubIK:CreateSlider({Text="Minimum Health", Defaut=0, Limits={0, 1000}, Callback=function(Value) IK.Minimum=Value end, Flag="IK_Mini"})
 
 Sections.Farming:CreateToggle({
     Text = "Stepaway";
