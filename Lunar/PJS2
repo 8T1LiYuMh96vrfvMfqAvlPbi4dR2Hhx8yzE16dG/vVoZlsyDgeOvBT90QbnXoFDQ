@@ -529,20 +529,18 @@ Sections.UI_Controls:CreateButton({
     
 
 -- Auto Dungeons
-
-
 local OfferOrder = {
-    ["Points"]=0; 
-    ["Heal"]=0;
-    
     ["Health"]=1;
     ["Kill"]=2;
     ["Damage"]=2;
-    ["Boss"]=3;
-    ["Permenent"]=4;
-
-    ["Pick"] = 4;
+    ["Elite"]=3;
+    ["Boss"]=5;
+    ["Permenent"]=20;
+    ["Pick"]=40;
 };
+
+local STAT_BASELINE = 1;
+local EMERGENCY_SCORE = 1e6;
 
 local HighPriority = {
     "pacifist";
@@ -564,26 +562,31 @@ Sections.Other:CreateToggle({
                 local Choices = {};
 
                 for _, Offer in pairs(Offers:GetChildren()) do
-                    local Info = { 0, 0, Offer.Name }; -- Prio, Scale, Index
-                    Choices[#Choices+1]=Info;
-
                     local Attributes = Offer:GetAttributes();
                     local Type = Attributes.Type;
                     local Amount = tonumber(Attributes.Title:match("%d+%.?%d*")) or 0;
-                    
+
                     local Title = string.lower(Attributes.Title);
                     local Description = string.lower(Attributes.Description);
                     local Rarity = Attributes.Rarity or 0;
 
-                    if Title == "glass cannon" then -- shit card 
-                        continue; 
+                    if Title == "glass cannon" then
+                        continue;
+                    end;
+
+                    local Info = { 0, Rarity, Offer.Name };
+
+                    if Title == "second wind" and Humanoid.Health/Humanoid.MaxHealth < .33 then
+                        Info[1] = EMERGENCY_SCORE;
+                        Choices[#Choices+1] = Info;
+                        continue;
                     end;
 
                     local Overall = {
                         Pick = table.find(HighPriority, Title)~=nil;
-                        Permenent = Type=="Event" and not Attributes.Floors and tonumber(Title:match("%d+%.?%d*"));
-                        
-                        Damage = Type=="Stat" and ((Title:match("damage")) or (Description:match("damage")~=nil)); -- also counts as damage reduction because thats good
+                        Permenent = Type=="Event" and not Attributes.Floors and tonumber(Title:match("%d+%.?%d*"))~=nil;
+
+                        Damage = Type=="Stat" and ((Title:match("damage")~=nil) or (Description:match("damage")~=nil));
                         Health = Type=="Stat" and Description:match("max health")~=nil;
 
                         Boss = Description:match("boss")~=nil;
@@ -593,37 +596,38 @@ Sections.Other:CreateToggle({
                         Points = Type=="Points";
                     };
 
-                    if Title == "second wind" and Humanoid.Health/Humanoid.MaxHealth < .33 then
-                        Info[1] = 7;
-                        continue;
-                    end;
-
-                    for i, v in pairs(Overall) do
-                        if not v then continue; end;
-
-                        local Importance = OfferOrder[i] or .5;
-                        
-                        if i == "Points" then
-                            Importance += Amount/1000;
-                            Info[2]=Amount;
-                        else
-                            Info[2] = Rarity;
+                    if Overall.Points then
+                        Info[1] = (OfferOrder["Points"] or 0) + Amount/1000;
+                        Info[2] = Amount;
+                    else
+                        local Matched = false;
+                        for i, v in pairs(Overall) do
+                            if not v then continue; end;
+                            Matched = true;
+                            Info[1] += (OfferOrder[i] or 0.5);
                         end;
 
-                        Info[1]+=Importance;
+                        if not Matched and Type == "Stat" then
+                            Info[1] = STAT_BASELINE;
+                        end;
                     end;
+
+                    Choices[#Choices+1] = Info;
                 end;
 
                 table.sort(Choices, function(a,b)
-                    return a[1] > b[1] or (a[1] == b[1] and a[2] > b[2])
+                    if a[1] ~= b[1] then
+                        return a[1] > b[1];
+                    end;
+                    return a[2] > b[2];
                 end);
 
                 local Choice = Choices[1];
-                if Choice then  
+                if Choice then
                     local Index = Choice[3];
                     pcall(function()
                         local Card = NotiFrame.OuwigaharaOffers.BBCards.Cards[Index].Card[Index].Click;
-                        
+
                         GuiService.SelectedObject = Card;
                         if GuiService.SelectedObject == Card then
                             VIM:Press("Return");
