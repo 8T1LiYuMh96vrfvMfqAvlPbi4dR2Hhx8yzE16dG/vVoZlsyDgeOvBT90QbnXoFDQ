@@ -531,9 +531,8 @@ Sections.UI_Controls:CreateButton({
 -- Auto Dungeons
 local OfferOrder = {
     ["Health"]=1;
+    ["Damage"]=1;
     ["Kill"]=2;
-    ["Damage"]=2;
-    ["Elite"]=3;
     ["Boss"]=5;
     ["Permenent"]=20;
     ["Pick"]=40;
@@ -607,7 +606,7 @@ Sections.Other:CreateToggle({
                             Info[1] += (OfferOrder[i] or 0.5);
                         end;
 
-                        if not Matched and Type == "Stat" then
+                        if not Matched and Type == "Event" then
                             Info[1] = STAT_BASELINE;
                         end;
                     end;
